@@ -16,7 +16,7 @@
   <property name="styleSheet">
    <string notr="true"/>
   </property>
-  <widget class="QWidget" name="centralwidget">
+  <widget class="QWidget" name="central_widget">
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <property name="spacing">
      <number>0</number>
@@ -34,7 +34,7 @@
      <number>0</number>
     </property>
     <item>
-     <widget class="QFrame" name="headerFrame">
+     <widget class="QFrame" name="header_frame">
       <property name="maximumSize">
        <size>
         <width>16777215</width>
@@ -110,7 +110,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QFrame" name="top_right_bnts">
+        <widget class="QFrame" name="top_right_btns">
          <property name="maximumSize">
           <size>
            <width>100</width>
@@ -150,7 +150,7 @@ QFrame{
            <number>0</number>
           </property>
           <item>
-           <widget class="QPushButton" name="minimizeButton">
+           <widget class="QPushButton" name="minimize_button">
             <property name="text">
              <string/>
             </property>
@@ -167,7 +167,7 @@ QFrame{
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="restoreButton">
+           <widget class="QPushButton" name="restore_button">
             <property name="text">
              <string/>
             </property>
@@ -184,7 +184,7 @@ QFrame{
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="closeButton">
+           <widget class="QPushButton" name="close_button">
             <property name="text">
              <string/>
             </property>
@@ -277,7 +277,7 @@ QLabel{
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item alignment="Qt::AlignLeft">
-           <widget class="QPushButton" name="menuToggle">
+           <widget class="QPushButton" name="menu_toggle">
             <property name="font">
              <font>
               <family>Verdana</family>
@@ -306,7 +306,7 @@ QLabel{
            </widget>
           </item>
           <item alignment="Qt::AlignLeft">
-           <widget class="QPushButton" name="addPatient">
+           <widget class="QPushButton" name="add_patient">
             <property name="font">
              <font>
               <family>Verdana</family>
@@ -356,7 +356,7 @@ QLabel{
              <string>Search</string>
             </property>
             <property name="icon">
-             <iconset resource="res/nike_app.qrc">
+             <iconset>
               <normaloff>:/icons/icons/icons8-search-32.png</normaloff>:/icons/icons/icons8-search-32.png</iconset>
             </property>
             <property name="flat">
@@ -420,7 +420,7 @@ QLabel{
            </widget>
           </item>
           <item>
-           <widget class="QListWidget" name="PatientsList"/>
+           <widget class="QListWidget" name="patient_list"/>
           </item>
          </layout>
         </widget>
@@ -461,7 +461,7 @@ QLabel{
            <number>0</number>
           </property>
           <item>
-           <widget class="QFrame" name="Recently_Frame">
+           <widget class="QFrame" name="recently_frame">
             <property name="font">
              <font>
               <pointsize>14</pointsize>
@@ -492,7 +492,7 @@ QLabel{
               <number>0</number>
              </property>
              <item alignment="Qt::AlignHCenter">
-              <widget class="QLabel" name="Recently_Viewed">
+              <widget class="QLabel" name="recently_viewed">
                <property name="maximumSize">
                 <size>
                  <width>16777215</width>
@@ -511,7 +511,7 @@ QLabel{
               </widget>
              </item>
              <item>
-              <widget class="QListWidget" name="Recently_List">
+              <widget class="QListWidget" name="recently_list">
                <property name="font">
                 <font>
                  <family>Verdana</family>
@@ -524,7 +524,7 @@ QLabel{
            </widget>
           </item>
           <item>
-           <widget class="QFrame" name="toolBox">
+           <widget class="QFrame" name="tool_box">
             <property name="minimumSize">
              <size>
               <width>0</width>

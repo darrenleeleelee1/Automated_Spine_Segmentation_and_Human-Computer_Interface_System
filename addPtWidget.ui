@@ -21,7 +21,7 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
-          <widget class="QLabel" name="label">
+          <widget class="QLabel" name="name">
            <property name="font">
             <font>
              <family>Verdana</family>
@@ -46,14 +46,14 @@
           </spacer>
          </item>
          <item>
-          <widget class="QLineEdit" name="lineEdit"/>
+          <widget class="QLineEdit" name="name_line_ed"/>
          </item>
         </layout>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
-          <widget class="QLabel" name="label_2">
+          <widget class="QLabel" name="birthday">
            <property name="font">
             <font>
              <family>Verdana</family>
@@ -81,7 +81,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="QDateEdit" name="dateEdit">
+          <widget class="QDateEdit" name="bd_day_edt">
            <property name="minimumSize">
             <size>
              <width>155</width>
@@ -95,7 +95,7 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
-          <widget class="QLabel" name="label_3">
+          <widget class="QLabel" name="no">
            <property name="font">
             <font>
              <family>Verdana</family>
@@ -120,7 +120,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="QLineEdit" name="lineEdit_3"/>
+          <widget class="QLineEdit" name="no_line_edt"/>
          </item>
         </layout>
        </item>
@@ -142,7 +142,7 @@
         </spacer>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton">
+        <widget class="QPushButton" name="submit">
          <property name="font">
           <font>
            <family>Verdana</family>
