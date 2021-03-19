@@ -9,7 +9,11 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import QCoreApplication, Qt
 import addPtWidget
+#from PyQt5.Qt import Qt
+#from PyQt5.QtWidgets import *
+#from PyQt5.QtGui import QCursor
 
 class Ui_MainWindow(object):
 	def setupUi(self, MainWindow):
@@ -52,13 +56,13 @@ class Ui_MainWindow(object):
 		self.top_right_btns = QtWidgets.QFrame(self.header_frame)
 		self.top_right_btns.setMaximumSize(QtCore.QSize(100, 16777215))
 		self.top_right_btns.setStyleSheet("QPushButton{\n"
-"    border-radius: 5px;\n"
-"    background-color: #76a5af;\n"
-"}\n"
-"\n"
-"QFrame{\n"
-"    background-color: #76a5af;\n"
-"}")
+			"    border-radius: 5px;\n"
+			"    background-color: #76a5af;\n"
+			"}\n"
+			"\n"
+			"QFrame{\n"
+			"    background-color: #76a5af;\n"
+			"}")
 		self.top_right_btns.setFrameShape(QtWidgets.QFrame.NoFrame)
 		self.top_right_btns.setFrameShadow(QtWidgets.QFrame.Raised)
 		self.top_right_btns.setObjectName("top_right_btns")
@@ -94,8 +98,8 @@ class Ui_MainWindow(object):
 		self.verticalLayout_2.addWidget(self.header_frame)
 		self.frame_mian_body = QtWidgets.QFrame(self.central_widget)
 		self.frame_mian_body.setStyleSheet("QFrame{\n"
-"    background-color: #4F4F4F\n"
-"}")
+			"    background-color: #4F4F4F\n"
+			"}")
 		self.frame_mian_body.setFrameShape(QtWidgets.QFrame.NoFrame)
 		self.frame_mian_body.setFrameShadow(QtWidgets.QFrame.Raised)
 		self.frame_mian_body.setObjectName("frame_mian_body")
@@ -113,20 +117,20 @@ class Ui_MainWindow(object):
 		font.setWeight(50)
 		self.frame_left_menu.setFont(font)
 		self.frame_left_menu.setStyleSheet("QFrame{\n"
-"    font: 9pt \"Verdana\";\n"
-"    background-color: #8E8E8E;\n"
-"}\n"
-"\n"
-"QPushButton{\n"
-"    background-color: #8E8E8E;\n"
-"    color: #fff;\n"
-"}\n"
-"QLabel{\n"
-"    color: #fff;\n"
-"}\n"
-"\n"
-"\n"
-"")
+			"    font: 9pt \"Verdana\";\n"
+			"    background-color: #8E8E8E;\n"
+			"}\n"
+			"\n"
+			"QPushButton{\n"
+			"    background-color: #8E8E8E;\n"
+			"    color: #fff;\n"
+			"}\n"
+			"QLabel{\n"
+			"    color: #fff;\n"
+			"}\n"
+			"\n"
+			"\n"
+			"")
 		self.frame_left_menu.setFrameShape(QtWidgets.QFrame.NoFrame)
 		self.frame_left_menu.setFrameShadow(QtWidgets.QFrame.Raised)
 		self.frame_left_menu.setObjectName("frame_left_menu")
@@ -208,8 +212,8 @@ class Ui_MainWindow(object):
 		self.frame_right = QtWidgets.QFrame(self.frame_mian_body)
 		self.frame_right.setMinimumSize(QtCore.QSize(0, 0))
 		self.frame_right.setStyleSheet("QFrame{\n"
-"    background-color: #4F4F4F\n"
-"}")
+			"    background-color: #4F4F4F\n"
+			"}")
 		self.frame_right.setFrameShape(QtWidgets.QFrame.NoFrame)
 		self.frame_right.setFrameShadow(QtWidgets.QFrame.Raised)
 		self.frame_right.setObjectName("frame_right")
@@ -222,8 +226,8 @@ class Ui_MainWindow(object):
 		font.setPointSize(14)
 		self.recently_frame.setFont(font)
 		self.recently_frame.setStyleSheet("QLabel{\n"
-"    color: #fff;\n"
-"}")
+			"    color: #fff;\n"
+			"}")
 		self.recently_frame.setFrameShape(QtWidgets.QFrame.NoFrame)
 		self.recently_frame.setFrameShadow(QtWidgets.QFrame.Raised)
 		self.recently_frame.setObjectName("recently_frame")
@@ -250,10 +254,10 @@ class Ui_MainWindow(object):
 		self.tool_box.setMinimumSize(QtCore.QSize(0, 70))
 		self.tool_box.setMaximumSize(QtCore.QSize(16777215, 70))
 		self.tool_box.setStyleSheet("QFrame{\n"
-"    \n"
-"    background-color: rgb(118, 165, 175);\n"
-"}\n"
-"")
+			"    \n"
+			"    background-color: rgb(118, 165, 175);\n"
+			"}\n"
+			"")
 		self.tool_box.setFrameShape(QtWidgets.QFrame.NoFrame)
 		self.tool_box.setFrameShadow(QtWidgets.QFrame.Raised)
 		self.tool_box.setObjectName("tool_box")
@@ -261,11 +265,14 @@ class Ui_MainWindow(object):
 		self.horizontalLayout.addWidget(self.frame_right)
 		self.verticalLayout_2.addWidget(self.frame_mian_body)
 		MainWindow.setCentralWidget(self.central_widget)
-
+		
 		self.retranslateUi(MainWindow)
 		QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
 		self.backend()
+		self.close_button.clicked.connect(QCoreApplication.instance().quit)#叉叉
+		MainWindow.setWindowFlag(QtCore.Qt.FramelessWindowHint) # 隱藏邊框
+
 
 	def retranslateUi(self, MainWindow):
 		_translate = QtCore.QCoreApplication.translate
