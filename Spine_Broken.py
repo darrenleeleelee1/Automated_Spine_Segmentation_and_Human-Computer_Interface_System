@@ -16,7 +16,7 @@ import addPtWidget
 #from PyQt5.QtGui import QCursor
 
 class Ui_MainWindow(object):
-	def setupUi(self, MainWindow):
+	def __init__(self, MainWindow):
 		MainWindow.setObjectName("MainWindow")
 		MainWindow.resize(1068, 743)
 		MainWindow.setStyleSheet("")
@@ -205,9 +205,9 @@ class Ui_MainWindow(object):
 		self.line_3.setFrameShape(QtWidgets.QFrame.HLine)
 		self.line_3.setObjectName("line_3")
 		self.verticalLayout_3.addWidget(self.line_3)
-		self.patient_list = QtWidgets.QListWidget(self.frame_left_menu)
-		self.patient_list.setObjectName("patient_list")
-		self.verticalLayout_3.addWidget(self.patient_list)
+		self.patient_list_widget = QtWidgets.QListWidget(self.frame_left_menu)
+		self.patient_list_widget.setObjectName("patient_list_widget")
+		self.verticalLayout_3.addWidget(self.patient_list_widget)
 		self.horizontalLayout.addWidget(self.frame_left_menu)
 		self.frame_right = QtWidgets.QFrame(self.frame_mian_body)
 		self.frame_right.setMinimumSize(QtCore.QSize(0, 0))
@@ -269,9 +269,12 @@ class Ui_MainWindow(object):
 		self.retranslateUi(MainWindow)
 		QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-		self.backend()
 		self.close_button.clicked.connect(QCoreApplication.instance().quit)#叉叉
 		MainWindow.setWindowFlag(QtCore.Qt.FramelessWindowHint) # 隱藏邊框
+
+		self.pt_list = []
+		self.backend()
+		
 
 
 	def retranslateUi(self, MainWindow):
@@ -288,17 +291,27 @@ class Ui_MainWindow(object):
 		self.add_patient.clicked.connect(self.addPatient)
 
 	def addPatient(self):
+		# 開啟add patient
 		self.Dialog = QtWidgets.QDialog()
 		self.ui = addPtWidget.Ui_Dialog()
 		self.ui.setupUi(self.Dialog)
 		self.Dialog.show()
+		self.Dialog.exec_()
+		self.pt_list.append(Patient(self.ui.name_line_edt.text(), self.ui.bd_day_edt.text(), self.ui.no_line_edt.text()))
+		for i in self.pt_list:
+			print(i.name, i.bd, i.no)
+		print()
 
+class Patient():
+	def __init__(self, _name, _bd, _no):
+		self.name = _name
+		self.bd = _bd
+		self.no = _no
 import nike_app_rc
 if __name__ == "__main__":
 	import sys
 	app = QtWidgets.QApplication(sys.argv)
 	MainWindow = QtWidgets.QMainWindow()
-	ui = Ui_MainWindow()
-	ui.setupUi(MainWindow)
+	ui = Ui_MainWindow(MainWindow)
 	MainWindow.show()
 	sys.exit(app.exec_())

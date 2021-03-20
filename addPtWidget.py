@@ -31,9 +31,9 @@ class Ui_Dialog(object):
         self.horizontalLayout.addWidget(self.name)
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
-        self.name_line_ed = QtWidgets.QLineEdit(Dialog)
-        self.name_line_ed.setObjectName("name_line_ed")
-        self.horizontalLayout.addWidget(self.name_line_ed)
+        self.name_line_edt = QtWidgets.QLineEdit(Dialog)
+        self.name_line_edt.setObjectName("name_line_edt")
+        self.horizontalLayout.addWidget(self.name_line_edt)
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
@@ -81,6 +81,8 @@ class Ui_Dialog(object):
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
+        self.backend(Dialog)
+
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
@@ -89,6 +91,11 @@ class Ui_Dialog(object):
         self.no.setText(_translate("Dialog", "No."))
         self.submit.setText(_translate("Dialog", "Submit"))
 
+    def backend(self, Dialog):
+        self.submit.clicked.connect(Dialog.close)
+
+   
+        
 
 if __name__ == "__main__":
     import sys
