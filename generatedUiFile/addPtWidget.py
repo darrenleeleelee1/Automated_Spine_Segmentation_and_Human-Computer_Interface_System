@@ -14,9 +14,9 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
-        Dialog.resize(307, 162)
-        self.formLayout = QtWidgets.QFormLayout(Dialog)
-        self.formLayout.setObjectName("formLayout")
+        Dialog.resize(305, 167)
+        self.gridLayout = QtWidgets.QGridLayout(Dialog)
+        self.gridLayout.setObjectName("gridLayout")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout()
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.verticalLayout = QtWidgets.QVBoxLayout()
@@ -69,19 +69,18 @@ class Ui_Dialog(object):
         self.horizontalLayout_4.setObjectName("horizontalLayout_4")
         spacerItem3 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_4.addItem(spacerItem3)
-        self.submit = QtWidgets.QPushButton(Dialog)
-        font = QtGui.QFont()
-        font.setFamily("Verdana")
-        self.submit.setFont(font)
+        self.submit = QtWidgets.QDialogButtonBox(Dialog)
+        self.submit.setOrientation(QtCore.Qt.Horizontal)
+        self.submit.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok)
         self.submit.setObjectName("submit")
         self.horizontalLayout_4.addWidget(self.submit)
         self.verticalLayout_2.addLayout(self.horizontalLayout_4)
-        self.formLayout.setLayout(0, QtWidgets.QFormLayout.LabelRole, self.verticalLayout_2)
+        self.gridLayout.addLayout(self.verticalLayout_2, 0, 0, 1, 1)
 
         self.retranslateUi(Dialog)
+        self.submit.accepted.connect(Dialog.accept)
+        self.submit.rejected.connect(Dialog.reject)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
-
-        self.backend(Dialog)
 
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
@@ -89,19 +88,3 @@ class Ui_Dialog(object):
         self.name.setText(_translate("Dialog", "Name"))
         self.birthday.setText(_translate("Dialog", "Birthday"))
         self.no.setText(_translate("Dialog", "No."))
-        self.submit.setText(_translate("Dialog", "Submit"))
-
-    def backend(self, Dialog):
-        self.submit.clicked.connect(Dialog.close)
-
-   
-        
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    Dialog = QtWidgets.QDialog()
-    ui = Ui_Dialog()
-    ui.setupUi(Dialog)
-    Dialog.show()
-    sys.exit(app.exec_())
