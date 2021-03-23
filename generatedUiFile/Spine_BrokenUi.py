@@ -221,6 +221,9 @@ class Ui_MainWindow(object):
         self.verticalLayout_3.addWidget(self.line_3)
         self.patient_list = QtWidgets.QListWidget(self.frame_left_menu)
         self.patient_list.setObjectName("patient_list")
+        self.patient_list.setStyleSheet("QListWidget{\n"
+"    color: white\n"
+"}")
         self.verticalLayout_3.addWidget(self.patient_list)
         self.horizontalLayout.addWidget(self.frame_left_menu, 0, QtCore.Qt.AlignLeft)
         self.frame_right = QtWidgets.QFrame(self.frame_mian_body)
