@@ -235,11 +235,17 @@ QFrame{
        <property name="bottomMargin">
         <number>0</number>
        </property>
-       <item>
+       <item alignment="Qt::AlignLeft">
         <widget class="QFrame" name="frame_left_menu">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="maximumSize">
           <size>
-           <width>200</width>
+           <width>50</width>
            <height>16777215</height>
           </size>
          </property>
@@ -257,17 +263,17 @@ QFrame{
 	font: 9pt &quot;Verdana&quot;;
 	background-color: #8E8E8E;
 }
-
 QPushButton{
+	padding: 5px 10px;
+	border:none;
+	border-radius:5px;
 	background-color: #8E8E8E;
 	color: #fff;
+	padding-left: 30px;
 }
 QLabel{
 	color: #fff;
-}
-
-
-</string>
+}</string>
          </property>
          <property name="frameShape">
           <enum>QFrame::NoFrame</enum>
@@ -276,28 +282,51 @@ QLabel{
           <enum>QFrame::Raised</enum>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
+          <property name="leftMargin">
+           <number>12</number>
+          </property>
           <item alignment="Qt::AlignLeft">
            <widget class="QPushButton" name="menu_toggle">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>150</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777177</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="font">
              <font>
               <family>Verdana</family>
-              <pointsize>16</pointsize>
+              <pointsize>14</pointsize>
              </font>
             </property>
+            <property name="layoutDirection">
+             <enum>Qt::LeftToRight</enum>
+            </property>
             <property name="styleSheet">
-             <string notr="true"/>
+             <string notr="true">background-image:url(:/icons/icons/cil-menu.png);
+background-repeat: none;
+padding-left: 30px;
+background-position: center left</string>
             </property>
             <property name="text">
-             <string>MENU</string>
-            </property>
-            <property name="icon">
-             <iconset resource="res/nike_app.qrc">
-              <normaloff>:/icons/icons/cil-menu.png</normaloff>:/icons/icons/cil-menu.png</iconset>
+             <string>   MENU</string>
             </property>
             <property name="iconSize">
              <size>
-              <width>36</width>
-              <height>36</height>
+              <width>48</width>
+              <height>48</height>
              </size>
             </property>
             <property name="flat">
@@ -307,18 +336,32 @@ QLabel{
           </item>
           <item alignment="Qt::AlignLeft">
            <widget class="QPushButton" name="add_patient">
+            <property name="minimumSize">
+             <size>
+              <width>150</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="font">
              <font>
               <family>Verdana</family>
               <pointsize>14</pointsize>
              </font>
             </property>
-            <property name="text">
-             <string>Add Patient</string>
+            <property name="styleSheet">
+             <string notr="true">background-image: url(:/icons/icons/cil-user-follow.png);
+background-repeat: none;
+background-position: center left;
+padding-left:50px;</string>
             </property>
-            <property name="icon">
-             <iconset resource="res/nike_app.qrc">
-              <normaloff>:/icons/icons/cil-user-follow.png</normaloff>:/icons/icons/cil-user-follow.png</iconset>
+            <property name="text">
+             <string>  Add Patient</string>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>24</width>
+              <height>24</height>
+             </size>
             </property>
             <property name="flat">
              <bool>true</bool>
@@ -327,6 +370,12 @@ QLabel{
           </item>
           <item>
            <widget class="Line" name="line_1">
+            <property name="maximumSize">
+             <size>
+              <width>16777174</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="styleSheet">
              <string notr="true">color: #fff;</string>
             </property>
@@ -346,18 +395,31 @@ QLabel{
             <property name="enabled">
              <bool>true</bool>
             </property>
+            <property name="minimumSize">
+             <size>
+              <width>150</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="font">
              <font>
               <family>Verdana</family>
               <pointsize>14</pointsize>
              </font>
             </property>
+            <property name="styleSheet">
+             <string notr="true">background-image: url(:/icons/icons/icons8-search-32.png);
+background-repeat: none;
+background-position: center left;</string>
+            </property>
             <property name="text">
              <string>Search</string>
             </property>
-            <property name="icon">
-             <iconset>
-              <normaloff>:/icons/icons/icons8-search-32.png</normaloff>:/icons/icons/icons8-search-32.png</iconset>
+            <property name="iconSize">
+             <size>
+              <width>24</width>
+              <height>24</height>
+             </size>
             </property>
             <property name="flat">
              <bool>true</bool>
@@ -385,18 +447,31 @@ QLabel{
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="minimumSize">
+             <size>
+              <width>150</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="font">
              <font>
               <family>Verdana</family>
               <pointsize>14</pointsize>
              </font>
             </property>
+            <property name="styleSheet">
+             <string notr="true">background-image: url(:/icons/icons/cil-people.png);
+background-repeat: none;
+background-position: center left;</string>
+            </property>
             <property name="text">
              <string>Patients</string>
             </property>
-            <property name="icon">
-             <iconset resource="res/nike_app.qrc">
-              <normaloff>:/icons/icons/cil-people.png</normaloff>:/icons/icons/cil-people.png</iconset>
+            <property name="iconSize">
+             <size>
+              <width>24</width>
+              <height>24</height>
+             </size>
             </property>
             <property name="flat">
              <bool>true</bool>
@@ -516,6 +591,10 @@ QLabel{
                 <font>
                  <family>Verdana</family>
                  <pointsize>10</pointsize>
+                 <weight>50</weight>
+                 <italic>false</italic>
+                 <bold>false</bold>
+                 <stylestrategy>PreferDefault</stylestrategy>
                 </font>
                </property>
               </widget>
