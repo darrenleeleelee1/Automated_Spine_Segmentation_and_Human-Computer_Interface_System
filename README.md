@@ -1,4 +1,4 @@
-# Spine__Broken
+# Spine_Broken
 ## Set up
 1. Create a new enviroment
 ```

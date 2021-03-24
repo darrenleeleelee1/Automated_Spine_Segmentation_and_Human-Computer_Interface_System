@@ -3,17 +3,11 @@ from PyQt5.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QCoreApplication, Qt
 from generatedUiFile.Spine_BrokenUi import Ui_MainWindow
-from generatedUiFile.addPtWidget import Ui_Dialog
-# class addDialog(QtWidgets.QDialog()):
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         self.ui = Ui_Dialog()
-#         self.ui.setupUi(self)
-#         self.status
-#     def closeEvent(self, event):
+import os
+from PyQt5.QtWidgets import *
 WINDOW_SIZE = 0;
         
-class initailWidget(QtWidgets.QMainWindow):
+class initialWidget(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.ui = Ui_MainWindow()
@@ -25,6 +19,7 @@ class initailWidget(QtWidgets.QMainWindow):
         self.ui.minimize_button.clicked.connect(lambda: self.showMinimized())
         self.ui.restore_button.clicked.connect(lambda: self.restore_or_maximize_window())
 
+        
 
         def moveWindow(e):
             if self.isMaximized() == False:  # Not maximized
@@ -44,15 +39,18 @@ class initailWidget(QtWidgets.QMainWindow):
         self.ui.add_patient.clicked.connect(self.addPatient)
 
     def addPatient(self):
-        # 開啟add patient
-        Dialog = QtWidgets.QDialog()
-        apt_widget = Ui_Dialog()
-        apt_widget.setupUi(Dialog)
-        Dialog.show()
-        if (Dialog.exec_() == 1):
-            self.pt_list.append(Patient(apt_widget.name_line_edt.text(), apt_widget.bd_day_edt.text(), apt_widget.no_line_edt.text()))
+        dir_choose = QFileDialog.getExistingDirectory(self, "選取資料夾", "/Users/user/Documents/畢專/dicom_data") #第三參數是起始路徑
+        if dir_choose == "":
+            print("\n取消")
+            return
+
+        print("\n選擇的資料夾:")
+        print(dir_choose)
+        pt_id = os.path.basename(dir_choose)
+        self.pt_list.append(pt_id)
+        self.ui.patient_list.addItem(pt_id)
         for i in self.pt_list:
-            print(i.name, i.bd, i.no)
+            print(i)
 
     def mousePressEvent(self, event):
         self.clickPosition = event.globalPos()
@@ -95,15 +93,14 @@ class initailWidget(QtWidgets.QMainWindow):
 
     
 class Patient():
-    def __init__(self, _name, _bd, _no):
-        self.name = _name
-        self.bd = _bd
-        self.no = _no
+    def __init__(self, _pt_id, _pt_path):
+        self.pt_id = _pt_id
+        self.pt_path = __pt_path
 
 
 if __name__ == '__main__':
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    mw = initailWidget()
+    mw = initialWidget()
     mw.show()
     sys.exit(app.exec_())
