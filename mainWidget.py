@@ -5,7 +5,7 @@ from PyQt5.QtCore import QCoreApplication, Qt
 from generatedUiFile.Spine_BrokenUi import Ui_MainWindow
 import os
 from PyQt5.QtWidgets import *
-WINDOW_SIZE = 0;
+WINDOW_SIZE = 0
         
 class initialWidget(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
