@@ -55,7 +55,7 @@ class initialWidget(QtWidgets.QMainWindow):
         #     self.pt_list.append(Patient(apt_widget.name_line_edt.text(), apt_widget.bd_day_edt.text(), apt_widget.no_line_edt.text()))
         # for i in self.pt_list:
         #     print(i.name, i.bd, i.no)
-        dir_choose = QFileDialog.getExistingDirectory(self, "选取文件夹", "/Users/user/Documents/畢專/dicom_data") #第三參數是起始路徑
+        dir_choose = QFileDialog.getExistingDirectory(self, "選取資料夾", "/Users/user/Documents/畢專/dicom_data") #第三參數是起始路徑
         if dir_choose == "":
             print("\n取消")
             return
