@@ -17,8 +17,6 @@ pip install pyqt5-tools
 ```
 import PyQt5
 ```
-## Example
-1. Calculator
 
 ## Extension
 [PyQt APIs](https://doc.qt.io/qtforpython/api.html)
@@ -33,7 +31,7 @@ import PyQt5
 
 * Shell
 ```
-pyuic5 -x ____.ui -o ____.py 
+pyuic5 -o ____.py ____.ui
 ```
 
 ## qrc file to py file
