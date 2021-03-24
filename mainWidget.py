@@ -3,7 +3,6 @@ from PyQt5.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QCoreApplication, Qt
 from generatedUiFile.Spine_BrokenUi import Ui_MainWindow
-from generatedUiFile.addPtWidget import Ui_Dialog
 import os
 from PyQt5.QtWidgets import *
 # class addDialog(QtWidgets.QDialog()):
