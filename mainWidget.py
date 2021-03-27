@@ -5,14 +5,7 @@ from PyQt5.QtCore import QCoreApplication, Qt
 from generatedUiFile.Spine_BrokenUi import Ui_MainWindow
 import os
 from PyQt5.QtWidgets import *
-# class addDialog(QtWidgets.QDialog()):
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         self.ui = Ui_Dialog()
-#         self.ui.setupUi(self)
-#         self.status
-#     def closeEvent(self, event):
-WINDOW_SIZE = 0;
+WINDOW_SIZE = 0
         
 class initialWidget(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
@@ -46,15 +39,6 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.add_patient.clicked.connect(self.addPatient)
 
     def addPatient(self):
-        # 開啟add patient
-        # Dialog = QtWidgets.QDialog()
-        # apt_widget = Ui_Dialog()
-        # apt_widget.setupUi(Dialog)
-        # Dialog.show()
-        # if (Dialog.exec_() == 1):
-        #     self.pt_list.append(Patient(apt_widget.name_line_edt.text(), apt_widget.bd_day_edt.text(), apt_widget.no_line_edt.text()))
-        # for i in self.pt_list:
-        #     print(i.name, i.bd, i.no)
         dir_choose = QFileDialog.getExistingDirectory(self, "選取資料夾", "/Users/user/Documents/畢專/dicom_data") #第三參數是起始路徑
         if dir_choose == "":
             print("\n取消")
@@ -63,8 +47,6 @@ class initialWidget(QtWidgets.QMainWindow):
         print("\n選擇的資料夾:")
         print(dir_choose)
         pt_id = os.path.basename(dir_choose)
-        #print(os.path.basename(dir_choose)) #get file name = pt no.
-        #self.pt_list.append(Patient(pt_id, dir_choose))
         self.pt_list.append(pt_id)
         self.ui.patient_list.addItem(pt_id)
         for i in self.pt_list:
@@ -111,10 +93,6 @@ class initialWidget(QtWidgets.QMainWindow):
 
     
 class Patient():
-    # def __init__(self, _name, _bd, _no):
-    #     self.name = _name
-    #     self.bd = _bd
-    #     self.no = _no
     def __init__(self, _pt_id, _pt_path):
         self.pt_id = _pt_id
         self.pt_path = __pt_path
