@@ -1,10 +1,10 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, File, UploadFile
+from fastapi.responses import FileResponse
+from typing import List
 import MySQLdb
 import MySQLdb.cursors as cursors
-from pydantic import BaseModel
-from fastapi import FastAPI, File, UploadFile
-from typing import List
 import os, aiofiles
+
 app = FastAPI()
 
 os.system('chcp')
@@ -22,8 +22,14 @@ os.system('chcp')
 
 @app.get("/gdicom/{medical_number}") # get dicom path
 async def get_dicom(medical_number: int):
-    dicom_path = "./01372635/5F3279B8"
-    return {"01372635", dicom_path}
+    # dicom_path = "./01372635/5F3279B8"
+    # return {"01372635", dicom_path}
+    root = './tmp'
+    # dicom_path = os.path.join(root, str(medical_number))
+    dicom_path = './tmp/13726235/5F3279B8'
+    if os.path.exists(dicom_path):
+        return FileResponse(dicom_path, media_type="application/dicom")
+    return {'error': 'File not found.'}
 
 @app.post("/pdicom/{medical_number}") # save dicoms
 async def post_dicom(medical_number: int, files: List[UploadFile] = File(...)):
@@ -37,6 +43,6 @@ async def post_dicom(medical_number: int, files: List[UploadFile] = File(...)):
             content = await file.read()  # async read
             await out_file.write(content)  # async write
 
+    # return {"files": [file.read() for file in files]}
     return {'Result': 'OK'}    
-    # return {"filenames": [file.filename for file in files]}
 
