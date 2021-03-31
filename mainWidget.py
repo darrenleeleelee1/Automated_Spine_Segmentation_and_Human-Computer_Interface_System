@@ -14,12 +14,6 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.setupUi(self)
         self.pt_list = []
         self.backend()
-        self.ui.menu_toggle.clicked.connect(lambda: self.slideLeftMenu())
-
-        self.ui.minimize_button.clicked.connect(lambda: self.showMinimized())
-        self.ui.restore_button.clicked.connect(lambda: self.restore_or_maximize_window())
-
-        
 
         def moveWindow(e):
             if self.isMaximized() == False:  # Not maximized
@@ -29,14 +23,18 @@ class initialWidget(QtWidgets.QMainWindow):
                     self.clickPosition = e.globalPos()
                     e.accept()
 
-        self.ui.header.mouseMoveEvent = moveWindow
+        self.ui.header.mouseMoveEvent = moveWindow # 移動視窗
 
         self.show()
 
     def backend(self):
         self.ui.close_button.clicked.connect(QCoreApplication.instance().quit)#叉叉
+        self.ui.minimize_button.clicked.connect(lambda: self.showMinimized())  # minimize window
+        self.ui.restore_button.clicked.connect(lambda: self.restore_or_maximize_window())  # restore window
         self.setWindowFlag(QtCore.Qt.FramelessWindowHint) # 隱藏邊框
+        self.ui.menu_toggle.clicked.connect(lambda: self.slideLeftMenu()) # slide menu
         self.ui.add_patient.clicked.connect(self.addPatient)
+        self.ui.search.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.search_page))
 
     def addPatient(self):
         dir_choose = QFileDialog.getExistingDirectory(self, "選取資料夾", "/Users/user/Documents/畢專/dicom_data") #第三參數是起始路徑
@@ -57,15 +55,11 @@ class initialWidget(QtWidgets.QMainWindow):
 
 
     def slideLeftMenu(self):
-
         width = self.ui.frame_left_menu.width()
-
-        if width == 70:
+        if width == 50:
             newWidth = 200
-
         else:
-            newWidth = 70
-
+            newWidth = 50
         self.animation = QPropertyAnimation(self.ui.frame_left_menu, b"minimumWidth")
         self.animation.setDuration(250)
         self.animation.setStartValue(width)
@@ -78,7 +72,6 @@ class initialWidget(QtWidgets.QMainWindow):
     def restore_or_maximize_window(self):
         global WINDOW_SIZE
         win_status = WINDOW_SIZE
-
         if win_status == 0:
             WINDOW_SIZE = 1
             self.showMaximized()
