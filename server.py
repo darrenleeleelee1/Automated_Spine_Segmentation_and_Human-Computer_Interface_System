@@ -1,8 +1,8 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import FileResponse
 from typing import List
-import MySQLdb
-import MySQLdb.cursors as cursors
+#import MySQLdb
+#import MySQLdb.cursors as cursors
 import os, aiofiles
 
 app = FastAPI()
