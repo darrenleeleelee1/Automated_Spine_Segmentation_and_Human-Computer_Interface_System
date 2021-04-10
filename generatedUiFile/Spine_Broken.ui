@@ -664,7 +664,7 @@ background-position: center left;</string>
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_4">
              <item>
-              <widget class="QLabel" name="label_2">
+              <widget class="QLabel" name="patients_label">
                <property name="minimumSize">
                 <size>
                  <width>0</width>
@@ -707,7 +707,7 @@ background-position: center left;</string>
                 </spacer>
                </item>
                <item>
-                <widget class="QLabel" name="search_no_2">
+                <widget class="QLabel" name="search_no_label">
                  <property name="minimumSize">
                   <size>
                    <width>100</width>
@@ -735,7 +735,7 @@ background-position: center left;</string>
                 </widget>
                </item>
                <item>
-                <widget class="QLineEdit" name="lineEdit_2">
+                <widget class="QLineEdit" name="input_no">
                  <property name="minimumSize">
                   <size>
                    <width>100</width>
@@ -795,12 +795,22 @@ background-position: center left;</string>
               </layout>
              </item>
              <item>
-              <widget class="QListWidget" name="listWidget">
+              <widget class="QListWidget" name="no_list">
                <property name="maximumSize">
                 <size>
                  <width>16777215</width>
                  <height>16777215</height>
                 </size>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>18</pointsize>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">color: #fff;
+padding-left: 50px;
+margin:50px;</string>
                </property>
                <property name="frameShape">
                 <enum>QFrame::NoFrame</enum>
@@ -874,7 +884,7 @@ background-position: center left;</string>
             </layout>
            </item>
            <item>
-            <widget class="QFrame" name="tool_box">
+            <widget class="QFrame" name="tool_box_empty_2">
              <property name="minimumSize">
               <size>
                <width>0</width>
@@ -904,7 +914,7 @@ background-position: center left;</string>
            </item>
           </layout>
          </widget>
-         <widget class="QWidget" name="page">
+         <widget class="QWidget" name="thumbnail_page">
           <layout class="QHBoxLayout" name="horizontalLayout_6">
            <property name="spacing">
             <number>0</number>
@@ -923,6 +933,18 @@ background-position: center left;</string>
            </property>
            <item>
             <widget class="QFrame" name="frame">
+             <property name="minimumSize">
+              <size>
+               <width>200</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>200</width>
+               <height>16777215</height>
+              </size>
+             </property>
              <property name="styleSheet">
               <string notr="true">background-color: rgb(153, 153, 153);</string>
              </property>
@@ -932,6 +954,11 @@ background-position: center left;</string>
              <property name="frameShadow">
               <enum>QFrame::Raised</enum>
              </property>
+             <layout class="QVBoxLayout" name="verticalLayout_8">
+              <item>
+               <widget class="QListWidget" name="thumbnail_list"/>
+              </item>
+             </layout>
             </widget>
            </item>
            <item>
@@ -956,7 +983,7 @@ background-position: center left;</string>
               </widget>
              </item>
              <item>
-              <widget class="QFrame" name="tool_box_empty_2">
+              <widget class="QFrame" name="tool_box_2">
                <property name="minimumSize">
                 <size>
                  <width>70</width>
@@ -994,7 +1021,7 @@ background-position: center left;</string>
      </widget>
     </item>
    </layout>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>0</x>
