@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1068, 743)
+        MainWindow.resize(850, 732)
         MainWindow.setStyleSheet("")
         self.central_widget = QtWidgets.QWidget(MainWindow)
         self.central_widget.setObjectName("central_widget")
@@ -77,7 +77,7 @@ class Ui_MainWindow(object):
         self.restore_button = QtWidgets.QPushButton(self.top_right_btns)
         self.restore_button.setText("")
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(":/icons/icons/cil-window-maximize.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap(":/icons/icons/cil-window-restore.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.restore_button.setIcon(icon1)
         self.restore_button.setIconSize(QtCore.QSize(24, 24))
         self.restore_button.setObjectName("restore_button")
@@ -105,7 +105,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.frame_left_menu = QtWidgets.QFrame(self.frame_mian_body)
         self.frame_left_menu.setMinimumSize(QtCore.QSize(0, 0))
-        self.frame_left_menu.setMaximumSize(QtCore.QSize(70, 16777215))
+        self.frame_left_menu.setMaximumSize(QtCore.QSize(50, 16777215))
         font = QtGui.QFont()
         font.setFamily("Verdana")
         font.setPointSize(9)
@@ -115,13 +115,13 @@ class Ui_MainWindow(object):
         self.frame_left_menu.setFont(font)
         self.frame_left_menu.setStyleSheet("QFrame{\n"
 "    font: 9pt \"Verdana\";\n"
-"    background-color: #8E8E8E;\n"
+"    background-color: rgb(102, 102, 102);\n"
 "}\n"
 "QPushButton{\n"
 "    padding: 5px 10px;\n"
 "    border:none;\n"
 "    border-radius:5px;\n"
-"    background-color: #8E8E8E;\n"
+"    background-color: rgb(102, 102, 102);\n"
 "    color: #fff;\n"
 "    padding-left: 30px;\n"
 "}\n"
@@ -144,10 +144,10 @@ class Ui_MainWindow(object):
         self.menu_toggle.setMaximumSize(QtCore.QSize(16777177, 16777215))
         font = QtGui.QFont()
         font.setFamily("Verdana")
-        font.setPointSize(24)
+        font.setPointSize(14)
         self.menu_toggle.setFont(font)
         self.menu_toggle.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.menu_toggle.setStyleSheet("background-image:url(:/icons/icons/menu-48-2.png);\n"
+        self.menu_toggle.setStyleSheet("background-image:url(:/icons/icons/cil-menu.png);\n"
 "background-repeat: none;\n"
 "padding-left: 30px;\n"
 "background-position: center left")
@@ -221,45 +221,30 @@ class Ui_MainWindow(object):
         self.verticalLayout_3.addWidget(self.line_3)
         self.patient_list = QtWidgets.QListWidget(self.frame_left_menu)
         self.patient_list.setObjectName("patient_list")
-        self.patient_list.setStyleSheet("QListWidget{\n"
-"    color: white\n"
-"}")
         self.verticalLayout_3.addWidget(self.patient_list)
         self.horizontalLayout.addWidget(self.frame_left_menu, 0, QtCore.Qt.AlignLeft)
-        self.frame_right = QtWidgets.QFrame(self.frame_mian_body)
-        self.frame_right.setMinimumSize(QtCore.QSize(0, 0))
-        self.frame_right.setStyleSheet("QFrame{\n"
-"    background-color: #4F4F4F\n"
-"}")
-        self.frame_right.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.frame_right.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_right.setObjectName("frame_right")
-        self.verticalLayout_4 = QtWidgets.QVBoxLayout(self.frame_right)
-        self.verticalLayout_4.setContentsMargins(0, 0, 0, 0)
-        self.verticalLayout_4.setSpacing(0)
-        self.verticalLayout_4.setObjectName("verticalLayout_4")
-        self.recently_frame = QtWidgets.QFrame(self.frame_right)
-        font = QtGui.QFont()
-        font.setPointSize(14)
-        self.recently_frame.setFont(font)
-        self.recently_frame.setStyleSheet("QLabel{\n"
+        self.stackedWidget = QtWidgets.QStackedWidget(self.frame_mian_body)
+        self.stackedWidget.setStyleSheet("background-color: #4F4F4F;")
+        self.stackedWidget.setLineWidth(0)
+        self.stackedWidget.setObjectName("stackedWidget")
+        self.recently_viewed_page = QtWidgets.QWidget()
+        self.recently_viewed_page.setStyleSheet("QLabel{\n"
 "    color: #fff;\n"
 "}")
-        self.recently_frame.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.recently_frame.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.recently_frame.setObjectName("recently_frame")
-        self.verticalLayout = QtWidgets.QVBoxLayout(self.recently_frame)
+        self.recently_viewed_page.setObjectName("recently_viewed_page")
+        self.verticalLayout = QtWidgets.QVBoxLayout(self.recently_viewed_page)
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout.setSpacing(0)
         self.verticalLayout.setObjectName("verticalLayout")
-        self.recently_viewed = QtWidgets.QLabel(self.recently_frame)
+        self.recently_viewed = QtWidgets.QLabel(self.recently_viewed_page)
         self.recently_viewed.setMaximumSize(QtCore.QSize(16777215, 50))
         font = QtGui.QFont()
         font.setFamily("Verdana")
-        font.setPointSize(24)
+        font.setPointSize(36)
         self.recently_viewed.setFont(font)
         self.recently_viewed.setObjectName("recently_viewed")
         self.verticalLayout.addWidget(self.recently_viewed, 0, QtCore.Qt.AlignHCenter)
-        self.recently_list = QtWidgets.QListWidget(self.recently_frame)
+        self.recently_list = QtWidgets.QListWidget(self.recently_viewed_page)
         font = QtGui.QFont()
         font.setFamily("Verdana")
         font.setPointSize(10)
@@ -268,26 +253,157 @@ class Ui_MainWindow(object):
         font.setWeight(50)
         font.setStyleStrategy(QtGui.QFont.PreferDefault)
         self.recently_list.setFont(font)
+        self.recently_list.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.recently_list.setObjectName("recently_list")
         self.verticalLayout.addWidget(self.recently_list)
-        self.verticalLayout_4.addWidget(self.recently_frame)
-        self.tool_box = QtWidgets.QFrame(self.frame_right)
-        self.tool_box.setMinimumSize(QtCore.QSize(0, 70))
-        self.tool_box.setMaximumSize(QtCore.QSize(16777215, 70))
-        self.tool_box.setStyleSheet("QFrame{\n"
+        self.tool_box_empty = QtWidgets.QFrame(self.recently_viewed_page)
+        self.tool_box_empty.setMinimumSize(QtCore.QSize(0, 70))
+        self.tool_box_empty.setMaximumSize(QtCore.QSize(16777215, 70))
+        self.tool_box_empty.setStyleSheet("QFrame{\n"
 "    \n"
 "    background-color: rgb(118, 165, 175);\n"
 "}\n"
 "")
-        self.tool_box.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.tool_box.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.tool_box.setObjectName("tool_box")
-        self.verticalLayout_4.addWidget(self.tool_box)
-        self.horizontalLayout.addWidget(self.frame_right)
+        self.tool_box_empty.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.tool_box_empty.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.tool_box_empty.setObjectName("tool_box_empty")
+        self.verticalLayout.addWidget(self.tool_box_empty)
+        self.stackedWidget.addWidget(self.recently_viewed_page)
+        self.search_page = QtWidgets.QWidget()
+        self.search_page.setStyleSheet("QLabel{\n"
+"    color: #fff;\n"
+"}")
+        self.search_page.setObjectName("search_page")
+        self.verticalLayout_5 = QtWidgets.QVBoxLayout(self.search_page)
+        self.verticalLayout_5.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_5.setSpacing(0)
+        self.verticalLayout_5.setObjectName("verticalLayout_5")
+        self.verticalLayout_4 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_4.setObjectName("verticalLayout_4")
+        self.patients_label = QtWidgets.QLabel(self.search_page)
+        self.patients_label.setMinimumSize(QtCore.QSize(0, 60))
+        self.patients_label.setMaximumSize(QtCore.QSize(16777215, 60))
+        font = QtGui.QFont()
+        font.setFamily("Verdana")
+        font.setPointSize(36)
+        self.patients_label.setFont(font)
+        self.patients_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.patients_label.setObjectName("patients_label")
+        self.verticalLayout_4.addWidget(self.patients_label)
+        self.horizontalLayout_5 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_5.setObjectName("horizontalLayout_5")
+        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_5.addItem(spacerItem)
+        self.search_no_label = QtWidgets.QLabel(self.search_page)
+        self.search_no_label.setMinimumSize(QtCore.QSize(100, 40))
+        self.search_no_label.setMaximumSize(QtCore.QSize(100, 40))
+        font = QtGui.QFont()
+        font.setFamily("Verdana")
+        font.setPointSize(14)
+        self.search_no_label.setFont(font)
+        self.search_no_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.search_no_label.setObjectName("search_no_label")
+        self.horizontalLayout_5.addWidget(self.search_no_label)
+        self.input_no = QtWidgets.QLineEdit(self.search_page)
+        self.input_no.setMinimumSize(QtCore.QSize(100, 40))
+        self.input_no.setMaximumSize(QtCore.QSize(100, 40))
+        self.input_no.setStyleSheet("color: #fff;")
+        self.input_no.setClearButtonEnabled(True)
+        self.input_no.setObjectName("input_no")
+        self.horizontalLayout_5.addWidget(self.input_no)
+        self.search_no_button = QtWidgets.QPushButton(self.search_page)
+        self.search_no_button.setMinimumSize(QtCore.QSize(40, 40))
+        self.search_no_button.setMaximumSize(QtCore.QSize(40, 40))
+        self.search_no_button.setStyleSheet("background-color: rgb(255, 255, 255);\n"
+"")
+        self.search_no_button.setText("")
+        icon3 = QtGui.QIcon()
+        icon3.addPixmap(QtGui.QPixmap(":/icons/icons/icons8-search-32.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.search_no_button.setIcon(icon3)
+        self.search_no_button.setIconSize(QtCore.QSize(24, 24))
+        self.search_no_button.setFlat(True)
+        self.search_no_button.setObjectName("search_no_button")
+        self.horizontalLayout_5.addWidget(self.search_no_button)
+        self.verticalLayout_4.addLayout(self.horizontalLayout_5)
+        self.no_list = QtWidgets.QListWidget(self.search_page)
+        self.no_list.setMaximumSize(QtCore.QSize(16777215, 16777215))
+        font = QtGui.QFont()
+        font.setPointSize(18)
+        self.no_list.setFont(font)
+        self.no_list.setStyleSheet("color: #fff;\n"
+"padding-left: 50px;\n"
+"margin:50px;")
+        self.no_list.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.no_list.setObjectName("no_list")
+        self.verticalLayout_4.addWidget(self.no_list)
+        self.verticalLayout_5.addLayout(self.verticalLayout_4)
+        self.tool_box_empty_2 = QtWidgets.QFrame(self.search_page)
+        self.tool_box_empty_2.setMinimumSize(QtCore.QSize(0, 70))
+        self.tool_box_empty_2.setMaximumSize(QtCore.QSize(16777215, 70))
+        self.tool_box_empty_2.setStyleSheet("QFrame{\n"
+"    \n"
+"    background-color: rgb(118, 165, 175);\n"
+"}\n"
+"")
+        self.tool_box_empty_2.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.tool_box_empty_2.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.tool_box_empty_2.setObjectName("tool_box_empty_2")
+        self.verticalLayout_5.addWidget(self.tool_box_empty_2)
+        self.stackedWidget.addWidget(self.search_page)
+        self.thumbnail_page = QtWidgets.QWidget()
+        self.thumbnail_page.setObjectName("thumbnail_page")
+        self.horizontalLayout_6 = QtWidgets.QHBoxLayout(self.thumbnail_page)
+        self.horizontalLayout_6.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout_6.setSpacing(0)
+        self.horizontalLayout_6.setObjectName("horizontalLayout_6")
+        self.frame = QtWidgets.QFrame(self.thumbnail_page)
+        self.frame.setMinimumSize(QtCore.QSize(200, 0))
+        self.frame.setMaximumSize(QtCore.QSize(200, 16777215))
+        self.frame.setStyleSheet("background-color: rgb(153, 153, 153);")
+        self.frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.frame.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.frame.setObjectName("frame")
+        self.verticalLayout_8 = QtWidgets.QVBoxLayout(self.frame)
+        self.verticalLayout_8.setObjectName("verticalLayout_8")
+        self.thumbnail_list = QtWidgets.QListWidget(self.frame)
+        self.thumbnail_list.setObjectName("thumbnail_list")
+        self.verticalLayout_8.addWidget(self.thumbnail_list)
+        self.horizontalLayout_6.addWidget(self.frame)
+        self.verticalLayout_7 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_7.setSpacing(0)
+        self.verticalLayout_7.setObjectName("verticalLayout_7")
+        self.frame_2 = QtWidgets.QFrame(self.thumbnail_page)
+        self.frame_2.setMinimumSize(QtCore.QSize(70, 0))
+        self.frame_2.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.frame_2.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.frame_2.setObjectName("frame_2")
+        self.verticalLayout_7.addWidget(self.frame_2)
+        self.tool_box_2 = QtWidgets.QFrame(self.thumbnail_page)
+        self.tool_box_2.setMinimumSize(QtCore.QSize(70, 70))
+        self.tool_box_2.setMaximumSize(QtCore.QSize(16777215, 70))
+        self.tool_box_2.setStyleSheet("QFrame{\n"
+"    \n"
+"    background-color: rgb(118, 165, 175);\n"
+"}\n"
+"")
+        self.tool_box_2.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.tool_box_2.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.tool_box_2.setObjectName("tool_box_2")
+        self.verticalLayout_7.addWidget(self.tool_box_2)
+        self.horizontalLayout_6.addLayout(self.verticalLayout_7)
+        self.stackedWidget.addWidget(self.thumbnail_page)
+        self.horizontalLayout.addWidget(self.stackedWidget)
         self.verticalLayout_2.addWidget(self.frame_mian_body)
+        self.layoutWidget = QtWidgets.QWidget(self.central_widget)
+        self.layoutWidget.setGeometry(QtCore.QRect(0, 0, 100, 30))
+        self.layoutWidget.setObjectName("layoutWidget")
+        self.verticalLayout_6 = QtWidgets.QVBoxLayout(self.layoutWidget)
+        self.verticalLayout_6.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_6.setObjectName("verticalLayout_6")
         MainWindow.setCentralWidget(self.central_widget)
 
         self.retranslateUi(MainWindow)
+        self.stackedWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -299,6 +415,8 @@ class Ui_MainWindow(object):
         self.search.setText(_translate("MainWindow", "Search"))
         self.patients.setText(_translate("MainWindow", "Patients"))
         self.recently_viewed.setText(_translate("MainWindow", "Recently Viewed"))
+        self.patients_label.setText(_translate("MainWindow", "Patients"))
+        self.search_no_label.setText(_translate("MainWindow", "Search No."))
 import generatedUiFile.res.nike_app_rc
 
 

@@ -1,3 +1,5 @@
-__pycache__/
-.DS_Store
+**/__pycache__/
+**/.DS_Store
 tmp/
+**.idea/
+>>>>>>> main
