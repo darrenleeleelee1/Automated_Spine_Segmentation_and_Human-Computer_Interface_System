@@ -6,13 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-<<<<<<< HEAD
-    <width>1068</width>
-    <height>792</height>
-=======
     <width>850</width>
     <height>732</height>
->>>>>>> 95312d60f0312779bd97b7d0ef134713feeb09fe
    </rect>
   </property>
   <property name="windowTitle">
@@ -516,37 +511,9 @@ background-position: center left;</string>
          <property name="currentIndex">
           <number>0</number>
          </property>
-<<<<<<< HEAD
-         <layout class="QVBoxLayout" name="verticalLayout_4">
-          <property name="spacing">
-           <number>0</number>
-          </property>
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-          <item>
-           <widget class="QFrame" name="main_frame">
-            <property name="font">
-             <font>
-              <pointsize>14</pointsize>
-             </font>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">QLabel{
-=======
          <widget class="QWidget" name="recently_viewed_page">
           <property name="styleSheet">
            <string notr="true">QLabel{
->>>>>>> 95312d60f0312779bd97b7d0ef134713feeb09fe
 	color: #fff;
 }</string>
           </property>
@@ -610,12 +577,6 @@ background-position: center left;</string>
                <height>70</height>
               </size>
              </property>
-<<<<<<< HEAD
-             <item>
-              <widget class="QStackedWidget" name="stackedWidget">
-               <property name="styleSheet">
-                <string notr="true">background-color: rgb(102, 102, 102);</string>
-=======
              <property name="maximumSize">
               <size>
                <width>16777215</width>
