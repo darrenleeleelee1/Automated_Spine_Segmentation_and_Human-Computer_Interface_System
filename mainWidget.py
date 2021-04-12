@@ -22,6 +22,8 @@ class initialWidget(QtWidgets.QMainWindow):
         self.pt_list.append("3847829")
         self.pt_list.append("2342422")
 
+
+
         for ptid in self.pt_list:
             self.ui.no_list.addItem(ptid)
 
@@ -57,14 +59,13 @@ class initialWidget(QtWidgets.QMainWindow):
 
     def addEntry(self):
         entryItem = self.ui.input_no.text()
-        self.ui.input_no.clear()
-        self.ui.no_list.clear()
+        if entryItem != '':
+            self.ui.input_no.clear()
+            self.ui.no_list.clear()
 
-        for id in self.pt_list:
-            print("id" ,id)
-            if id.startswith(entryItem):
-                self.ui.no_list.addItem(id)
-                print("match")
+            for id in self.pt_list:
+                if id.startswith(entryItem):
+                    self.ui.no_list.addItem(id)
 
         list1 = []
         list1.insert(0, entryItem)  # 也把 entryItem 存在 list1 裡傳給後端
