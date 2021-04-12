@@ -85,10 +85,16 @@ class initialWidget(QtWidgets.QMainWindow):
         print("\n選擇的資料夾:")
         print(dir_choose)
         pt_id = os.path.basename(dir_choose)
-        self.pt_list.append(pt_id)
+        
+        # if pt_id in pt_set:
+
+        # else:
+        # pt_set.add(pt_id)
+        self.pt_list.append(Patient(pt_id, dir_choose))
         self.ui.patient_list.addItem(pt_id)
-        for i in self.pt_list:
-            print(i)
+        self.ui.no_list.addItem(pt_id)
+        # for i in self.pt_list:
+        #     print(i)
 
     def mousePressEvent(self, event):
         self.clickPosition = event.globalPos()
