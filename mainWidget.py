@@ -1,10 +1,12 @@
+from os import listdir
+from os.path import join
 from PyQt5.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
                           QSize, QTime, QUrl, Qt, QEvent)
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QCoreApplication, Qt
 from PyQt5.QtGui import QStandardItem, QStandardItemModel
 from generatedUiFile.Spine_BrokenUi import Ui_MainWindow
-import os
+import os, requests
 from PyQt5.QtWidgets import *
 
 WINDOW_SIZE = 0
@@ -95,6 +97,24 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.no_list.addItem(pt_id)
         # for i in self.pt_list:
         #     print(i)
+
+        # post
+        url = 'http://127.0.0.1:8000/pdicom/' + pt_id
+        #headers = {'accept': 'application/json', 'Content-Type': 'multipart/form-data'}
+        myfiles = listdir(dir_choose)  # 檔案
+        dic_file = []
+        for f in myfiles:
+            # 產生檔案的絕對路徑
+            fullpath = join(dir_choose, f)
+            # dicom的名字
+            dicom_id = os.path.basename(fullpath)
+            print(dicom_id)
+            print(fullpath)
+            dic_file.append(('files', (dicom_id, open(fullpath, 'rb'))))
+
+        response = requests.post(url, files=dic_file)
+        print(response.reason)
+        print(response.json())
 
     def mousePressEvent(self, event):
         self.clickPosition = event.globalPos()
