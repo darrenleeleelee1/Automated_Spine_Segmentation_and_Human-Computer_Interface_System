@@ -45,8 +45,8 @@ async def get_dicom(medical_number: int):
 @app.post("/pdicom/{medical_number}") # save dicoms
 async def post_dicom(medical_number: str, files: List[UploadFile] = File(...)):
     directory = f'./tmp/{medical_number}'
-    
-    
+    if os.path.exists(directory):
+        return {"Result": "Directory already exist."}
     await aiofiles.os.mkdir(directory)
     
     for file in files:
@@ -55,12 +55,9 @@ async def post_dicom(medical_number: str, files: List[UploadFile] = File(...)):
             print(type(content))
             await out_file.write(content)  # async write
 
-    # return {"files": [file.read() for file in files]}
     return {'Result': 'OK'}    
 
-# @app.post("/files/")
-# async def create_file(file: bytes = UploadFile(...)):
-#     return {'file': file.filename}
+
 
 import uvicorn
 if __name__ == "__main__":
