@@ -1,7 +1,14 @@
 import requests
-files = [('files', ('README', open('./README.md', 'rb')))]
-# header = {'Content-Type': 'multipart/form-data'}
-response = requests.post('http://127.0.0.1:8000/pdicom/123', files=files)
-# response = requests.post('http://127.0.0.1:8000/files', files={'fir': open('./README.md', 'rb')})
+from pydicom import dcmread
+from pydicom.filebase import DicomBytesIO
+import matplotlib.pyplot as plt
+response = requests.get('http://127.0.0.1:8000/gdicom/13726235')
+# print(response.content)
+print(type(response.content))
 
-print(response.headers)
+raw = DicomBytesIO(response.content)
+ds = dcmread(raw)
+arr = ds.pixel_array
+print(type(ds))
+plt.imshow(arr, cmap="gray")
+plt.show()
