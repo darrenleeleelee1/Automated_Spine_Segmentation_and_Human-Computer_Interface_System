@@ -37,7 +37,7 @@ async def get_dicom(medical_number: int):
     #     if os.path.exists(path):
     #         item.append({filename: open(path, 'rb').read()})
     # return item
-    dicom_path = './tmp/13726235/5F3279B8'
+    dicom_path = './tmp/01372635/5F3279B8'
     if os.path.exists(dicom_path):
         return FileResponse(dicom_path, media_type="application/dicom")
     return {'error': 'File not found.'}
