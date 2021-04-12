@@ -43,7 +43,7 @@ async def get_dicom(medical_number: int):
     return {'error': 'File not found.'}
 
 @app.post("/pdicom/{medical_number}") # save dicoms
-async def post_dicom(medical_number: int, files: List[UploadFile] = File(...)):
+async def post_dicom(medical_number: str, files: List[UploadFile] = File(...)):
     directory = f'./tmp/{medical_number}'
     
     
