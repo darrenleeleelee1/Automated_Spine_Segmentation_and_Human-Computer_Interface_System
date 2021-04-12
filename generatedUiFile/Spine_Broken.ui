@@ -775,7 +775,6 @@ margin:50px;</string>
                </property>
                <property name="frameShape">
                 <enum>QFrame::NoFrame</enum>
->>>>>>> 95312d60f0312779bd97b7d0ef134713feeb09fe
                </property>
                <widget class="QWidget" name="page_9">
                 <layout class="QVBoxLayout" name="verticalLayout_5">
