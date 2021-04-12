@@ -143,7 +143,7 @@ class initialWidget(QtWidgets.QMainWindow):
 class Patient():
     def __init__(self, _pt_id, _pt_path):
         self.pt_id = _pt_id
-        self.pt_path = __pt_path
+        self.pt_path = _pt_path
 
 
 if __name__ == '__main__':
