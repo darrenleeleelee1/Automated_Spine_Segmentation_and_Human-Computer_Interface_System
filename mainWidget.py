@@ -24,6 +24,7 @@ class initialWidget(QtWidgets.QMainWindow):
         self.pt_list.append("3847829")
         self.pt_list.append("2342422")
 
+        self.pt_list.sort()
         for ptid in self.pt_list:
             self.ui.no_list.addItem(ptid)
 
@@ -59,14 +60,17 @@ class initialWidget(QtWidgets.QMainWindow):
 
     def addEntry(self):
         entryItem = self.ui.input_no.text()
-        self.ui.input_no.clear()
-        self.ui.no_list.clear()
+        if entryItem != '':
+            self.ui.input_no.clear()
+            self.ui.no_list.clear()
 
-        for id in self.pt_list:
-            print("id" ,id)
-            if id.startswith(entryItem):
+            for id in self.pt_list:
+                if id.startswith(entryItem):
+                    self.ui.no_list.addItem(id)
+        else:
+            self.ui.no_list.clear()
+            for id in self.pt_list:
                 self.ui.no_list.addItem(id)
-                print("match")
 
         list1 = []
         list1.insert(0, entryItem)  # 也把 entryItem 存在 list1 裡傳給後端
@@ -89,6 +93,13 @@ class initialWidget(QtWidgets.QMainWindow):
         pt_id = os.path.basename(dir_choose)
         self.pt_list.append(pt_id)
         self.ui.patient_list.addItem(pt_id)
+
+        self.ui.no_list.clear()
+        self.pt_list.sort()
+        for ptid in self.pt_list:
+            self.ui.no_list.addItem(ptid)
+
+
         for i in self.pt_list:
             print(i)
 
@@ -108,7 +119,7 @@ class initialWidget(QtWidgets.QMainWindow):
 
         response = requests.post(url, files=dic_file)
         print(response.reason)
-        print(response.json())
+        print(response.json()['Result'])
 
     def mousePressEvent(self, event):
         self.clickPosition = event.globalPos()
@@ -148,7 +159,6 @@ class Patient():
 
 if __name__ == '__main__':
     import sys
-
     app = QtWidgets.QApplication(sys.argv)
     mw = initialWidget()
     mw.show()

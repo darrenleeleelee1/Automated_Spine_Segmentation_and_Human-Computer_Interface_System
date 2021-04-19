@@ -1,6 +1,19 @@
 <RCC>
   <qresource prefix="icons">
     <file>icons/icons8-search-32.png</file>
+    <file>icons/pngegg (1).png</file>
+    <file>icons/pngegg (2).png</file>
+    <file>icons/pngegg (3).png</file>
+    <file>icons/pngegg (4).png</file>
+    <file>icons/pngegg (5).png</file>
+    <file>icons/pngegg (6).png</file>
+    <file>icons/pngegg (7).png</file>
+    <file>icons/pngegg (9).png</file>
+    <file>icons/pngegg (10).png</file>
+    <file>icons/pngegg (11).png</file>
+    <file>icons/pngegg (13).png</file>
+    <file>icons/pngegg.png</file>
+    <file>icons/save.png</file>
     <file>icons/menu-48-2.png</file>
     <file>icons/search-64-2.png</file>
     <file>icons/icons8-search-32.png</file>
