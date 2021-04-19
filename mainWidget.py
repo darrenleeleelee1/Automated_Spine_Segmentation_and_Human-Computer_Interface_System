@@ -119,7 +119,7 @@ class initialWidget(QtWidgets.QMainWindow):
 
         response = requests.post(url, files=dic_file)
         print(response.reason)
-        print(response.json())
+        print(response.json()['Result'])
 
     def mousePressEvent(self, event):
         self.clickPosition = event.globalPos()
@@ -159,7 +159,6 @@ class Patient():
 
 if __name__ == '__main__':
     import sys
-
     app = QtWidgets.QApplication(sys.argv)
     mw = initialWidget()
     mw.show()
