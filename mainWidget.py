@@ -23,7 +23,7 @@ class initialWidget(QtWidgets.QMainWindow):
         self.pt_list.append("0135678")
         self.pt_list.append("3847829")
         self.pt_list.append("2342422")
-
+        self.pt_set = set()
         for ptid in self.pt_list:
             self.ui.no_list.addItem(ptid)
 
@@ -55,7 +55,8 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.patient_list.itemClicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.thumbnail_page))
 
         self.ui.input_no.setCompleter(completer)  # 搜尋紀錄
-
+        
+        
 
     def addEntry(self):
         entryItem = self.ui.input_no.text()
@@ -77,7 +78,12 @@ class initialWidget(QtWidgets.QMainWindow):
 
         if not self.model.findItems(entryItem):
             self.model.insertRow(0, QStandardItem(entryItem))
-
+    def duplicate_add(self):
+        msg = QMessageBox()
+        msg.setWindowTitle("Warning")
+        msg.setText("Patient already exist !")
+        msg.setIcon(QMessageBox.Warning)
+        x = msg.exec_()
     def addPatient(self):
         dir_choose = QFileDialog.getExistingDirectory(self, "選取資料夾", "/Users/user/Documents/畢專/dicom_data")  # 第三參數是起始路徑
         if dir_choose == "":
@@ -88,11 +94,7 @@ class initialWidget(QtWidgets.QMainWindow):
         print(dir_choose)
         pt_id = os.path.basename(dir_choose)
         
-        # if pt_id in pt_set:
-
-        # else:
-        # pt_set.add(pt_id)
-        self.pt_list.append(Patient(pt_id, dir_choose))
+        self.pt_list.append(pt_id)
         self.ui.patient_list.addItem(pt_id)
         self.ui.no_list.addItem(pt_id)
         # for i in self.pt_list:
@@ -115,6 +117,10 @@ class initialWidget(QtWidgets.QMainWindow):
         response = requests.post(url, files=dic_file)
         print(response.reason)
         print(response.json())
+        if(response.json()['Result'] == 'Directory already exists.'):
+            self.duplicate_add()
+        
+
 
     def mousePressEvent(self, event):
         self.clickPosition = event.globalPos()
