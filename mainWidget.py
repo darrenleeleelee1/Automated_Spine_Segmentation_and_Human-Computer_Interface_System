@@ -23,7 +23,8 @@ class initialWidget(QtWidgets.QMainWindow):
         self.pt_list.append("0135678")
         self.pt_list.append("3847829")
         self.pt_list.append("2342422")
-        self.pt_set = set()
+
+        self.pt_list.sort()
         for ptid in self.pt_list:
             self.ui.no_list.addItem(ptid)
 
@@ -60,14 +61,17 @@ class initialWidget(QtWidgets.QMainWindow):
 
     def addEntry(self):
         entryItem = self.ui.input_no.text()
-        self.ui.input_no.clear()
-        self.ui.no_list.clear()
+        if entryItem != '':
+            self.ui.input_no.clear()
+            self.ui.no_list.clear()
 
-        for id in self.pt_list:
-            print("id" ,id)
-            if id.startswith(entryItem):
+            for id in self.pt_list:
+                if id.startswith(entryItem):
+                    self.ui.no_list.addItem(id)
+        else:
+            self.ui.no_list.clear()
+            for id in self.pt_list:
                 self.ui.no_list.addItem(id)
-                print("match")
 
         list1 = []
         list1.insert(0, entryItem)  # 也把 entryItem 存在 list1 裡傳給後端
@@ -96,9 +100,15 @@ class initialWidget(QtWidgets.QMainWindow):
         
         self.pt_list.append(pt_id)
         self.ui.patient_list.addItem(pt_id)
-        self.ui.no_list.addItem(pt_id)
-        # for i in self.pt_list:
-        #     print(i)
+
+        self.ui.no_list.clear()
+        self.pt_list.sort()
+        for ptid in self.pt_list:
+            self.ui.no_list.addItem(ptid)
+
+
+        for i in self.pt_list:
+            print(i)
 
         # post
         url = 'http://127.0.0.1:8000/pdicom/' + pt_id
@@ -160,7 +170,6 @@ class Patient():
 
 if __name__ == '__main__':
     import sys
-
     app = QtWidgets.QApplication(sys.argv)
     mw = initialWidget()
     mw.show()
