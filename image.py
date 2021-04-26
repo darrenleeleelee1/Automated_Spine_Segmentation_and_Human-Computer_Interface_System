@@ -4,7 +4,8 @@ import requests
 from pydicom import dcmread
 from pydicom.filebase import DicomBytesIO
 import matplotlib.pyplot as plt
-import cv2, numpy as np
+import numpy as np
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -13,7 +14,6 @@ class Ui_MainWindow(object):
         self.centralwidget.setObjectName("centralwidget")
         self.photo = QtWidgets.QLabel(self.centralwidget)
         self.photo.setText("")
-        self.photo.setPixmap(QtGui.QPixmap("cat.jpg"))
         self.photo.setScaledContents(True)
         self.photo.setObjectName("photo")
         
@@ -34,6 +34,7 @@ class Ui_MainWindow(object):
         # ds = dcmread(raw)
         
         ds = dcmread(r'.\tmp\01372635\5F327951')
+        print(ds)
         arr = ds.pixel_array
         arr = np.uint8(arr)
         qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], QtGui.QImage.Format_Grayscale8)
