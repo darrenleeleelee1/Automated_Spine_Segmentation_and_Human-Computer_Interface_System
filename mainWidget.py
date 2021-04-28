@@ -39,9 +39,12 @@ class initialWidget(QtWidgets.QMainWindow):
                     e.accept()
 
         self.ui.header.mouseMoveEvent = moveWindow  # 移動視窗
+        self.ui.photo = QtWidgets.QLabel(self.ui.frame_2)
+        self.ui.photo.setText("")
         self.show()
 
     def backend(self):
+        self.ui.stackedWidget.setCurrentWidget(self.ui.recently_viewed_page)
         self.ui.close_button.clicked.connect(QCoreApplication.instance().quit)  # 叉叉
         self.ui.minimize_button.clicked.connect(lambda: self.showMinimized())  # minimize window
         self.ui.restore_button.clicked.connect(lambda: self.restore_or_maximize_window())  # restore window
@@ -54,10 +57,10 @@ class initialWidget(QtWidgets.QMainWindow):
         completer = QCompleter(self.model, self)
 
         self.ui.patient_list.itemClicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.thumbnail_page))
+        
 
         self.ui.input_no.setCompleter(completer)  # 搜尋紀錄
-        
-        
+
 
     def addEntry(self):
         entryItem = self.ui.input_no.text()

@@ -4,7 +4,7 @@ import requests
 from pydicom import dcmread
 from pydicom.filebase import DicomBytesIO
 import matplotlib.pyplot as plt
-import cv2, numpy as np
+import numpy as np
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -19,13 +19,13 @@ class Ui_MainWindow(object):
         
         MainWindow.setCentralWidget(self.centralwidget)
 
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        # self.retranslateUi(MainWindow)
+        # QtCore.QMetaObject.connectSlotsByName(MainWindow)
         self.show_dog()
 
-    def retranslateUi(self, MainWindow):
-        _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+    # def retranslateUi(self, MainWindow):
+    #     _translate = QtCore.QCoreApplication.translate
+    #     MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
 
     def show_dog(self):
         # 後端傳回的為FileResponse response.content為bytes
@@ -33,7 +33,7 @@ class Ui_MainWindow(object):
         # raw = DicomBytesIO(response.content)
         # ds = dcmread(raw)
         
-        ds = dcmread(r'.\tmp\01372635\5F327951')
+        ds = dcmread('./tmp/5F329171')
         arr = ds.pixel_array
         arr = np.uint8(arr)
         qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], QtGui.QImage.Format_Grayscale8)
