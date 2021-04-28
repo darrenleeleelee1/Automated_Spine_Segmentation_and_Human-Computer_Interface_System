@@ -1,6 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-
+import os
 import requests
+import pydicom
 from pydicom import dcmread
 from pydicom.filebase import DicomBytesIO
 import matplotlib.pyplot as plt
@@ -13,7 +14,6 @@ class Ui_MainWindow(object):
         self.centralwidget.setObjectName("centralwidget")
         self.photo = QtWidgets.QLabel(self.centralwidget)
         self.photo.setText("")
-        self.photo.setPixmap(QtGui.QPixmap("cat.jpg"))
         self.photo.setScaledContents(True)
         self.photo.setObjectName("photo")
         
@@ -32,8 +32,14 @@ class Ui_MainWindow(object):
         # response = requests.get('http://127.0.0.1:8000/gdicom/13726235')
         # raw = DicomBytesIO(response.content)
         # ds = dcmread(raw)
-        
-        ds = dcmread(r'.\tmp\01372635\5F327951')
+        if(os.path.exists(r'./tmp/01372635/5F327951')):
+            print('yes')
+        else:
+            print('no')
+        #print(r'./tmp/01372635/5F327951')
+        ds = dcmread('./tmp/01372635/5F327951.dcm')
+        print("PixelData" in ds)
+        #print(ds)
         arr = ds.pixel_array
         arr = np.uint8(arr)
         qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], QtGui.QImage.Format_Grayscale8)
