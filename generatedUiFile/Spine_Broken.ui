@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>588</width>
-    <height>458</height>
+    <height>497</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -527,7 +527,7 @@ background-position: center left;</string>
           <number>0</number>
          </property>
          <property name="currentIndex">
-          <number>2</number>
+          <number>3</number>
          </property>
          <widget class="QWidget" name="recently_viewed_page">
           <property name="styleSheet">
@@ -1249,6 +1249,13 @@ QPushButton{
               </widget>
              </item>
             </layout>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="new_page">
+          <layout class="QHBoxLayout" name="horizontalLayout_9">
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_9"/>
            </item>
           </layout>
          </widget>
