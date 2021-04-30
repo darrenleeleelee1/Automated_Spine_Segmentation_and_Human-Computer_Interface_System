@@ -39,9 +39,13 @@ class initialWidget(QtWidgets.QMainWindow):
                     e.accept()
 
         self.ui.header.mouseMoveEvent = moveWindow  # 移動視窗
-        self.show()
+        self.ui.photo = QtWidgets.QLabel(self.ui.frame_2)
+        self.ui.photo.setText("")
+        self.show() 
+
 
     def backend(self):
+        self.ui.stackedWidget.setCurrentWidget(self.ui.recently_viewed_page)
         self.ui.close_button.clicked.connect(QCoreApplication.instance().quit)  # 叉叉
         self.ui.minimize_button.clicked.connect(lambda: self.showMinimized())  # minimize window
         self.ui.restore_button.clicked.connect(lambda: self.restore_or_maximize_window())  # restore window
@@ -54,8 +58,59 @@ class initialWidget(QtWidgets.QMainWindow):
         completer = QCompleter(self.model, self)
 
         self.ui.patient_list.itemClicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.thumbnail_page))
+        
 
         self.ui.input_no.setCompleter(completer)  # 搜尋紀錄
+
+        self.setPhotoStackWidget()
+
+    def setPhotoStackWidget(self):
+        self.ui.horizontalLayout_9.setContentsMargins(0, 0, 0, 0)
+        self.ui.horizontalLayout_9.setSpacing(0)
+        self.ui.verticalLayout_9 = QtWidgets.QVBoxLayout()
+        self.ui.verticalLayout_9.setSpacing(0)
+        self.PhotoStackWidget = QtWidgets.QStackedWidget(self.ui.new_page)
+        
+        # self.ui.stackedWidget.addWidget(self.PhotoStackWidget)
+        self.ui.stackedWidget.setCurrentIndex(3)
+        MAXIMUM_photo_page = 5
+        self.photo_label = []
+        self.photo_page = []
+        self.photo_left_frame = []
+        self.photo_right_frame = []
+        self.thumbnail_list = []
+        for i in range(MAXIMUM_photo_page):
+            self.photo_page.append(QtWidgets.QWidget())
+            self.photo_left_frame.append(QtWidgets.QFrame(self.photo_page[i]))
+            self.PhotoStackWidget.addWidget(self.photo_page[i])
+            self.horizontalLayout_6 = QtWidgets.QHBoxLayout(self.photo_page[i])
+            self.horizontalLayout_6.setContentsMargins(0, 0, 0, 0)
+            self.horizontalLayout_6.setSpacing(0)
+            self.photo_left_frame[i] = QtWidgets.QFrame(self.photo_page[i])
+            self.photo_left_frame[i].setMinimumSize(QtCore.QSize(150, 0))
+            self.photo_left_frame[i].setMaximumSize(QtCore.QSize(100, 16777215))
+            self.photo_left_frame[i].setStyleSheet("background-color: rgb(153, 153, 153);")
+            self.photo_left_frame[i].setFrameShape(QtWidgets.QFrame.StyledPanel)
+            self.photo_left_frame[i].setFrameShadow(QtWidgets.QFrame.Raised)
+            self.verticalLayout_8 = QtWidgets.QVBoxLayout(self.photo_left_frame[i])
+            self.verticalLayout_8.setContentsMargins(0, 0, 0, 0)
+            self.verticalLayout_8.setSpacing(0)
+            self.thumbnail_list.append(QtWidgets.QListWidget(self.photo_left_frame[i]))
+            self.thumbnail_list[i].setFrameShape(QtWidgets.QFrame.NoFrame)
+            self.verticalLayout_8.addWidget(self.thumbnail_list[i])
+            self.photo_right_frame.append(QtWidgets.QFrame(self.photo_page[i]))
+            self.photo_right_frame[i].setMinimumSize(QtCore.QSize(70, 0))
+            self.photo_right_frame[i].setFrameShape(QtWidgets.QFrame.StyledPanel)
+            self.photo_right_frame[i].setFrameShadow(QtWidgets.QFrame.Raised)
+            self.gridLayout = QtWidgets.QGridLayout(self.photo_right_frame[i])
+            self.photo_label.append(QtWidgets.QLabel(self.photo_right_frame[i]))
+            self.photo_label[i].setText(str(i))
+            self.horizontalLayout_6.addWidget(self.photo_left_frame[i])
+            self.horizontalLayout_6.addWidget(self.photo_right_frame[i])
+        
+        self.ui.verticalLayout_9.addWidget(self.PhotoStackWidget)
+        # self.ui.verticalLayout_9.addWidget(self.ui.tool_box_2)
+        self.PhotoStackWidget.setCurrentIndex(0)
 
 
     def addEntry(self):
@@ -81,7 +136,12 @@ class initialWidget(QtWidgets.QMainWindow):
 
         if not self.model.findItems(entryItem):
             self.model.insertRow(0, QStandardItem(entryItem))
-
+    def duplicate_add(self):
+        msg = QMessageBox()
+        msg.setWindowTitle("Warning")
+        msg.setText("Patient already exist !")
+        msg.setIcon(QMessageBox.Warning)
+        x = msg.exec_()
     def addPatient(self):
         dir_choose = QFileDialog.getExistingDirectory(self, "選取資料夾", "/Users/user/Documents/畢專/dicom_data")  # 第三參數是起始路徑
         if dir_choose == "":
@@ -91,6 +151,7 @@ class initialWidget(QtWidgets.QMainWindow):
         print("\n選擇的資料夾:")
         print(dir_choose)
         pt_id = os.path.basename(dir_choose)
+        
         self.pt_list.append(pt_id)
         self.ui.patient_list.addItem(pt_id)
 
@@ -119,7 +180,11 @@ class initialWidget(QtWidgets.QMainWindow):
 
         response = requests.post(url, files=dic_file)
         print(response.reason)
-        print(response.json()['Result'])
+        print(response.json())
+        if(response.json()['Result'] == 'Directory already exists.'):
+            self.duplicate_add()
+        
+
 
     def mousePressEvent(self, event):
         self.clickPosition = event.globalPos()
