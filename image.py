@@ -33,7 +33,7 @@ class Ui_MainWindow(object):
         # raw = DicomBytesIO(response.content)
         # ds = dcmread(raw)
         
-        ds = dcmread(r'.\tmp\01372635\5F327951')
+        ds = dcmread('./tmp/01372635/5F327951.dcm')
         arr = ds.pixel_array
         arr = np.uint8(arr)
         qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], QtGui.QImage.Format_Grayscale8)
