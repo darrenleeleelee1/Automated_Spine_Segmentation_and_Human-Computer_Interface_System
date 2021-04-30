@@ -370,6 +370,7 @@ class Ui_MainWindow(object):
         self.stackedWidget_2.setObjectName("stackedWidget_2")
         self.page = QtWidgets.QWidget()
         self.page.setObjectName("page")
+        self.stackedWidget_2.addWidget(self.page)
         self.horizontalLayout_6 = QtWidgets.QHBoxLayout(self.page)
         self.horizontalLayout_6.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout_6.setSpacing(0)
@@ -410,7 +411,7 @@ class Ui_MainWindow(object):
         self.label.setObjectName("label")
         self.gridLayout.addWidget(self.label, 0, 1, 1, 1)
         self.horizontalLayout_6.addWidget(self.frame_2)
-        self.stackedWidget_2.addWidget(self.page)
+
         self.page_2 = QtWidgets.QWidget()
         self.page_2.setObjectName("page_2")
         self.stackedWidget_2.addWidget(self.page_2)
