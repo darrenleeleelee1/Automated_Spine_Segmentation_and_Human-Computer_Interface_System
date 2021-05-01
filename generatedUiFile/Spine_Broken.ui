@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>501</width>
-    <height>458</height>
+    <width>1029</width>
+    <height>849</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -910,7 +910,7 @@ margin:50px;</string>
                      <number>0</number>
                     </property>
                     <item>
-                     <widget class="QListWidget" name="thumbnail_list">
+                     <widget class="QListWidget" name="thumbnail_list_1">
                       <property name="frameShape">
                        <enum>QFrame::NoFrame</enum>
                       </property>
