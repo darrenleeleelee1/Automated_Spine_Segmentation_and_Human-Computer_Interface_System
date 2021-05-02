@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>588</width>
-    <height>497</height>
+    <width>1029</width>
+    <height>849</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -207,7 +207,7 @@ QFrame{
      </widget>
     </item>
     <item>
-     <widget class="QFrame" name="frame_mian_body">
+     <widget class="QFrame" name="frame_main_body">
       <property name="styleSheet">
        <string notr="true">QFrame{
 	background-color: #4F4F4F
@@ -519,7 +519,7 @@ background-position: center left;</string>
         </widget>
        </item>
        <item>
-        <widget class="QStackedWidget" name="stackedWidget">
+        <widget class="QStackedWidget" name="stackedWidget_right">
          <property name="styleSheet">
           <string notr="true">background-color: #4F4F4F;</string>
          </property>
@@ -527,7 +527,7 @@ background-position: center left;</string>
           <number>0</number>
          </property>
          <property name="currentIndex">
-          <number>3</number>
+          <number>2</number>
          </property>
          <widget class="QWidget" name="recently_viewed_page">
           <property name="styleSheet">
@@ -552,7 +552,7 @@ background-position: center left;</string>
             <number>0</number>
            </property>
            <item alignment="Qt::AlignHCenter">
-            <widget class="QLabel" name="recently_viewed">
+            <widget class="QLabel" name="recently_viewed_label">
              <property name="maximumSize">
               <size>
                <width>16777215</width>
@@ -852,8 +852,8 @@ margin:50px;</string>
               <number>0</number>
              </property>
              <item>
-              <widget class="QStackedWidget" name="stackedWidget_2">
-               <widget class="QWidget" name="page">
+              <widget class="QStackedWidget" name="stackedWidget_patients">
+               <widget class="QWidget" name="patient_page_1">
                 <layout class="QHBoxLayout" name="horizontalLayout_6">
                  <property name="spacing">
                   <number>0</number>
@@ -871,7 +871,7 @@ margin:50px;</string>
                   <number>0</number>
                  </property>
                  <item>
-                  <widget class="QFrame" name="frame">
+                  <widget class="QFrame" name="thumbnail_frame">
                    <property name="minimumSize">
                     <size>
                      <width>150</width>
@@ -910,7 +910,7 @@ margin:50px;</string>
                      <number>0</number>
                     </property>
                     <item>
-                     <widget class="QListWidget" name="thumbnail_list">
+                     <widget class="QListWidget" name="thumbnail_list_1">
                       <property name="frameShape">
                        <enum>QFrame::NoFrame</enum>
                       </property>
@@ -920,7 +920,7 @@ margin:50px;</string>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QFrame" name="frame_2">
+                  <widget class="QFrame" name="pic_frame">
                    <property name="minimumSize">
                     <size>
                      <width>70</width>
@@ -934,29 +934,29 @@ margin:50px;</string>
                     <enum>QFrame::Raised</enum>
                    </property>
                    <layout class="QGridLayout" name="gridLayout">
-                    <item row="0" column="0">
-                     <widget class="QLabel" name="photo">
-                      <property name="text">
-                       <string>TextLabel</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="1" column="0">
-                     <widget class="QLabel" name="label_2">
-                      <property name="text">
-                       <string>TextLabel</string>
-                      </property>
-                     </widget>
-                    </item>
                     <item row="1" column="1">
-                     <widget class="QLabel" name="label_3">
+                     <widget class="QLabel" name="pic_1_4">
                       <property name="text">
                        <string>TextLabel</string>
                       </property>
                      </widget>
                     </item>
                     <item row="0" column="1">
-                     <widget class="QLabel" name="label">
+                     <widget class="QLabel" name="pic_1_1">
+                      <property name="text">
+                       <string>TextLabel</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="0">
+                     <widget class="QLabel" name="pic_1_2">
+                      <property name="text">
+                       <string>TextLabel</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="0">
+                     <widget class="QLabel" name="pic_1_3">
                       <property name="text">
                        <string>TextLabel</string>
                       </property>
@@ -967,11 +967,466 @@ margin:50px;</string>
                  </item>
                 </layout>
                </widget>
-               <widget class="QWidget" name="page_2"/>
+               <widget class="QWidget" name="patient_page_2">
+                <layout class="QHBoxLayout" name="horizontalLayout_9">
+                 <property name="spacing">
+                  <number>0</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <widget class="QFrame" name="thumbnail_frame_2">
+                   <property name="minimumSize">
+                    <size>
+                     <width>150</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>100</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">background-color: rgb(153, 153, 153);</string>
+                   </property>
+                   <property name="frameShape">
+                    <enum>QFrame::StyledPanel</enum>
+                   </property>
+                   <property name="frameShadow">
+                    <enum>QFrame::Raised</enum>
+                   </property>
+                   <layout class="QVBoxLayout" name="verticalLayout_9">
+                    <property name="spacing">
+                     <number>0</number>
+                    </property>
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QListWidget" name="thumbnail_list_2">
+                      <property name="frameShape">
+                       <enum>QFrame::NoFrame</enum>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QFrame" name="pic_frame_2">
+                   <property name="minimumSize">
+                    <size>
+                     <width>70</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="frameShape">
+                    <enum>QFrame::StyledPanel</enum>
+                   </property>
+                   <property name="frameShadow">
+                    <enum>QFrame::Raised</enum>
+                   </property>
+                   <layout class="QGridLayout" name="gridLayout_3">
+                    <item row="1" column="1">
+                     <widget class="QLabel" name="pic_2_1">
+                      <property name="text">
+                       <string>TextLabel</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="1">
+                     <widget class="QLabel" name="pic_2_2">
+                      <property name="text">
+                       <string>TextLabel</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="0">
+                     <widget class="QLabel" name="pic_2_4">
+                      <property name="text">
+                       <string>TextLabel</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="0">
+                     <widget class="QLabel" name="pic_2_3">
+                      <property name="text">
+                       <string>TextLabel</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+               <widget class="QWidget" name="patient_page_3">
+                <layout class="QHBoxLayout" name="horizontalLayout_10">
+                 <property name="spacing">
+                  <number>0</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <widget class="QFrame" name="thumbnail_frame_3">
+                   <property name="minimumSize">
+                    <size>
+                     <width>150</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>100</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">background-color: rgb(153, 153, 153);</string>
+                   </property>
+                   <property name="frameShape">
+                    <enum>QFrame::StyledPanel</enum>
+                   </property>
+                   <property name="frameShadow">
+                    <enum>QFrame::Raised</enum>
+                   </property>
+                   <layout class="QVBoxLayout" name="verticalLayout_10">
+                    <property name="spacing">
+                     <number>0</number>
+                    </property>
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QListWidget" name="thumbnail_list_3">
+                      <property name="frameShape">
+                       <enum>QFrame::NoFrame</enum>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QFrame" name="pic_frame_3">
+                   <property name="minimumSize">
+                    <size>
+                     <width>70</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="frameShape">
+                    <enum>QFrame::StyledPanel</enum>
+                   </property>
+                   <property name="frameShadow">
+                    <enum>QFrame::Raised</enum>
+                   </property>
+                   <layout class="QGridLayout" name="gridLayout_4">
+                    <item row="1" column="1">
+                     <widget class="QLabel" name="pic_3_1">
+                      <property name="text">
+                       <string>TextLabel</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="1">
+                     <widget class="QLabel" name="pic_3_2">
+                      <property name="text">
+                       <string>TextLabel</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="0">
+                     <widget class="QLabel" name="pic_3_4">
+                      <property name="text">
+                       <string>TextLabel</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="0">
+                     <widget class="QLabel" name="pic_3_3">
+                      <property name="text">
+                       <string>TextLabel</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+               <widget class="QWidget" name="patient_page_4">
+                <layout class="QHBoxLayout" name="horizontalLayout_11">
+                 <property name="spacing">
+                  <number>0</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <widget class="QFrame" name="thumbnail_frame_4">
+                   <property name="minimumSize">
+                    <size>
+                     <width>150</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>100</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">background-color: rgb(153, 153, 153);</string>
+                   </property>
+                   <property name="frameShape">
+                    <enum>QFrame::StyledPanel</enum>
+                   </property>
+                   <property name="frameShadow">
+                    <enum>QFrame::Raised</enum>
+                   </property>
+                   <layout class="QVBoxLayout" name="verticalLayout_11">
+                    <property name="spacing">
+                     <number>0</number>
+                    </property>
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QListWidget" name="thumbnail_list_4">
+                      <property name="frameShape">
+                       <enum>QFrame::NoFrame</enum>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QFrame" name="pic_frame_4">
+                   <property name="minimumSize">
+                    <size>
+                     <width>70</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="frameShape">
+                    <enum>QFrame::StyledPanel</enum>
+                   </property>
+                   <property name="frameShadow">
+                    <enum>QFrame::Raised</enum>
+                   </property>
+                   <layout class="QGridLayout" name="gridLayout_5">
+                    <item row="1" column="1">
+                     <widget class="QLabel" name="pic_4_1">
+                      <property name="text">
+                       <string>TextLabel</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="1">
+                     <widget class="QLabel" name="pic_4_3">
+                      <property name="text">
+                       <string>TextLabel</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="0">
+                     <widget class="QLabel" name="pic_4_4">
+                      <property name="text">
+                       <string>TextLabel</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="0">
+                     <widget class="QLabel" name="pic_4_2">
+                      <property name="text">
+                       <string>TextLabel</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+               <widget class="QWidget" name="patient_page_5">
+                <layout class="QHBoxLayout" name="horizontalLayout_12">
+                 <property name="spacing">
+                  <number>0</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <widget class="QFrame" name="thumbnail_frame_5">
+                   <property name="minimumSize">
+                    <size>
+                     <width>150</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>100</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">background-color: rgb(153, 153, 153);</string>
+                   </property>
+                   <property name="frameShape">
+                    <enum>QFrame::StyledPanel</enum>
+                   </property>
+                   <property name="frameShadow">
+                    <enum>QFrame::Raised</enum>
+                   </property>
+                   <layout class="QVBoxLayout" name="verticalLayout_12">
+                    <property name="spacing">
+                     <number>0</number>
+                    </property>
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QListWidget" name="thumbnail_list_5">
+                      <property name="frameShape">
+                       <enum>QFrame::NoFrame</enum>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QFrame" name="pic_frame_5">
+                   <property name="minimumSize">
+                    <size>
+                     <width>70</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="frameShape">
+                    <enum>QFrame::StyledPanel</enum>
+                   </property>
+                   <property name="frameShadow">
+                    <enum>QFrame::Raised</enum>
+                   </property>
+                   <layout class="QGridLayout" name="gridLayout_6">
+                    <item row="1" column="1">
+                     <widget class="QLabel" name="pic_5_4">
+                      <property name="text">
+                       <string>TextLabel</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="1">
+                     <widget class="QLabel" name="pic_5_1">
+                      <property name="text">
+                       <string>TextLabel</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="0">
+                     <widget class="QLabel" name="pic_5_2">
+                      <property name="text">
+                       <string>TextLabel</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="0">
+                     <widget class="QLabel" name="pic_5_3">
+                      <property name="text">
+                       <string>TextLabel</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
               </widget>
              </item>
              <item>
-              <widget class="QFrame" name="tool_box_2">
+              <widget class="QFrame" name="tool_box">
                <property name="minimumSize">
                 <size>
                  <width>70</width>
@@ -1013,7 +1468,7 @@ QPushButton{
                  <number>0</number>
                 </property>
                 <item>
-                 <widget class="QPushButton" name="pushButton">
+                 <widget class="QPushButton" name="pushButton_record">
                   <property name="text">
                    <string/>
                   </property>
@@ -1033,7 +1488,7 @@ QPushButton{
                  </widget>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="pushButton_2">
+                 <widget class="QPushButton" name="pushButton_mouse">
                   <property name="text">
                    <string/>
                   </property>
@@ -1053,7 +1508,7 @@ QPushButton{
                  </widget>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="pushButton_3">
+                 <widget class="QPushButton" name="pushButton_move">
                   <property name="text">
                    <string/>
                   </property>
@@ -1073,7 +1528,7 @@ QPushButton{
                  </widget>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="pushButton_5">
+                 <widget class="QPushButton" name="pushButton_magnifier">
                   <property name="text">
                    <string/>
                   </property>
@@ -1093,7 +1548,7 @@ QPushButton{
                  </widget>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="pushButton_4">
+                 <widget class="QPushButton" name="pushButton_rotate">
                   <property name="text">
                    <string/>
                   </property>
@@ -1113,7 +1568,7 @@ QPushButton{
                  </widget>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="pushButton_7">
+                 <widget class="QPushButton" name="pushButton_brightness">
                   <property name="text">
                    <string/>
                   </property>
@@ -1133,7 +1588,7 @@ QPushButton{
                  </widget>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="pushButton_8">
+                 <widget class="QPushButton" name="pushButton_angle">
                   <property name="text">
                    <string/>
                   </property>
@@ -1153,7 +1608,7 @@ QPushButton{
                  </widget>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="pushButton_11">
+                 <widget class="QPushButton" name="pushButton_ruler">
                   <property name="text">
                    <string/>
                   </property>
@@ -1173,7 +1628,7 @@ QPushButton{
                  </widget>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="pushButton_10">
+                 <widget class="QPushButton" name="pushButton_pen">
                   <property name="text">
                    <string/>
                   </property>
@@ -1193,7 +1648,7 @@ QPushButton{
                  </widget>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="pushButton_9">
+                 <widget class="QPushButton" name="pushButton_add_pic">
                   <property name="text">
                    <string/>
                   </property>
@@ -1213,7 +1668,7 @@ QPushButton{
                  </widget>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="pushButton_6">
+                 <widget class="QPushButton" name="pushButton_save">
                   <property name="text">
                    <string/>
                   </property>
@@ -1249,13 +1704,6 @@ QPushButton{
               </widget>
              </item>
             </layout>
-           </item>
-          </layout>
-         </widget>
-         <widget class="QWidget" name="new_page">
-          <layout class="QHBoxLayout" name="horizontalLayout_9">
-           <item>
-            <layout class="QVBoxLayout" name="verticalLayout_9"/>
            </item>
           </layout>
          </widget>
