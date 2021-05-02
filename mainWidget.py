@@ -39,28 +39,56 @@ class initialWidget(QtWidgets.QMainWindow):
                     e.accept()
 
         self.ui.header.mouseMoveEvent = moveWindow  # 移動視窗
-        self.ui.photo = QtWidgets.QLabel(self.ui.frame_2)
-        self.ui.photo.setText("")
+    
         self.show() 
 
 
     def backend(self):
-        self.ui.stackedWidget.setCurrentWidget(self.ui.recently_viewed_page)
+        self.ui.stackedWidget_right.setCurrentWidget(self.ui.recently_viewed_page)
         self.ui.close_button.clicked.connect(QCoreApplication.instance().quit)  # 叉叉
         self.ui.minimize_button.clicked.connect(lambda: self.showMinimized())  # minimize window
         self.ui.restore_button.clicked.connect(lambda: self.restore_or_maximize_window())  # restore window
         self.setWindowFlag(QtCore.Qt.FramelessWindowHint)  # 隱藏邊框
         self.ui.menu_toggle.clicked.connect(lambda: self.slideLeftMenu())  # slide menu
         self.ui.add_patient.clicked.connect(self.addPatient)
-        self.ui.search.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.search_page))
+        self.ui.search.clicked.connect(lambda: self.ui.stackedWidget_right.setCurrentWidget(self.ui.search_page))
         self.ui.input_no.editingFinished.connect(self.addEntry)  # 按enter
         self.ui.search_no_button.clicked.connect(self.addEntry)  # 按 search_no
         completer = QCompleter(self.model, self)
 
-        self.ui.patient_list.itemClicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.thumbnail_page))
+        self.ui.patient_list.itemClicked.connect(lambda: self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page))
         
 
         self.ui.input_no.setCompleter(completer)  # 搜尋紀錄
+        self.linkPage2Array()
+
+    def linkPage2Array(self):
+        MAXIMUM_PAGE = 5
+        # 把QtDesigner的一些重複的Widget用array對應
+        # patient_page
+        var_patient_page = 'self.ui.patient_page'
+        self.patient_page = [None] * (MAXIMUM_PAGE + 1)
+        var_array_patient_page = 'self.patient_page'
+        for i in range(1, MAXIMUM_PAGE + 1):
+            exec("%s[%d] = %s_%d" % (var_array_patient_page, i, var_patient_page, i))
+        # thumbnail_list
+        var_thumbnail_list = 'self.ui.thumbnail_list'
+        self.thumbnail_list = [None] * (MAXIMUM_PAGE + 1)
+        var_array_thumbnail_list = 'self.thumbnail_list'
+        for i in range(1, MAXIMUM_PAGE + 1):
+            exec("%s[%d] = %s_%d" % (var_array_thumbnail_list, i, var_thumbnail_list, i))
+            # print(id(self.thumbnail_list[i]))
+        # pics
+        var_pic = 'self.ui.pic'
+        self.pic = [ [None] * 5 for i in range(MAXIMUM_PAGE + 1)]
+        var_array_pic = 'self.pic'
+        for i in range(1, MAXIMUM_PAGE + 1):
+            for j in range(1, 5):
+                print("%s[%d][%d] = %s_%d_%d" % (var_array_pic, i, j, var_pic, i, j))
+                exec("%s[%d][%d] = %s_%d_%d" % (var_array_pic, i, j, var_pic, i, j))
+                print(id(self.pic[i][j]))
+
+
 
     def addEntry(self):
         entryItem = self.ui.input_no.text()
