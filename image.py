@@ -3,10 +3,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import requests
 from pydicom import dcmread
 from pydicom.filebase import DicomBytesIO
-import matplotlib.pyplot as plt
 import numpy as np
-
-
+import matplotlib.pyplot as plt
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
