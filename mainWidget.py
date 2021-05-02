@@ -85,6 +85,7 @@ class initialWidget(QtWidgets.QMainWindow):
 
         if not self.model.findItems(entryItem):
             self.model.insertRow(0, QStandardItem(entryItem))
+
     def duplicate_add(self):
         msg = QMessageBox()
         msg.setWindowTitle("Warning")
