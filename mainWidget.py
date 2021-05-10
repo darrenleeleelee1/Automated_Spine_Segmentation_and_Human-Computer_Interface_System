@@ -32,9 +32,14 @@ class initialWidget(QtWidgets.QMainWindow):
 
         self.backend()
 
-    
+        def moveWindow(e):
+            if self.isMaximized() == False:  # Not maximized
+                if e.buttons() == Qt.LeftButton:
+                    self.move(self.pos() + e.globalPos() - self.clickPosition)
+                    self.clickPosition = e.globalPos()
+                    e.accept()
 
-        self.ui.header.mouseMoveEvent = self.moveWindow  # 移動視窗
+        self.ui.header.mouseMoveEvent = moveWindow  # 移動視窗
     
         self.show() 
 
@@ -93,7 +98,8 @@ class initialWidget(QtWidgets.QMainWindow):
         qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], QtGui.QImage.Format_Grayscale8)
         self.pic[i][j].setPixmap(QtGui.QPixmap(qimage))
         self.pic[i][j].setGeometry(QtCore.QRect(0, 0, 400, 500))
-        
+        self.pic[i][j].mousePressEvent = lambda pressed: self.getPos(pressed, i, j) # 讓每個pic的mousePressEvent可以傳出告訴自己是誰
+        self.pic[i][j].mouseMoveEvent = self.drawLine
         # self.pic[i][j].
         
 
@@ -121,20 +127,13 @@ class initialWidget(QtWidgets.QMainWindow):
             for j in range(1, 5):
                 exec("%s[%d][%d] = %s_%d_%d" % (var_array_pic, i, j, var_pic, i, j))
                 self.pic[i][j].setText("%d-%d" % (i, j))
-                self.pic[i][j].mousePressEvent = lambda pressed: self.getPos(pressed, i, j) # 讓每個pic的mousePressEvent可以傳出告訴自己是誰
-                self.pic[i][j].mouseMoveEvent = self.drawLine
         # pic_cnt
         self.pic_cnt = [0] * (MAXIMUM_PAGE + 1)
 
 
         # 暫時試試放照片
         self.showPic(1, 1, "01372635","5F327951")
-    def moveWindow(e):
-        if self.isMaximized() == False:  # Not maximized
-            if e.buttons() == Qt.LeftButton:
-                self.move(self.pos() + e.globalPos() - self.clickPosition)
-                self.clickPosition = e.globalPos()
-                e.accept()
+        self.showPic(1, 2, "01372635","5F327943")
 
     def addEntry(self):
         entryItem = self.ui.input_no.text()
