@@ -84,10 +84,10 @@ class initialWidget(QtWidgets.QMainWindow):
         self.pic_last_y = event.y()
         self.update()
 
-    def picPaint(self, event, pixmap):
-        q = QtGui.QPainter(self.pic[self.pic_ith][self.pic_jth])
+    def picPaint(self, event, pixmap, _i, _j):
+        q = QtGui.QPainter(self.pic[_i][_j])
         q.drawPixmap(0, 0, 512, 512, pixmap)
-        q.drawLine(self.pic_last_x, self.pic_last_y, self.pic_x[self.pic_ith][self.pic_jth], self.pic_y[self.pic_ith][self.pic_jth])
+        q.drawLine(self.pic_last_x, self.pic_last_y, self.pic_x[_i][_j], self.pic_y[_i][_j])
         q.end()
 
     def pushButtonAngleClicked(self):
@@ -205,7 +205,7 @@ class initialWidget(QtWidgets.QMainWindow):
         self.pic[i][j].setGeometry(QtCore.QRect(0, 0, 400, 500))
         self.pic[i][j].mousePressEvent = lambda pressed: self.picPressed(pressed, i, j) # 讓每個pic的mousePressEvent可以傳出告訴自己是誰
         self.pic[i][j].mouseMoveEvent = self.picMouseMove
-        self.pic[i][j].paintEvent = lambda painted: self.picPaint(painted, QtGui.QPixmap(qimage))
+        self.pic[i][j].paintEvent = lambda painted: self.picPaint(painted, QtGui.QPixmap(qimage), i, j)
         # self.pic[i][j].
         
     def linkPage2Array(self, MAXIMUM_PAGE = 5):
