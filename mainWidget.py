@@ -32,11 +32,19 @@ class initialWidget(QtWidgets.QMainWindow):
 
         self.backend()
 
+        def moveWindow(e):
+            if self.isMaximized() == False:  # Not maximized
+
+                if e.buttons() == Qt.LeftButton:
+                    self.move(self.pos() + e.globalPos() - self.clickPosition)
+                    self.clickPosition = e.globalPos()
+                    e.accept()
+
+        self.ui.header.mouseMoveEvent = moveWindow  # 移動視窗
+        self.show()
     
 
-        self.ui.header.mouseMoveEvent = self.moveWindow  # 移動視窗
-    
-        self.show() 
+
 
 
     def backend(self):
