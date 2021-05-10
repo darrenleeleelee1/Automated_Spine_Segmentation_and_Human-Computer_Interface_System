@@ -32,15 +32,9 @@ class initialWidget(QtWidgets.QMainWindow):
 
         self.backend()
 
-        def moveWindow(e):
-            if self.isMaximized() == False:  # Not maximized
+    
 
-                if e.buttons() == Qt.LeftButton:
-                    self.move(self.pos() + e.globalPos() - self.clickPosition)
-                    self.clickPosition = e.globalPos()
-                    e.accept()
-
-        self.ui.header.mouseMoveEvent = moveWindow  # 移動視窗
+        self.ui.header.mouseMoveEvent = self.moveWindow  # 移動視窗
     
         self.show() 
 
@@ -63,8 +57,35 @@ class initialWidget(QtWidgets.QMainWindow):
 
         self.ui.input_no.setCompleter(completer)  # 搜尋紀錄
         self.linkPage2Array() # 將影像處理頁面預設有五頁
+        self.ui.pushButton_angle.clicked.connect(self.pushButtonAngleClicked)
 
-    def show_pic(self, i, j, patient_no, patient_dics):
+    def getPos(self, event, _i, _j):
+        print("clicked")
+        print(_i, _j) # 說明是哪個pic[_i][_j]被按
+        self.pic_ith = _i
+        self.pic_jth = _j
+        self.pic_x[self.pic_ith][self.pic_jth] = None
+        self.pic_y[self.pic_ith][self.pic_jth] = None
+        if event.button() == QtCore.Qt.LeftButton:
+            self.pic_x[self.pic_ith][self.pic_jth] = event.pos().x()
+            self.pic_y[self.pic_ith][self.pic_jth] = event.pos().y()
+        print(self.pic_x[self.pic_ith][self.pic_jth], self.pic_y[self.pic_ith][self.pic_jth])
+        print("clicked")
+
+    def drawLine(self, event):
+        distance_from_center = round(((event.y() - self.pic_y[self.pic_ith][self.pic_jth])**2 + (event.x() - self.pic_x[self.pic_ith][self.pic_jth])**2)**0.5)
+        # self.label.setText('Coordinates: ( %d : %d )' % (event.x(), event.y()) + "Distance from center: " + str(distance_from_center))       
+        print(distance_from_center)
+        q = QtGui.QPainter(self.pic[self.pic_ith][self.pic_jth])
+        q.drawLine(event.x(), event.y(), self.pic_x[self.pic_ith][self.pic_jth], self.pic_y[self.pic_ith][self.pic_jth])
+        self.update()
+            
+
+    def pushButtonAngleClicked(self):
+        return       
+
+
+    def showPic(self, i, j, patient_no, patient_dics):
         dicom_path = "./tmp/" + patient_no + "/" + patient_dics
         ds = dcmread(dicom_path)
         arr = ds.pixel_array
@@ -72,6 +93,9 @@ class initialWidget(QtWidgets.QMainWindow):
         qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], QtGui.QImage.Format_Grayscale8)
         self.pic[i][j].setPixmap(QtGui.QPixmap(qimage))
         self.pic[i][j].setGeometry(QtCore.QRect(0, 0, 400, 500))
+        
+        # self.pic[i][j].
+        
 
     def linkPage2Array(self, MAXIMUM_PAGE = 5):
         # 把QtDesigner的一些重複的Widget用array對應
@@ -90,18 +114,27 @@ class initialWidget(QtWidgets.QMainWindow):
         # pics
         var_pic = 'self.ui.pic'
         self.pic = [ [None] * 5 for i in range(MAXIMUM_PAGE + 1)]
+        self.pic_x = [ [None] * 5 for i in range(MAXIMUM_PAGE + 1)]
+        self.pic_y = [ [None] * 5 for i in range(MAXIMUM_PAGE + 1)]
         var_array_pic = 'self.pic'
         for i in range(1, MAXIMUM_PAGE + 1):
             for j in range(1, 5):
                 exec("%s[%d][%d] = %s_%d_%d" % (var_array_pic, i, j, var_pic, i, j))
                 self.pic[i][j].setText("%d-%d" % (i, j))
+                self.pic[i][j].mousePressEvent = lambda pressed: self.getPos(pressed, i, j) # 讓每個pic的mousePressEvent可以傳出告訴自己是誰
+                self.pic[i][j].mouseMoveEvent = self.drawLine
         # pic_cnt
         self.pic_cnt = [0] * (MAXIMUM_PAGE + 1)
 
 
         # 暫時試試放照片
-        self.show_pic(1, 1, "01372635","5F327951")
-        
+        self.showPic(1, 1, "01372635","5F327951")
+    def moveWindow(e):
+        if self.isMaximized() == False:  # Not maximized
+            if e.buttons() == Qt.LeftButton:
+                self.move(self.pos() + e.globalPos() - self.clickPosition)
+                self.clickPosition = e.globalPos()
+                e.accept()
 
     def addEntry(self):
         entryItem = self.ui.input_no.text()
