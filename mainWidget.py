@@ -39,7 +39,7 @@ class initialWidget(QtWidgets.QMainWindow):
                     self.clickPosition = e.globalPos()
                     e.accept()
 
-        self.ui.header.mouseMoveEvent = self.moveWindow  # 移動視窗
+        self.ui.header.mouseMoveEvent = moveWindow  # 移動視窗
     
         self.show() 
 
