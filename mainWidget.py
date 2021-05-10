@@ -37,7 +37,7 @@ class initialWidget(QtWidgets.QMainWindow):
                     self.move(self.pos() + e.globalPos() - self.clickPosition)
                     self.clickPosition = e.globalPos()
                     e.accept()
-s
+
         self.ui.header.mouseMoveEvent = moveWindow  # 移動視窗
     
         self.show() 
@@ -47,7 +47,7 @@ s
         self.ui.stackedWidget_right.setCurrentWidget(self.ui.recently_viewed_page)
         self.ui.close_button.clicked.connect(QCoreApplication.instance().quit)  # 叉叉
         self.ui.minimize_button.clicked.connect(lambda: self.showMinimized())  # minimize window
-        self.ui.restore_button.clicked.connect(lambda: self.restore_or_maximize_window())  # restore window
+        self.ui.restore_button.clicked.connect(lambda: self.restoreOrMaximizeWindow())  # restore window
         self.setWindowFlag(QtCore.Qt.FramelessWindowHint)  # 隱藏邊框
         self.ui.menu_toggle.clicked.connect(lambda: self.slideLeftMenu())  # slide menu
         self.ui.add_patient.clicked.connect(self.addPatient)
@@ -56,12 +56,16 @@ s
         self.ui.search_no_button.clicked.connect(self.addEntry)  # 按 search_no
         completer = QCompleter(self.model, self)
 
-        self.ui.patient_list.itemClicked.connect(lambda: self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page))
+        self.ui.patient_list.itemClicked.connect(self.patient_listItemClicked)
         
-
         self.ui.input_no.setCompleter(completer)  # 搜尋紀錄
         self.linkPage2Array() # 將影像處理頁面預設有五頁
         self.ui.pushButton_angle.clicked.connect(self.pushButtonAngleClicked)
+        self.ui.pushButton_add_pic.clicked.connect(self.pushButtonAddpicClicked)
+
+    def patient_listItemClicked(self, item):
+        print(str(item.text()))
+        self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
 
     def getPos(self, event, _i, _j):
         print("clicked")
@@ -132,7 +136,15 @@ s
 
         # 暫時試試放照片
         self.showPic(1, 1, "01372635","5F327951")
-        self.showPic(1, 2, "01372635","5F327943")
+        self.showPic(1, 2, "01372635","5F327951")
+        self.showPic(1, 3, "01372635","5F327951")
+        self.showPic(1, 4, "01372635","5F327951")
+
+    def pushButtonAddpicClicked(self):
+        fileName1, filetype = QFileDialog.getOpenFileName(self,"選取檔案","/Users/user/Documents/畢專/dicom_data","All Files (*);;Text Files (*.txt)")  #設定副檔名過濾,注意用雙分號間隔
+        print(filetype)
+
+        # fileName2, ok2 = QFileDialog.getSaveFileName(self,"檔案儲存","./","All Files (*);;Text Files (*.txt)")
 
     def addEntry(self):
         entryItem = self.ui.input_no.text()
@@ -157,7 +169,8 @@ s
 
         if not self.model.findItems(entryItem):
             self.model.insertRow(0, QStandardItem(entryItem))
-    def duplicate_add(self):
+    def duplicateAdd(self):
+        print("test")
         msg = QMessageBox()
         msg.setWindowTitle("Warning")
         msg.setText("Patient already exist !")
@@ -173,18 +186,6 @@ s
         print(dir_choose)
         pt_id = os.path.basename(dir_choose)
         
-        self.pt_list.append(pt_id)
-        self.ui.patient_list.addItem(pt_id)
-
-        self.ui.no_list.clear()
-        self.pt_list.sort()
-        for ptid in self.pt_list:
-            self.ui.no_list.addItem(ptid)
-
-
-        for i in self.pt_list:
-            print(i)
-
         # post
         url = 'http://127.0.0.1:8000/pdicom/' + pt_id
         #headers = {'accept': 'application/json', 'Content-Type': 'multipart/form-data'}
@@ -202,11 +203,20 @@ s
         response = requests.post(url, files=dic_file)
         print(response.reason)
         print(response.json())
-        if(response.json()['Result'] == 'Directory already exists.'):
-            self.duplicate_add()
         
+        if(response.json()['Result'] == 'Directory already exists.'):
+            self.duplicateAdd()
+        else:
+            self.pt_list.append(pt_id)
+            self.ui.patient_list.addItem(pt_id)
 
-
+            self.ui.no_list.clear()
+            self.pt_list.sort()
+            for ptid in self.pt_list:
+                self.ui.no_list.addItem(ptid)
+            for i in self.pt_list:
+                print(i)
+        
     def mousePressEvent(self, event):
         self.clickPosition = event.globalPos()
 
@@ -223,7 +233,7 @@ s
         self.animation.setEasingCurve(QtCore.QEasingCurve.InOutQuart)
         self.animation.start()
 
-    def restore_or_maximize_window(self):
+    def restoreOrMaximizeWindow(self):
         global WINDOW_SIZE
         win_status = WINDOW_SIZE
         if win_status == 0:

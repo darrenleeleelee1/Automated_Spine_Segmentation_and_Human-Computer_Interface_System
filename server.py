@@ -46,7 +46,7 @@ async def get_dicom(medical_number: int):
 async def post_dicom(medical_number: str, files: List[UploadFile] = File(...)):
     directory = f'./tmp/{medical_number}'
     if os.path.exists(directory):
-        return {"Result": "Directory already exist."}
+        return {"Result": "Directory already exists."}
 
     await aiofiles.os.mkdir(directory)
     
