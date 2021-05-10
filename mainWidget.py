@@ -32,7 +32,12 @@ class initialWidget(QtWidgets.QMainWindow):
 
         self.backend()
 
-    
+        def moveWindow(e):
+            if self.isMaximized() == False:  # Not maximized
+                if e.buttons() == Qt.LeftButton:
+                    self.move(self.pos() + e.globalPos() - self.clickPosition)
+                    self.clickPosition = e.globalPos()
+                    e.accept()
 
         self.ui.header.mouseMoveEvent = self.moveWindow  # 移動視窗
     
@@ -128,13 +133,8 @@ class initialWidget(QtWidgets.QMainWindow):
 
 
         # 暫時試試放照片
-        self.showPic(1, 1, "01372635","5F327951")
-    def moveWindow(e):
-        if self.isMaximized() == False:  # Not maximized
-            if e.buttons() == Qt.LeftButton:
-                self.move(self.pos() + e.globalPos() - self.clickPosition)
-                self.clickPosition = e.globalPos()
-                e.accept()
+        self.showPic(1, 1, "01372635","5F327951.dcm")
+
 
     def addEntry(self):
         entryItem = self.ui.input_no.text()
