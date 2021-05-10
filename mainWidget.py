@@ -64,7 +64,7 @@ class initialWidget(QtWidgets.QMainWindow):
         self.linkPage2Array() # 將影像處理頁面預設有五頁
         self.ui.pushButton_angle.clicked.connect(self.pushButtonAngleClicked)
 
-    def getPos(self, event, _i, _j):
+    def picPressed(self, event, _i, _j):
         print("clicked")
         print(_i, _j) # 說明是哪個pic[_i][_j]被按
         self.pic_ith = _i
@@ -77,14 +77,22 @@ class initialWidget(QtWidgets.QMainWindow):
         print(self.pic_x[self.pic_ith][self.pic_jth], self.pic_y[self.pic_ith][self.pic_jth])
         print("clicked")
 
-    def drawLine(self, event):
+    def picMouseMove(self, event):
         distance_from_center = round(((event.y() - self.pic_y[self.pic_ith][self.pic_jth])**2 + (event.x() - self.pic_x[self.pic_ith][self.pic_jth])**2)**0.5)
         # self.label.setText('Coordinates: ( %d : %d )' % (event.x(), event.y()) + "Distance from center: " + str(distance_from_center))       
         print(distance_from_center)
-        q = QtGui.QPainter(self.pic[self.pic_ith][self.pic_jth])
-        q.drawLine(event.x(), event.y(), self.pic_x[self.pic_ith][self.pic_jth], self.pic_y[self.pic_ith][self.pic_jth])
+        # q = QtGui.QPainter(self.pic[self.pic_ith][self.pic_jth])
+        # q.drawLine(event.x(), event.y(), self.pic_x[self.pic_ith][self.pic_jth], self.pic_y[self.pic_ith][self.pic_jth])
+        self.pic_last_x = event.x()
+        self.pic_last_y = event.y()
         self.update()
-            
+
+    def picPaint(self, event, pixmap):
+        if 
+            q = QtGui.QPainter(self.pic[self.pic_ith][self.pic_jth])
+            q.drawPixmap(0, 0, 512, 512, pixmap)
+            q.drawLine(self.pic_last_x, self.pic_last_y, self.pic_x[self.pic_ith][self.pic_jth], self.pic_y[self.pic_ith][self.pic_jth])
+            q.end()
 
     def pushButtonAngleClicked(self):
         return       
@@ -98,8 +106,10 @@ class initialWidget(QtWidgets.QMainWindow):
         qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], QtGui.QImage.Format_Grayscale8)
         self.pic[i][j].setPixmap(QtGui.QPixmap(qimage))
         self.pic[i][j].setGeometry(QtCore.QRect(0, 0, 400, 500))
-        self.pic[i][j].mousePressEvent = lambda pressed: self.getPos(pressed, i, j) # 讓每個pic的mousePressEvent可以傳出告訴自己是誰
-        self.pic[i][j].mouseMoveEvent = self.drawLine
+        self.pic[i][j].mousePressEvent = lambda pressed: self.picPressed(pressed, i, j) # 讓每個pic的mousePressEvent可以傳出告訴自己是誰
+        self.pic[i][j].mouseMoveEvent = self.picMouseMove
+        self.pic[i][j].paintEvent = lambda painted: self.picPaint(painted, QtGui.QPixmap(qimage))
+
         # self.pic[i][j].
         
 
@@ -127,13 +137,14 @@ class initialWidget(QtWidgets.QMainWindow):
             for j in range(1, 5):
                 exec("%s[%d][%d] = %s_%d_%d" % (var_array_pic, i, j, var_pic, i, j))
                 self.pic[i][j].setText("%d-%d" % (i, j))
+                self.pic_x[i][j] = self.pic_y[i][j] = 0
         # pic_cnt
         self.pic_cnt = [0] * (MAXIMUM_PAGE + 1)
-
-
+        self.pic_ith = self.pic_jth = 1
+        self.pic_last_x = self.pic_last_y = 0
         # 暫時試試放照片
         self.showPic(1, 1, "01372635","5F327951")
-        self.showPic(1, 2, "01372635","5F327943")
+        # self.showPic(1, 2, "01372635","5F327951")
 
     def addEntry(self):
         entryItem = self.ui.input_no.text()
