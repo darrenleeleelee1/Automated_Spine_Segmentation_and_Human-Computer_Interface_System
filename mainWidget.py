@@ -176,6 +176,7 @@ class initialWidget(QtWidgets.QMainWindow):
         msg.setText("Patient already exist !")
         msg.setIcon(QMessageBox.Warning)
         x = msg.exec_()
+
     def addPatient(self):
         dir_choose = QFileDialog.getExistingDirectory(self, "選取資料夾", "/Users/user/Documents/畢專/dicom_data")  # 第三參數是起始路徑
         if dir_choose == "":
