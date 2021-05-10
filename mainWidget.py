@@ -37,8 +37,7 @@ class initialWidget(QtWidgets.QMainWindow):
                     self.move(self.pos() + e.globalPos() - self.clickPosition)
                     self.clickPosition = e.globalPos()
                     e.accept()
-    
-
+s
         self.ui.header.mouseMoveEvent = moveWindow  # 移動視窗
     
         self.show() 
@@ -127,14 +126,13 @@ class initialWidget(QtWidgets.QMainWindow):
             for j in range(1, 5):
                 exec("%s[%d][%d] = %s_%d_%d" % (var_array_pic, i, j, var_pic, i, j))
                 self.pic[i][j].setText("%d-%d" % (i, j))
-
         # pic_cnt
         self.pic_cnt = [0] * (MAXIMUM_PAGE + 1)
 
 
         # 暫時試試放照片
         self.showPic(1, 1, "01372635","5F327951")
-
+        self.showPic(1, 2, "01372635","5F327943")
 
     def addEntry(self):
         entryItem = self.ui.input_no.text()
