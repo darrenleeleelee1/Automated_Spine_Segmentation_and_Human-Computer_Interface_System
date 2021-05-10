@@ -129,12 +129,7 @@ class initialWidget(QtWidgets.QMainWindow):
 
         # 暫時試試放照片
         self.showPic(1, 1, "01372635","5F327951")
-    def moveWindow(e):
-        if self.isMaximized() == False:  # Not maximized
-            if e.buttons() == Qt.LeftButton:
-                self.move(self.pos() + e.globalPos() - self.clickPosition)
-                self.clickPosition = e.globalPos()
-                e.accept()
+    
 
     def addEntry(self):
         entryItem = self.ui.input_no.text()
