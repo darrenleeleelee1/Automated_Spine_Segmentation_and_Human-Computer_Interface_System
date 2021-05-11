@@ -90,10 +90,12 @@ class initialWidget(QtWidgets.QMainWindow):
         self.qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], QtGui.QImage.Format_Grayscale8)
         # self.pic[i][j].setPixmap(QtGui.QPixmap(self.qimage))
         # self.pic[i][j].setGeometry(QtCore.QRect(self.pic_1_1_pos_x - (self.size - 1)*self.img_width, self.pic_1_1_pos_y - (self.size - 1)*self.img_width, self.img_width * self.size, self.img_width * self.size))
-        self.pic[i][j].move(self.pic_1_1_pos_x + self.moveX, self.pic_1_1_pos_y+self.moveY)
+        # self.pic[i][j].move(self.pic_1_1_pos_x + self.moveX, self.pic_1_1_pos_y+self.moveY)
+        self.pic[i][j].move(self.pic_1_1_pos_x, self.pic_1_1_pos_y)
         # self.pic[i][j].setGeometry(QtCore.QRect(300, 15, 300, 300))
 
         t = QtGui.QTransform()
+        t.translate(150, 150)
         realAngle = self.angle * 90
         t.rotate(realAngle)
         rotated_img = self.qimage.transformed(t)
@@ -339,34 +341,34 @@ class Patient():
         self.pt_id = _pt_id
         self.pt_path = __pt_path
 
-class MovingObject(QGraphicsEllipseItem):
+class image(QtWidgets.QLabel):
     def __init__(self, x, y, r):
         super().__init__(0, 0, r, r)
         self.setPos(x, y)
-        self.setBrush(Qt.blue)
+
         self.setAcceptHoverEvents(True)
 
-    # def hoverEnterEvent(self, event):
-    #     app.instance().setOverrideCursor(Qt.OpenHandCursor)
-    #
-    # def hoverLeaveEvent(self, event):
-    #     app.instance().restoreOverrideCursor()
-    #
-    # def mousePressEvent(self, event):
-    #     pass
-    #
-    # def mouseMoveEvent(self, event):
-    #     orig_cursor_position = event.lastScenePos()
-    #     updated_cursor_position = event.scenePos()
-    #
-    #     orig_position = self.scenePos()
-    #
-    #     self.updated_cursor_x = updated_cursor_position.x() - orig_cursor_position.x() + orig_position.x()
-    #     self.updated_cursor_y = updated_cursor_position.y() - orig_cursor_position.y() + orig_position.y()
-    #     self.setPos(QPointF(self.updated_cursor_x, self.updated_cursor_y))
-    #
-    # def mouseReleaseEvent(self, event):
-    #     print('x: {0}, y: {1}'.format(self.pos().x(), self.pos().y()))
+    def hoverEnterEvent(self, event):
+        app.instance().setOverrideCursor(Qt.OpenHandCursor)
+
+    def hoverLeaveEvent(self, event):
+        app.instance().restoreOverrideCursor()
+
+    def mousePressEvent(self, event):
+        pass
+
+    def mouseMoveEvent(self, event):
+        orig_cursor_position = event.lastScenePos()
+        updated_cursor_position = event.scenePos()
+
+        orig_position = self.scenePos()
+
+        self.updated_cursor_x = updated_cursor_position.x() - orig_cursor_position.x() + orig_position.x()
+        self.updated_cursor_y = updated_cursor_position.y() - orig_cursor_position.y() + orig_position.y()
+        self.setPos(QPointF(self.updated_cursor_x, self.updated_cursor_y))
+
+    def mouseReleaseEvent(self, event):
+        print('x: {0}, y: {1}'.format(self.pos().x(), self.pos().y()))
 
 
 if __name__ == '__main__':
