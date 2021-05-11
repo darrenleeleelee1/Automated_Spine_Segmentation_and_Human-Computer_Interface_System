@@ -32,6 +32,7 @@ class initialWidget(QtWidgets.QMainWindow):
 
         self.backend()
 
+
         def moveWindow(e):
             if self.isMaximized() == False:  # Not maximized
 
@@ -41,9 +42,10 @@ class initialWidget(QtWidgets.QMainWindow):
                     e.accept()
 
         self.ui.header.mouseMoveEvent = moveWindow  # 移動視窗
-        self.show()
-    
 
+        self.show()
+
+    
 
 
 
@@ -51,7 +53,7 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.stackedWidget_right.setCurrentWidget(self.ui.recently_viewed_page)
         self.ui.close_button.clicked.connect(QCoreApplication.instance().quit)  # 叉叉
         self.ui.minimize_button.clicked.connect(lambda: self.showMinimized())  # minimize window
-        self.ui.restore_button.clicked.connect(lambda: self.restore_or_maximize_window())  # restore window
+        self.ui.restore_button.clicked.connect(lambda: self.restoreOrMaximizeWindow())  # restore window
         self.setWindowFlag(QtCore.Qt.FramelessWindowHint)  # 隱藏邊框
         self.ui.menu_toggle.clicked.connect(lambda: self.slideLeftMenu())  # slide menu
         self.ui.add_patient.clicked.connect(self.addPatient)
@@ -59,15 +61,14 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.input_no.editingFinished.connect(self.addEntry)  # 按enter
         self.ui.search_no_button.clicked.connect(self.addEntry)  # 按 search_no
         completer = QCompleter(self.model, self)
-
-        self.ui.patient_list.itemClicked.connect(lambda: self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page))
-        
-
+        self.ui.patient_list.itemClicked.connect(self.patient_listItemClicked)
         self.ui.input_no.setCompleter(completer)  # 搜尋紀錄
         self.linkPage2Array() # 將影像處理頁面預設有五頁
         self.ui.pushButton_angle.clicked.connect(self.pushButtonAngleClicked)
+        self.ui.pushButton_add_pic.clicked.connect(self.pushButtonAddPicClicked)
 
-    def getPos(self, event, _i, _j):
+#工具列-----------------------------------------------------------------------------------------------------------
+    def picPressed(self, event, _i, _j):
         print("clicked")
         print(_i, _j) # 說明是哪個pic[_i][_j]被按
         self.pic_ith = _i
@@ -80,30 +81,31 @@ class initialWidget(QtWidgets.QMainWindow):
         print(self.pic_x[self.pic_ith][self.pic_jth], self.pic_y[self.pic_ith][self.pic_jth])
         print("clicked")
 
-    def drawLine(self, event):
+    def picMouseMove(self, event):
         distance_from_center = round(((event.y() - self.pic_y[self.pic_ith][self.pic_jth])**2 + (event.x() - self.pic_x[self.pic_ith][self.pic_jth])**2)**0.5)
         # self.label.setText('Coordinates: ( %d : %d )' % (event.x(), event.y()) + "Distance from center: " + str(distance_from_center))       
         print(distance_from_center)
-        q = QtGui.QPainter(self.pic[self.pic_ith][self.pic_jth])
-        q.drawLine(event.x(), event.y(), self.pic_x[self.pic_ith][self.pic_jth], self.pic_y[self.pic_ith][self.pic_jth])
+        # q = QtGui.QPainter(self.pic[self.pic_ith][self.pic_jth])
+        # q.drawLine(event.x(), event.y(), self.pic_x[self.pic_ith][self.pic_jth], self.pic_y[self.pic_ith][self.pic_jth])
+        self.pic_last_x = event.x()
+        self.pic_last_y = event.y()
         self.update()
-            
+
+    def picPaint(self, event, pixmap, _i, _j):
+        q = QtGui.QPainter(self.pic[_i][_j])
+        q.drawPixmap(0, 0, 512, 512, pixmap)
+        q.drawLine(self.pic_last_x, self.pic_last_y, self.pic_x[_i][_j], self.pic_y[_i][_j])
+        q.end()
 
     def pushButtonAngleClicked(self):
         return       
 
+    def pushButtonAddPicClicked(self):
+        fileName1, filetype = QFileDialog.getOpenFileName(self,"選取檔案","/Users/user/Documents/畢專/dicom_data","All Files (*);;Text Files (*.txt)")  #設定副檔名過濾,注意用雙分號間隔
+        print(filetype)
+        # fileName2, ok2 = QFileDialog.getSaveFileName(self,"檔案儲存","./","All Files (*);;Text Files (*.txt)")
 
-    def showPic(self, i, j, patient_no, patient_dics):
-        dicom_path = "./tmp/" + patient_no + "/" + patient_dics
-        ds = dcmread(dicom_path)
-        arr = ds.pixel_array
-        arr = np.uint8(arr)
-        qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], QtGui.QImage.Format_Grayscale8)
-        self.pic[i][j].setPixmap(QtGui.QPixmap(qimage))
-        self.pic[i][j].setGeometry(QtCore.QRect(0, 0, 400, 500))
-        
-        # self.pic[i][j].
-        
+
 
     def linkPage2Array(self, MAXIMUM_PAGE = 5):
         # 把QtDesigner的一些重複的Widget用array對應
@@ -160,36 +162,18 @@ class initialWidget(QtWidgets.QMainWindow):
         completer = QCompleter(self.model, self)
         self.ui.input_no.setCompleter(completer)
 
-        if not self.model.findItems(entryItem):
-            self.model.insertRow(0, QStandardItem(entryItem))
-    def duplicate_add(self):
-        msg = QMessageBox()
-        msg.setWindowTitle("Warning")
-        msg.setText("Patient already exist !")
-        msg.setIcon(QMessageBox.Warning)
-        x = msg.exec_()
-    def addPatient(self):
+
+#MENU選單---------------------------------------------------------------------------------------------------------
+    #add patient
+    def addPatient(self): 
         dir_choose = QFileDialog.getExistingDirectory(self, "選取資料夾", "/Users/user/Documents/畢專/dicom_data")  # 第三參數是起始路徑
         if dir_choose == "":
             print("\n取消")
             return
-
         print("\n選擇的資料夾:")
         print(dir_choose)
         pt_id = os.path.basename(dir_choose)
         
-        self.pt_list.append(pt_id)
-        self.ui.patient_list.addItem(pt_id)
-
-        self.ui.no_list.clear()
-        self.pt_list.sort()
-        for ptid in self.pt_list:
-            self.ui.no_list.addItem(ptid)
-
-
-        for i in self.pt_list:
-            print(i)
-
         # post
         url = 'http://127.0.0.1:8000/pdicom/' + pt_id
         #headers = {'accept': 'application/json', 'Content-Type': 'multipart/form-data'}
@@ -208,13 +192,57 @@ class initialWidget(QtWidgets.QMainWindow):
         print(response.reason)
         print(response.json())
         if(response.json()['Result'] == 'Directory already exists.'):
-            self.duplicate_add()
-        
+            self.duplicateAdd()
+        else:
+            self.pt_list.append(pt_id)
+            self.ui.patient_list.addItem(pt_id)
 
+            self.ui.no_list.clear()
+            self.pt_list.sort()
+            for ptid in self.pt_list:
+                self.ui.no_list.addItem(ptid)
+            for i in self.pt_list:
+                print(i)    
+    
+    def duplicateAdd(self):
+        print("test")
+        msg = QMessageBox()
+        msg.setWindowTitle("Warning")
+        msg.setText("Patient already exist !")
+        msg.setIcon(QMessageBox.Warning)
+        x = msg.exec_() 
 
-    def mousePressEvent(self, event):
-        self.clickPosition = event.globalPos()
+    # search
+    def addEntry(self): 
+        entryItem = self.ui.input_no.text()
+        if entryItem != '':
+            self.ui.input_no.clear()
+            self.ui.no_list.clear()
 
+            for id in self.pt_list:
+                if id.startswith(entryItem):
+                    self.ui.no_list.addItem(id)
+        else:
+            self.ui.no_list.clear()
+            for id in self.pt_list:
+                self.ui.no_list.addItem(id)
+
+        list1 = []
+        list1.insert(0, entryItem)  # 也把 entryItem 存在 list1 裡傳給後端
+        # print("list = ", list1)
+
+        completer = QCompleter(self.model, self)
+        self.ui.input_no.setCompleter(completer)
+
+        if not self.model.findItems(entryItem):
+            self.model.insertRow(0, QStandardItem(entryItem))
+            
+    # list item clicked
+    def patient_listItemClicked(self, item):
+        print(str(item.text()))
+        self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
+
+    # menu 伸縮
     def slideLeftMenu(self):
         width = self.ui.frame_left_menu.width()
         if width == 50:
@@ -228,7 +256,59 @@ class initialWidget(QtWidgets.QMainWindow):
         self.animation.setEasingCurve(QtCore.QEasingCurve.InOutQuart)
         self.animation.start()
 
-    def restore_or_maximize_window(self):
+#其他/初始--------------------------------------------------------------------------------------------------------
+    def showPic(self, i, j, patient_no, patient_dics):
+        dicom_path = "./tmp/" + patient_no + "/" + patient_dics
+        ds = dcmread(dicom_path)
+        arr = ds.pixel_array
+        arr = np.uint8(arr)
+        qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], QtGui.QImage.Format_Grayscale8)
+        self.pic[i][j].setPixmap(QtGui.QPixmap(qimage))
+        self.pic[i][j].setGeometry(QtCore.QRect(0, 0, 400, 500))
+        self.pic[i][j].mousePressEvent = lambda pressed: self.picPressed(pressed, i, j) # 讓每個pic的mousePressEvent可以傳出告訴自己是誰
+        self.pic[i][j].mouseMoveEvent = self.picMouseMove
+        self.pic[i][j].paintEvent = lambda painted: self.picPaint(painted, QtGui.QPixmap(qimage), i, j)
+        # self.pic[i][j].
+        
+    def linkPage2Array(self, MAXIMUM_PAGE = 5):
+        # 把QtDesigner的一些重複的Widget用array對應
+        # patient_page
+        var_patient_page = 'self.ui.patient_page'
+        self.patient_page = [None] * (MAXIMUM_PAGE + 1)
+        var_array_patient_page = 'self.patient_page'
+        for i in range(1, MAXIMUM_PAGE + 1):
+            exec("%s[%d] = %s_%d" % (var_array_patient_page, i, var_patient_page, i))
+        # thumbnail_list
+        var_thumbnail_list = 'self.ui.thumbnail_list'
+        self.thumbnail_list = [None] * (MAXIMUM_PAGE + 1)
+        var_array_thumbnail_list = 'self.thumbnail_list'
+        for i in range(1, MAXIMUM_PAGE + 1):
+            exec("%s[%d] = %s_%d" % (var_array_thumbnail_list, i, var_thumbnail_list, i))
+        # pics
+        var_pic = 'self.ui.pic'
+        self.pic = [ [None] * 5 for i in range(MAXIMUM_PAGE + 1)]
+        self.pic_x = [ [None] * 5 for i in range(MAXIMUM_PAGE + 1)]
+        self.pic_y = [ [None] * 5 for i in range(MAXIMUM_PAGE + 1)]
+        var_array_pic = 'self.pic'
+        for i in range(1, MAXIMUM_PAGE + 1):
+            for j in range(1, 5):
+                exec("%s[%d][%d] = %s_%d_%d" % (var_array_pic, i, j, var_pic, i, j))
+                self.pic[i][j].setText("%d-%d" % (i, j))
+                self.pic_x[i][j] = self.pic_y[i][j] = 0
+        # pic_cnt
+        self.pic_cnt = [0] * (MAXIMUM_PAGE + 1)
+        self.pic_ith = self.pic_jth = 1
+        self.pic_last_x = self.pic_last_y = 0
+        # 暫時試試放照片
+        self.showPic(1, 1, "01372635","5F327951")
+        self.showPic(1, 2, "01372635","5F327951")
+        self.showPic(1, 3, "01372635","5F327951")
+        self.showPic(1, 4, "01372635","5F327951")
+
+    def mousePressEvent(self, event):
+        self.clickPosition = event.globalPos()
+
+    def restoreOrMaximizeWindow(self):
         global WINDOW_SIZE
         win_status = WINDOW_SIZE
         if win_status == 0:
@@ -241,12 +321,10 @@ class initialWidget(QtWidgets.QMainWindow):
             self.showNormal()
             self.ui.restore_button.setIcon(QtGui.QIcon(u":/icons/icons/cil-window-maximize.png"))
 
-
 class Patient():
     def __init__(self, _pt_id, _pt_path):
         self.pt_id = _pt_id
         self.pt_path = __pt_path
-
 
 if __name__ == '__main__':
     import sys
