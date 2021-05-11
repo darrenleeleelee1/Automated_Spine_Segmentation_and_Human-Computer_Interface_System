@@ -71,12 +71,11 @@ class initialWidget(QtWidgets.QMainWindow):
         if(self.tool_lock == 'mouse'):
             return
         elif(self.tool_lock == 'angle'):
-            if event.button()== Qt.LeftButton:
+            if event.button() == Qt.LeftButton:
                 if(self.pic_clicked[_i][_j]):
                     self.pic_released[_i][_j] = True
                 else:
                     self.pic_released[_i][_j] = False
-            # print("clicked:%d, released:%d" % (self.pic_clicked[_i][_j], self.pic_released[_i][_j]))
         elif(self.tool_lock == 'pen'):
             return
 
@@ -86,21 +85,21 @@ class initialWidget(QtWidgets.QMainWindow):
         self.pic_jth = _j
         if(self.tool_lock == 'mouse'):
             return
-        if(self.tool_lock == 'angle'):
+        elif(self.tool_lock == 'angle'):
             if event.button() == QtCore.Qt.LeftButton:
                 if(not self.pic_clicked[_i][_j]):
                     self.pic_clicked[_i][_j] = True
-                    self.pic_start_x[self.pic_ith][self.pic_jth] = event.pos().x()
-                    self.pic_start_y[self.pic_ith][self.pic_jth] = event.pos().y()
+                    self.angle_start_x[self.pic_ith][self.pic_jth] = event.pos().x()
+                    self.angle_start_y[self.pic_ith][self.pic_jth] = event.pos().y()
                 else:
                     self.pic_clicked[_i][_j] = False
             # print("clicked:%d, released:%d" % (self.pic_clicked[_i][_j], self.pic_released[_i][_j]))
         elif(self.tool_lock == 'pen'):
             if event.button() == QtCore.Qt.LeftButton:
-                self.pic_end_x[_i][_j] = event.x()
-                self.pic_end_y[_i][_j] = event.y()
-                self.pic_start_x[self.pic_ith][self.pic_jth] = event.pos().x()
-                self.pic_start_y[self.pic_ith][self.pic_jth] = event.pos().y()
+                self.pen_end_x[_i][_j] = event.x()
+                self.pen_end_y[_i][_j] = event.y()
+                self.pen_start_x[self.pic_ith][self.pic_jth] = event.pos().x()
+                self.pen_start_y[self.pic_ith][self.pic_jth] = event.pos().y()
     def picMouseMove(self, event, _i, _j):
         # distance_from_center = round(((event.y() - self.pic_start_y[self.pic_ith][self.pic_jth])**2 + (event.x() - self.pic_start_x[self.pic_ith][self.pic_jth])**2)**0.5)
         # self.label.setText('Coordinates: ( %d : %d )' % (event.x(), event.y()) + "Distance from center: " + str(distance_from_center))       
@@ -110,17 +109,18 @@ class initialWidget(QtWidgets.QMainWindow):
         elif(self.tool_lock == 'angle'):
             if event.buttons() == QtCore.Qt.NoButton:
                 if(self.pic_clicked[self.pic_ith][self.pic_jth] and self.pic_released[self.pic_ith][self.pic_jth]):
-                    self.pic_end_x[self.pic_ith][self.pic_jth] = event.x()
-                    self.pic_end_y[self.pic_ith][self.pic_jth] = event.y()
+                    self.angle_end_x[self.pic_ith][self.pic_jth] = event.x()
+                    self.angle_end_y[self.pic_ith][self.pic_jth] = event.y()
             elif event.buttons() == QtCore.Qt.LeftButton:
                 if(self.pic_clicked[self.pic_ith][self.pic_jth] and not self.pic_released[self.pic_ith][self.pic_jth]):
-                    self.pic_middle_x[self.pic_ith][self.pic_jth] = self.pic_end_x[self.pic_ith][self.pic_jth] = event.x()
-                    self.pic_middle_y[self.pic_ith][self.pic_jth] = self.pic_end_y[self.pic_ith][self.pic_jth] = event.y()
+                    self.angle_middle_x[self.pic_ith][self.pic_jth] = self.angle_end_x[self.pic_ith][self.pic_jth] = event.x()
+                    self.angle_middle_y[self.pic_ith][self.pic_jth] = self.angle_end_y[self.pic_ith][self.pic_jth] = event.y()
         elif(self.tool_lock == 'pen'):
-            self.pic_start_x[self.pic_ith][self.pic_jth] = self.pic_end_x[_i][_j]
-            self.pic_start_y[self.pic_ith][self.pic_jth] = self.pic_end_y[_i][_j]
-            self.pic_end_x[_i][_j] = event.x() 
-            self.pic_end_y[_i][_j] = event.y()
+            if event.buttons() == QtCore.Qt.LeftButton:
+                self.pen_start_x[self.pic_ith][self.pic_jth] = self.pen_end_x[_i][_j]
+                self.pen_start_y[self.pic_ith][self.pic_jth] = self.pen_end_y[_i][_j]
+                self.pen_end_x[_i][_j] = event.x() 
+                self.pen_end_y[_i][_j] = event.y()
         
         self.update()
 
@@ -135,20 +135,15 @@ class initialWidget(QtWidgets.QMainWindow):
             pen = QtGui.QPen()
             pen.setWidth(6)
             q.setPen(pen)
-            q.drawLine(self.pic_middle_x[_i][_j], self.pic_middle_y[_i][_j], self.pic_start_x[_i][_j], self.pic_start_y[_i][_j])
-            q.drawLine(self.pic_end_x[_i][_j], self.pic_end_y[_i][_j], self.pic_middle_x[_i][_j], self.pic_middle_y[_i][_j])
-            print("Count #%d:" % self.tmp_cnt)
-            print("tool: %s", self.tool_lock)
-            print("start(%d, %d)" % (self.pic_start_x[_i][_j], self.pic_start_y[_i][_j]))
-            print("middle(%d, %d)" % (self.pic_middle_x[_i][_j], self.pic_middle_y[_i][_j]))
-            print("end(%d, %d)" % (self.pic_end_x[_i][_j], self.pic_end_y[_i][_j]))
-            self.tmp_cnt += 1
+            q.drawLine(self.angle_middle_x[_i][_j], self.angle_middle_y[_i][_j], self.angle_start_x[_i][_j], self.angle_start_y[_i][_j])
+            q.drawLine(self.angle_end_x[_i][_j], self.angle_end_y[_i][_j], self.angle_middle_x[_i][_j], self.angle_middle_y[_i][_j])
+
         elif(self.tool_lock == 'pen'):
             self.pic[_i][_j].setMouseTracking(False)
             pen = QtGui.QPen()
             pen.setWidth(6)
             p.setPen(pen)
-            p.drawLine(self.pic_end_x[_i][_j], self.pic_end_y[_i][_j], self.pic_start_x[_i][_j], self.pic_start_y[_i][_j])
+            p.drawLine(self.pen_end_x[_i][_j], self.pen_end_y[_i][_j], self.pen_start_x[_i][_j], self.pen_start_y[_i][_j])
         q.drawPixmap(0, 0, self.transparent_pix[_i][_j])
         
         q.end()
@@ -292,12 +287,16 @@ class initialWidget(QtWidgets.QMainWindow):
         # pics
         var_pic = 'self.ui.pic'
         self.pic = [ [None] * (MAXIMUM_PIC + 1) for i in range(MAXIMUM_PAGE + 1) ]
-        self.pic_start_x = [ [None] * (MAXIMUM_PIC + 1) for i in range(MAXIMUM_PAGE + 1) ]
-        self.pic_start_y = [ [None] * (MAXIMUM_PIC + 1) for i in range(MAXIMUM_PAGE + 1) ]
-        self.pic_middle_x = [ [None] * (MAXIMUM_PIC + 1) for i in range(MAXIMUM_PAGE + 1) ]
-        self.pic_middle_y = [ [None] * (MAXIMUM_PIC + 1) for i in range(MAXIMUM_PAGE + 1) ]
-        self.pic_end_x = [ [None] * (MAXIMUM_PIC + 1) for i in range(MAXIMUM_PAGE + 1) ]
-        self.pic_end_y = [ [None] * (MAXIMUM_PIC + 1) for i in range(MAXIMUM_PAGE + 1) ]
+        self.pen_start_x = [ [None] * (MAXIMUM_PIC + 1) for i in range(MAXIMUM_PAGE + 1) ]
+        self.pen_start_y = [ [None] * (MAXIMUM_PIC + 1) for i in range(MAXIMUM_PAGE + 1) ]
+        self.pen_end_x = [ [None] * (MAXIMUM_PIC + 1) for i in range(MAXIMUM_PAGE + 1) ]
+        self.pen_end_y = [ [None] * (MAXIMUM_PIC + 1) for i in range(MAXIMUM_PAGE + 1) ]
+        self.angle_start_x = [ [None] * (MAXIMUM_PIC + 1) for i in range(MAXIMUM_PAGE + 1) ]
+        self.angle_start_y = [ [None] * (MAXIMUM_PIC + 1) for i in range(MAXIMUM_PAGE + 1) ]
+        self.angle_middle_x = [ [None] * (MAXIMUM_PIC + 1) for i in range(MAXIMUM_PAGE + 1) ]
+        self.angle_middle_y = [ [None] * (MAXIMUM_PIC + 1) for i in range(MAXIMUM_PAGE + 1) ]
+        self.angle_end_x = [ [None] * (MAXIMUM_PIC + 1) for i in range(MAXIMUM_PAGE + 1) ]
+        self.angle_end_y = [ [None] * (MAXIMUM_PIC + 1) for i in range(MAXIMUM_PAGE + 1) ]
         self.pic_clicked = [ [False] * (MAXIMUM_PIC + 1) for i in range(MAXIMUM_PAGE + 1) ]
         self.pic_released = [ [False] * (MAXIMUM_PIC + 1) for i in range(MAXIMUM_PAGE + 1) ]
         var_array_pic = 'self.pic'
@@ -305,10 +304,11 @@ class initialWidget(QtWidgets.QMainWindow):
             for j in range(1, (MAXIMUM_PIC + 1)):
                 exec("%s[%d][%d] = %s_%d_%d" % (var_array_pic, i, j, var_pic, i, j))
                 self.pic[i][j].setText("%d-%d" % (i, j))
-                self.pic_start_x[i][j] = self.pic_start_y[i][j] = 0
-                self.pic_middle_x[i][j] = self.pic_middle_y[i][j] = 0
-                self.pic_end_x[i][j] = self.pic_end_y[i][j] = 0
-        # pic_cnt
+                self.pen_start_x[i][j] = self.pen_start_y[i][j] = 0
+                self.pen_end_x[i][j] = self.pen_end_y[i][j] = 0
+                self.angle_start_x[i][j] = self.angle_start_y[i][j] = 0
+                self.angle_middle_x[i][j] = self.angle_middle_y[i][j] = 0
+                self.angle_end_x[i][j] = self.angle_end_y[i][j] = 0
         self.pic_cnt = [0] * (MAXIMUM_PAGE + 1)
         self.pic_ith = self.pic_jth = 1
 
