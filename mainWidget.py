@@ -105,40 +105,6 @@ class initialWidget(QtWidgets.QMainWindow):
         print(filetype)
         # fileName2, ok2 = QFileDialog.getSaveFileName(self,"檔案儲存","./","All Files (*);;Text Files (*.txt)")
 
-
-
-    def linkPage2Array(self, MAXIMUM_PAGE = 5):
-        # 把QtDesigner的一些重複的Widget用array對應
-        # patient_page
-        var_patient_page = 'self.ui.patient_page'
-        self.patient_page = [None] * (MAXIMUM_PAGE + 1)
-        var_array_patient_page = 'self.patient_page'
-        for i in range(1, MAXIMUM_PAGE + 1):
-            exec("%s[%d] = %s_%d" % (var_array_patient_page, i, var_patient_page, i))
-        # thumbnail_list
-        var_thumbnail_list = 'self.ui.thumbnail_list'
-        self.thumbnail_list = [None] * (MAXIMUM_PAGE + 1)
-        var_array_thumbnail_list = 'self.thumbnail_list'
-        for i in range(1, MAXIMUM_PAGE + 1):
-            exec("%s[%d] = %s_%d" % (var_array_thumbnail_list, i, var_thumbnail_list, i))
-        # pics
-        var_pic = 'self.ui.pic'
-        self.pic = [ [None] * 5 for i in range(MAXIMUM_PAGE + 1)]
-        self.pic_x = [ [None] * 5 for i in range(MAXIMUM_PAGE + 1)]
-        self.pic_y = [ [None] * 5 for i in range(MAXIMUM_PAGE + 1)]
-        var_array_pic = 'self.pic'
-        for i in range(1, MAXIMUM_PAGE + 1):
-            for j in range(1, 5):
-                exec("%s[%d][%d] = %s_%d_%d" % (var_array_pic, i, j, var_pic, i, j))
-                self.pic[i][j].setText("%d-%d" % (i, j))
-                self.pic[i][j].mousePressEvent = lambda pressed: self.getPos(pressed, i, j) # 讓每個pic的mousePressEvent可以傳出告訴自己是誰
-                self.pic[i][j].mouseMoveEvent = self.drawLine
-        # pic_cnt
-        self.pic_cnt = [0] * (MAXIMUM_PAGE + 1)
-
-
-        # 暫時試試放照片
-        self.showPic(1, 1, "01372635","5F327951")
     
 
     def addEntry(self):
