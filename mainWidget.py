@@ -75,6 +75,16 @@ class initialWidget(QtWidgets.QMainWindow):
                 if(self.pic_clicked[_i][_j]):
                     self.pic_released[_i][_j] = True
                 else:
+                    if(self.angle_start_x[_i][_j] != self.angle_middle_x[_i][_j] and self.angle_start_y[_i][_j] != self.angle_middle_y[_i][_j]):
+                        self.angle_coordinate_list[_i][_j].append(angleCoordinate(
+                            self.angle_start_x[_i][_j], self.angle_start_y[_i][_j],
+                            self.angle_middle_x[_i][_j], self.angle_middle_y[_i][_j],
+                            self.angle_end_x[_i][_j], self.angle_end_y[_i][_j]
+                            ))
+                        self.angle_start_x[_i][_j] = self.angle_middle_x[_i][_j] = 0  
+                        self.angle_start_y[_i][_j] = self.angle_middle_y[_i][_j] = 0
+                    print(self.angle_coordinate_list[_i][_j])  
+                    print(_i, _j, len(self.angle_coordinate_list[_i][_j]))
                     self.pic_released[_i][_j] = False
         elif(self.tool_lock == 'pen'):
             return
@@ -130,14 +140,18 @@ class initialWidget(QtWidgets.QMainWindow):
         p = QtGui.QPainter(self.transparent_pix[_i][_j])
         if(self.tool_lock == 'mouse'):
             return
+        
         elif(self.tool_lock == 'angle'):
-            self.pic[_i][_j].setMouseTracking(True)
-            pen = QtGui.QPen()
-            pen.setWidth(6)
-            q.setPen(pen)
-            q.drawLine(self.angle_middle_x[_i][_j], self.angle_middle_y[_i][_j], self.angle_start_x[_i][_j], self.angle_start_y[_i][_j])
-            q.drawLine(self.angle_end_x[_i][_j], self.angle_end_y[_i][_j], self.angle_middle_x[_i][_j], self.angle_middle_y[_i][_j])
-
+            if(not self.pic_clicked[_i][_j] and not self.pic_released[_i][_j]):
+                return
+            else:
+                self.pic[_i][_j].setMouseTracking(True)
+                pen = QtGui.QPen()
+                pen.setWidth(6)
+                q.setPen(pen)
+                q.drawLine(self.angle_middle_x[_i][_j], self.angle_middle_y[_i][_j], self.angle_start_x[_i][_j], self.angle_start_y[_i][_j])
+                q.drawLine(self.angle_end_x[_i][_j], self.angle_end_y[_i][_j], self.angle_middle_x[_i][_j], self.angle_middle_y[_i][_j])
+            
         elif(self.tool_lock == 'pen'):
             self.pic[_i][_j].setMouseTracking(False)
             pen = QtGui.QPen()
@@ -145,7 +159,16 @@ class initialWidget(QtWidgets.QMainWindow):
             p.setPen(pen)
             p.drawLine(self.pen_end_x[_i][_j], self.pen_end_y[_i][_j], self.pen_start_x[_i][_j], self.pen_start_y[_i][_j])
         q.drawPixmap(0, 0, self.transparent_pix[_i][_j])
-        
+        # show every angle
+        # for k in range(1, self.MAXIMUM_PAGE + 1):
+        #     for v in range(1, (self.MAXIMUM_PIC + 1)):
+        for w in self.angle_coordinate_list[_i][_j]:
+            pen = QtGui.QPen()
+            pen.setWidth(6)
+            q.setPen(pen)
+            q.drawLine(w.mx, w.my, w.sx, w.sy)
+            q.drawLine(w.ex, w.ey, w.mx, w.my)
+            
         q.end()
 
 #按鈕連結處--------------------------------------------------------------------------------------------------------
@@ -270,38 +293,41 @@ class initialWidget(QtWidgets.QMainWindow):
         self.pic[i][j].mouseMoveEvent = lambda moved: self.picMouseMove(moved, i, j)
         self.pic[i][j].paintEvent = lambda painted: self.picPaint(painted, QtGui.QPixmap(qimage), i, j)
         
-    def linkPage2Array(self, MAXIMUM_PAGE = 5, MAXIMUM_PIC = 4):
+    def linkPage2Array(self, _MAXIMUM_PAGE = 5, _MAXIMUM_PIC = 4):
         # 把QtDesigner的一些重複的Widget用array對應
         # patient_page
+        self.MAXIMUM_PAGE = _MAXIMUM_PAGE
+        self.MAXIMUM_PIC = _MAXIMUM_PIC
         var_patient_page = 'self.ui.patient_page'
-        self.patient_page = [None] * (MAXIMUM_PAGE + 1)
+        self.patient_page = [None] * (self.MAXIMUM_PAGE + 1)
         var_array_patient_page = 'self.patient_page'
-        for i in range(1, MAXIMUM_PAGE + 1):
+        for i in range(1, self.MAXIMUM_PAGE + 1):
             exec("%s[%d] = %s_%d" % (var_array_patient_page, i, var_patient_page, i))
         # thumbnail_list
         var_thumbnail_list = 'self.ui.thumbnail_list'
-        self.thumbnail_list = [None] * (MAXIMUM_PAGE + 1)
+        self.thumbnail_list = [None] * (self.MAXIMUM_PAGE + 1)
         var_array_thumbnail_list = 'self.thumbnail_list'
-        for i in range(1, MAXIMUM_PAGE + 1):
+        for i in range(1, self.MAXIMUM_PAGE + 1):
             exec("%s[%d] = %s_%d" % (var_array_thumbnail_list, i, var_thumbnail_list, i))
         # pics
         var_pic = 'self.ui.pic'
-        self.pic = [ [None] * (MAXIMUM_PIC + 1) for i in range(MAXIMUM_PAGE + 1) ]
-        self.pen_start_x = [ [None] * (MAXIMUM_PIC + 1) for i in range(MAXIMUM_PAGE + 1) ]
-        self.pen_start_y = [ [None] * (MAXIMUM_PIC + 1) for i in range(MAXIMUM_PAGE + 1) ]
-        self.pen_end_x = [ [None] * (MAXIMUM_PIC + 1) for i in range(MAXIMUM_PAGE + 1) ]
-        self.pen_end_y = [ [None] * (MAXIMUM_PIC + 1) for i in range(MAXIMUM_PAGE + 1) ]
-        self.angle_start_x = [ [None] * (MAXIMUM_PIC + 1) for i in range(MAXIMUM_PAGE + 1) ]
-        self.angle_start_y = [ [None] * (MAXIMUM_PIC + 1) for i in range(MAXIMUM_PAGE + 1) ]
-        self.angle_middle_x = [ [None] * (MAXIMUM_PIC + 1) for i in range(MAXIMUM_PAGE + 1) ]
-        self.angle_middle_y = [ [None] * (MAXIMUM_PIC + 1) for i in range(MAXIMUM_PAGE + 1) ]
-        self.angle_end_x = [ [None] * (MAXIMUM_PIC + 1) for i in range(MAXIMUM_PAGE + 1) ]
-        self.angle_end_y = [ [None] * (MAXIMUM_PIC + 1) for i in range(MAXIMUM_PAGE + 1) ]
-        self.pic_clicked = [ [False] * (MAXIMUM_PIC + 1) for i in range(MAXIMUM_PAGE + 1) ]
-        self.pic_released = [ [False] * (MAXIMUM_PIC + 1) for i in range(MAXIMUM_PAGE + 1) ]
+        self.pic = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
+        self.pen_start_x = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
+        self.pen_start_y = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
+        self.pen_end_x = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
+        self.pen_end_y = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
+        self.angle_start_x = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
+        self.angle_start_y = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
+        self.angle_middle_x = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
+        self.angle_middle_y = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
+        self.angle_end_x = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
+        self.angle_end_y = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
+        self.pic_clicked = [ [False] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
+        self.pic_released = [ [False] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
+        self.angle_coordinate_list = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
         var_array_pic = 'self.pic'
-        for i in range(1, MAXIMUM_PAGE + 1):
-            for j in range(1, (MAXIMUM_PIC + 1)):
+        for i in range(1, self.MAXIMUM_PAGE + 1):
+            for j in range(1, (self.MAXIMUM_PIC + 1)):
                 exec("%s[%d][%d] = %s_%d_%d" % (var_array_pic, i, j, var_pic, i, j))
                 self.pic[i][j].setText("%d-%d" % (i, j))
                 self.pen_start_x[i][j] = self.pen_start_y[i][j] = 0
@@ -309,13 +335,14 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.angle_start_x[i][j] = self.angle_start_y[i][j] = 0
                 self.angle_middle_x[i][j] = self.angle_middle_y[i][j] = 0
                 self.angle_end_x[i][j] = self.angle_end_y[i][j] = 0
-        self.pic_cnt = [0] * (MAXIMUM_PAGE + 1)
+                self.angle_coordinate_list[i][j] = []
+        self.pic_cnt = [0] * (self.MAXIMUM_PAGE + 1)
         self.pic_ith = self.pic_jth = 1
 
         # 畫圖透明canvas
-        self.transparent_pix = [ [None] * (MAXIMUM_PIC + 1) for i in range(MAXIMUM_PAGE + 1) ]
-        for i in range(1, MAXIMUM_PAGE + 1):
-            for j in range(1, (MAXIMUM_PIC + 1)):
+        self.transparent_pix = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
+        for i in range(1, self.MAXIMUM_PAGE + 1):
+            for j in range(1, (self.MAXIMUM_PIC + 1)):
                 self.transparent_pix[i][j] = QtGui.QPixmap(512, 512)
                 self.transparent_pix[i][j].fill(Qt.transparent)
 
@@ -345,6 +372,14 @@ class Patient():
     def __init__(self, _pt_id, _pt_path):
         self.pt_id = _pt_id
         self.pt_path = __pt_path
+class angleCoordinate():
+    def __init__(self, _sx, _sy, _mx, _my, _ex, _ey):
+        self.sx = _sx
+        self.sy = _sy
+        self.mx = _mx
+        self.my = _my
+        self.ex = _ex
+        self.ey = _ey
 
 if __name__ == '__main__':
     import sys
