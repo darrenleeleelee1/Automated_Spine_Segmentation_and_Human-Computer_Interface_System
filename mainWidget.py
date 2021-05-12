@@ -89,7 +89,6 @@ class initialWidget(QtWidgets.QMainWindow):
         elif(self.tool_lock == 'pen'):
             return
 
-
     def picMousePressed(self, event, _i, _j):
         self.pic_ith = _i
         self.pic_jth = _j
@@ -110,6 +109,7 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.pen_end_y[_i][_j] = event.y()
                 self.pen_start_x[self.pic_ith][self.pic_jth] = event.pos().x()
                 self.pen_start_y[self.pic_ith][self.pic_jth] = event.pos().y()
+
     def picMouseMove(self, event, _i, _j):
         # distance_from_center = round(((event.y() - self.pic_start_y[self.pic_ith][self.pic_jth])**2 + (event.x() - self.pic_start_x[self.pic_ith][self.pic_jth])**2)**0.5)
         # self.label.setText('Coordinates: ( %d : %d )' % (event.x(), event.y()) + "Distance from center: " + str(distance_from_center))       
@@ -131,18 +131,29 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.pen_start_y[self.pic_ith][self.pic_jth] = self.pen_end_y[_i][_j]
                 self.pen_end_x[_i][_j] = event.x() 
                 self.pen_end_y[_i][_j] = event.y()
-        
         self.update()
 
     def picPaint(self, event, pixmap, _i, _j):
         q = QtGui.QPainter(self.pic[_i][_j])
         q.drawPixmap(0, 0, 512, 512, pixmap)
         p = QtGui.QPainter(self.transparent_pix[_i][_j])
+        q.drawPixmap(0, 0, self.transparent_pix[_i][_j])
+        # show every angle
+        # for k in range(1, self.MAXIMUM_PAGE + 1):
+        #     for v in range(1, (self.MAXIMUM_PIC + 1)):
+        for w in self.angle_coordinate_list[_i][_j]:
+            pen = QtGui.QPen()
+            pen.setWidth(6)
+            q.setPen(pen)
+            q.drawLine(w.mx, w.my, w.sx, w.sy)
+            q.drawLine(w.ex, w.ey, w.mx, w.my)
+
         if(self.tool_lock == 'mouse'):
             return
         
         elif(self.tool_lock == 'angle'):
             if(not self.pic_clicked[_i][_j] and not self.pic_released[_i][_j]):
+                #self.pic[_i][_j].setMouseTracking(False)
                 return
             else:
                 self.pic[_i][_j].setMouseTracking(True)
@@ -158,17 +169,6 @@ class initialWidget(QtWidgets.QMainWindow):
             pen.setWidth(6)
             p.setPen(pen)
             p.drawLine(self.pen_end_x[_i][_j], self.pen_end_y[_i][_j], self.pen_start_x[_i][_j], self.pen_start_y[_i][_j])
-        q.drawPixmap(0, 0, self.transparent_pix[_i][_j])
-        # show every angle
-        # for k in range(1, self.MAXIMUM_PAGE + 1):
-        #     for v in range(1, (self.MAXIMUM_PIC + 1)):
-        for w in self.angle_coordinate_list[_i][_j]:
-            pen = QtGui.QPen()
-            pen.setWidth(6)
-            q.setPen(pen)
-            q.drawLine(w.mx, w.my, w.sx, w.sy)
-            q.drawLine(w.ex, w.ey, w.mx, w.my)
-            
         q.end()
 
 #按鈕連結處--------------------------------------------------------------------------------------------------------
