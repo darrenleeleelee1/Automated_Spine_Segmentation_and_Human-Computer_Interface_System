@@ -320,10 +320,10 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.transparent_pix[i][j].fill(Qt.transparent)
 
         # 暫時試試放照片
-        self.showPic(1, 1, "01372635","5F327951")
-        self.showPic(1, 2, "01372635","5F327951")
-        self.showPic(1, 3, "01372635","5F327951")
-        self.showPic(1, 4, "01372635","5F327951")
+        self.showPic(1, 1, "01372635","5F327951.dcm")
+        self.showPic(1, 2, "01372635","5F327951.dcm")
+        self.showPic(1, 3, "01372635","5F327951.dcm")
+        self.showPic(1, 4, "01372635","5F327951.dcm")
 
     def mousePressEvent(self, event):
         self.clickPosition = event.globalPos()
