@@ -271,10 +271,10 @@ class initialWidget(QtWidgets.QMainWindow):
         self.pic_cnt = [0] * (MAXIMUM_PAGE + 1)
         self.pic_ith = self.pic_jth = 1
         # 暫時試試放照片
-        self.showPic(1, 1, "01372635","5F327951")
-        self.showPic(1, 2, "01372635","5F327951")
-        self.showPic(1, 3, "01372635","5F327951")
-        self.showPic(1, 4, "01372635","5F327951")
+        self.showPic(1, 1, "01372635","5F327951.dcm")
+        self.showPic(1, 2, "01372635","5F327951.dcm")
+        self.showPic(1, 3, "01372635","5F327951.dcm")
+        self.showPic(1, 4, "01372635","5F327951.dcm")
 
     def mousePressEvent(self, event):
         self.clickPosition = event.globalPos()
