@@ -83,8 +83,6 @@ class initialWidget(QtWidgets.QMainWindow):
                             ))
                         self.angle_start_x[_i][_j] = self.angle_middle_x[_i][_j] = 0  
                         self.angle_start_y[_i][_j] = self.angle_middle_y[_i][_j] = 0
-                    print(self.angle_coordinate_list[_i][_j])  
-                    print(_i, _j, len(self.angle_coordinate_list[_i][_j]))
                     self.pic_released[_i][_j] = False
         elif(self.tool_lock == 'pen'):
             return
@@ -103,7 +101,6 @@ class initialWidget(QtWidgets.QMainWindow):
                     self.angle_start_y[self.pic_ith][self.pic_jth] = event.pos().y()
                 else:
                     self.pic_clicked[_i][_j] = False
-            # print("clicked:%d, released:%d" % (self.pic_clicked[_i][_j], self.pic_released[_i][_j]))
         elif(self.tool_lock == 'pen'):
             if event.button() == QtCore.Qt.LeftButton:
                 self.pen_end_x[_i][_j] = event.x()
@@ -143,7 +140,7 @@ class initialWidget(QtWidgets.QMainWindow):
         
         elif(self.tool_lock == 'angle'):
             if(not self.pic_clicked[_i][_j] and not self.pic_released[_i][_j]):
-                return
+                pass
             else:
                 self.pic[_i][_j].setMouseTracking(True)
                 pen = QtGui.QPen()
