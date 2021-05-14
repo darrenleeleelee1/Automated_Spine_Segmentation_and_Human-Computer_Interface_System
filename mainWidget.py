@@ -1,17 +1,20 @@
 from os import listdir
 from os.path import join
 from PyQt5.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
-                          QSize, QTime, QUrl, Qt, QEvent)
+                          QSize, QTime, QUrl, Qt, QEvent, QPointF)
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QCoreApplication, Qt
-from PyQt5.QtGui import QStandardItem, QStandardItemModel
+from PyQt5.QtGui import QStandardItem, QStandardItemModel, QTransform, QPainter
 from generatedUiFile.Spine_BrokenUi import Ui_MainWindow
 import os, requests
 from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene
 from pydicom import dcmread
 from pydicom.filebase import DicomBytesIO
 import numpy as np
 WINDOW_SIZE = 0
+
+
 
 
 class initialWidget(QtWidgets.QMainWindow):
@@ -21,6 +24,15 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.setupUi(self)
         self.pt_list = []
         self.model = QStandardItemModel()
+        self.angle = 0
+        self.size = 1
+        self.pic_label_width = 512
+        self.pic_label_height = 512
+        self.moveImage = False
+        self.moveX = 0
+        self.moveY = 0
+        self.clickPos = 0
+
 
         self.pt_list.append("0135678")
         self.pt_list.append("3847829")
@@ -29,24 +41,27 @@ class initialWidget(QtWidgets.QMainWindow):
         self.pt_list.sort()
         for ptid in self.pt_list:
             self.ui.no_list.addItem(ptid)
-        
-        self.tmp_cnt = 0    
-        
-        # 控制工具列現在選擇的工具為: mouse(defalut), pen, angle, ruler, move 
+
+        self.tmp_cnt = 0
+
+        # 控制工具列現在選擇的工具為: mouse(defalut), pen, angle, ruler, move
         self.tool_lock = "mouse"
         self.backend()
 
 
         def moveWindow(e):
             if self.isMaximized() == False:  # Not maximized
+
                 if e.buttons() == Qt.LeftButton:
                     self.move(self.pos() + e.globalPos() - self.clickPosition)
                     self.clickPosition = e.globalPos()
                     e.accept()
 
         self.ui.header.mouseMoveEvent = moveWindow  # 移動視窗
-    
-        self.show() 
+
+
+        self.show()
+
 
     def backend(self):
         self.ui.stackedWidget_right.setCurrentWidget(self.ui.recently_viewed_page)
@@ -60,12 +75,29 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.input_no.editingFinished.connect(self.addEntry)  # 按enter
         self.ui.search_no_button.clicked.connect(self.addEntry)  # 按 search_no
         completer = QCompleter(self.model, self)
-        self.ui.patient_list.itemClicked.connect(self.patient_listItemClicked)
+        self.ui.patient_list.itemClicked.connect(lambda: self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page))
         self.ui.input_no.setCompleter(completer)  # 搜尋紀錄
         self.linkPage2Array() # 將影像處理頁面預設有五頁
+
         self.ui.pushButton_angle.clicked.connect(self.pushButtonAngleClicked) # 角度按鈕連結
         self.ui.pushButton_add_pic.clicked.connect(self.pushButtonAddPicClicked) # 加照片按鈕連結
         self.ui.pushButton_pen.clicked.connect(self.pushButtonPenClicked)
+
+
+        self.ui.pushButton_magnifier.clicked.connect(lambda: self.slideZoomInOrOut())  # 打開放大縮小的frame
+        self.ui.pushButton_rotate.clicked.connect(lambda: self.slideRotateLeftOrRight())    # 打開旋轉的frame
+        self.ui.pushButton_rotate_right.clicked.connect(self.rotate_image_right)    #向右旋轉
+        self.ui.pushButton_rotate_left.clicked.connect(self.rotate_image_left)  #向左旋轉
+        self.ui.zoomIn.clicked.connect(self.image_zoom_in)
+        self.ui.zoomOut.clicked.connect(self.image_zoom_out)
+        self.ui.pushButton_move.clicked.connect(self.image_move)
+        self.ui.patient_list.itemClicked.connect(self.patient_listItemClicked)
+        self.ui.pushButton_angle.clicked.connect(self.pushButtonAngleClicked)
+        self.ui.pushButton_add_pic.clicked.connect(self.pushButtonAddPicClicked)
+
+
+
+
 #工具列-----------------------------------------------------------------------------------------------------------
     def picMouseReleased(self, event, _i, _j):
         if(self.tool_lock == 'mouse'):
@@ -81,8 +113,12 @@ class initialWidget(QtWidgets.QMainWindow):
                             self.angle_middle_x[_i][_j], self.angle_middle_y[_i][_j],
                             self.angle_end_x[_i][_j], self.angle_end_y[_i][_j]
                             ))
-                        self.angle_start_x[_i][_j] = self.angle_middle_x[_i][_j] = 0  
+                        self.angle_start_x[_i][_j] = self.angle_middle_x[_i][_j] = 0
                         self.angle_start_y[_i][_j] = self.angle_middle_y[_i][_j] = 0
+
+                    print(self.angle_coordinate_list[_i][_j])
+                    print(_i, _j, len(self.angle_coordinate_list[_i][_j]))
+
                     self.pic_released[_i][_j] = False
         elif(self.tool_lock == 'pen'):
             return
@@ -109,7 +145,7 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.pen_start_y[self.pic_ith][self.pic_jth] = event.pos().y()
     def picMouseMove(self, event, _i, _j):
         # distance_from_center = round(((event.y() - self.pic_start_y[self.pic_ith][self.pic_jth])**2 + (event.x() - self.pic_start_x[self.pic_ith][self.pic_jth])**2)**0.5)
-        # self.label.setText('Coordinates: ( %d : %d )' % (event.x(), event.y()) + "Distance from center: " + str(distance_from_center))       
+        # self.label.setText('Coordinates: ( %d : %d )' % (event.x(), event.y()) + "Distance from center: " + str(distance_from_center))
         # print(distance_from_center)
         if(self.tool_lock == 'mouse'):
             return
@@ -126,18 +162,28 @@ class initialWidget(QtWidgets.QMainWindow):
             if event.buttons() == QtCore.Qt.LeftButton:
                 self.pen_start_x[self.pic_ith][self.pic_jth] = self.pen_end_x[_i][_j]
                 self.pen_start_y[self.pic_ith][self.pic_jth] = self.pen_end_y[_i][_j]
-                self.pen_end_x[_i][_j] = event.x() 
+                self.pen_end_x[_i][_j] = event.x()
                 self.pen_end_y[_i][_j] = event.y()
-        
+
         self.update()
 
     def picPaint(self, event, pixmap, _i, _j):
         q = QtGui.QPainter(self.pic[_i][_j])
-        q.drawPixmap(0, 0, 512, 512, pixmap)
+        img_width = self.pic_label_width * self.size
+        img_height = self.pic_label_height * self.size
+        # q.resetTransform()
+        q.translate(self.pic_label_width / 2, self.pic_label_height / 2)   # 把旋轉中心設成（pic_label_width/2, pic_label_height/2）
+        q.rotate(self.angle)
+        q.translate(-self.pic_label_width / 2, -self.pic_label_height / 2)
+
+        q.drawPixmap(0, 0, img_width, img_height, pixmap)
+        # q.drawPixmap(0, 0, self.pic_label_width, self.pic_label_height, pixmap)
+
+
         p = QtGui.QPainter(self.transparent_pix[_i][_j])
         if(self.tool_lock == 'mouse'):
             return
-        
+
         elif(self.tool_lock == 'angle'):
             if(not self.pic_clicked[_i][_j] and not self.pic_released[_i][_j]):
                 pass
@@ -148,21 +194,24 @@ class initialWidget(QtWidgets.QMainWindow):
                 q.setPen(pen)
                 q.drawLine(self.angle_middle_x[_i][_j], self.angle_middle_y[_i][_j], self.angle_start_x[_i][_j], self.angle_start_y[_i][_j])
                 q.drawLine(self.angle_end_x[_i][_j], self.angle_end_y[_i][_j], self.angle_middle_x[_i][_j], self.angle_middle_y[_i][_j])
-            
+
         elif(self.tool_lock == 'pen'):
             self.pic[_i][_j].setMouseTracking(False)
             pen = QtGui.QPen()
             pen.setWidth(6)
             p.setPen(pen)
             p.drawLine(self.pen_end_x[_i][_j], self.pen_end_y[_i][_j], self.pen_start_x[_i][_j], self.pen_start_y[_i][_j])
+
         q.drawPixmap(0, 0, self.transparent_pix[_i][_j])
         # show every angle
         for w in self.angle_coordinate_list[_i][_j]:
             pen = QtGui.QPen()
             pen.setWidth(6)
             q.setPen(pen)
+
             q.drawPolyline(w.points)
             w.printDetail()
+
         q.end()
 
 #按鈕連結處--------------------------------------------------------------------------------------------------------
@@ -178,11 +227,44 @@ class initialWidget(QtWidgets.QMainWindow):
     def pushButtonPenClicked(self):
         self.tool_lock = 'pen'
 
-    
+
+    def rotate_image_right(self):
+        self.angle = self.angle + 90
+        # self.showPic(1, 1, "01372635", "5F327951")
+        # self.showPic(1, 2, "01372635", "5F327951")
+        # self.showPic(1, 3, "01372635", "5F327951")
+        # self.showPic(1, 4, "01372635", "5F327951")
+
+
+    def rotate_image_left(self):
+        self.angle = self.angle - 90
+        self.showPic(1, 1, "01372635", "5F327951")
+        self.showPic(1, 2, "01372635", "5F327951")
+        self.showPic(1, 3, "01372635", "5F327951")
+        self.showPic(1, 4, "01372635", "5F327951")
+
+    def image_zoom_in(self):
+        # if self.size < ?: #上限
+
+        self.pic[1][3].setCursor(QtGui.QCursor(QtCore.Qt.CrossCursor))
+        self.size = self.size * 1.25
+        self.showPic(1, 1, "01372635", "5F327951")
+        self.showPic(1, 2, "01372635", "5F327951")
+        self.showPic(1, 3, "01372635", "5F327951")
+        self.showPic(1, 4, "01372635", "5F327951")
+
+
+    def image_zoom_out(self):
+        if self.size > 1:   #下限
+            self.size = self.size * 0.8
+            self.showPic(1, 1, "01372635", "5F327951")
+            self.showPic(1, 2, "01372635", "5F327951")
+            self.showPic(1, 3, "01372635", "5F327951")
+            self.showPic(1, 4, "01372635", "5F327951")
 
 #MENU選單---------------------------------------------------------------------------------------------------------
     #add patient
-    def addPatient(self): 
+    def addPatient(self):
         dir_choose = QFileDialog.getExistingDirectory(self, "選取資料夾", "/Users/user/Documents/畢專/dicom_data")  # 第三參數是起始路徑
         if dir_choose == "":
             print("\n取消")
@@ -190,7 +272,7 @@ class initialWidget(QtWidgets.QMainWindow):
         print("\n選擇的資料夾:")
         print(dir_choose)
         pt_id = os.path.basename(dir_choose)
-        
+
         # post
         url = 'http://127.0.0.1:8000/pdicom/' + pt_id
         #headers = {'accept': 'application/json', 'Content-Type': 'multipart/form-data'}
@@ -213,24 +295,114 @@ class initialWidget(QtWidgets.QMainWindow):
         else:
             self.pt_list.append(pt_id)
             self.ui.patient_list.addItem(pt_id)
-
             self.ui.no_list.clear()
             self.pt_list.sort()
-            for ptid in self.pt_list:
-                self.ui.no_list.addItem(ptid)
-            for i in self.pt_list:
-                print(i)    
-    
+        for ptid in self.pt_list:
+            self.ui.no_list.addItem(ptid)
+        for i in self.pt_list:
+            print(i)
+
+
+    def slideZoomInOrOut(self):
+        zoom_frame_width = self.ui.zoom_frame.width()
+        if zoom_frame_width == 0:
+            new_zoom_frame_width = 100
+
+        else:
+            new_zoom_frame_width = 0
+        self.animation = QPropertyAnimation(self.ui.zoom_frame, b"minimumWidth")
+        self.animation.setDuration(250)
+        self.animation.setStartValue(zoom_frame_width)
+        self.animation.setEndValue(new_zoom_frame_width)
+        self.animation.setEasingCurve(QtCore.QEasingCurve.InOutQuart)
+        self.animation.start()
+
+
+    def slideRotateLeftOrRight(self):
+        rotate_frame_width = self.ui.rotate_frame.width()
+        if rotate_frame_width == 0:
+            new_rotate_frame_width = 100
+
+        else:
+            new_rotate_frame_width = 0
+        self.animation = QPropertyAnimation(self.ui.rotate_frame, b"minimumWidth")
+        self.animation.setDuration(250)
+        self.animation.setStartValue(rotate_frame_width)
+        self.animation.setEndValue(new_rotate_frame_width)
+        self.animation.setEasingCurve(QtCore.QEasingCurve.InOutQuart)
+        self.animation.start()
+
+
     def duplicateAdd(self):
         print("test")
         msg = QMessageBox()
         msg.setWindowTitle("Warning")
         msg.setText("Patient already exist !")
         msg.setIcon(QMessageBox.Warning)
-        x = msg.exec_() 
+        x = msg.exec_()
+
+    def image_move(self):
+        self.moveImage = True
+
+        # def mousePressEvent(self, event):
+        #     if self.moveImage:
+        #         self.ui.pic_1_3.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        #         self.clickPosition = event.globalPos()
+        #         self.moveX = event.x()
+        #         self.moveY = event.y()
+        #         print(event.globalPos())
+        #         print("sc")
+
+        def image_moving(e):
+            if self.moveImage and e.buttons() == Qt.LeftButton:
+                print(e.x(), e.y())
+                print(self.pos())
+
+                # self.move(self.pos() + e.globalPos() - self.clickPos)
+                self.clickPos = e.globalPos()
+                e.accept()
+
+
+        self.pic[1][1].mousePressEvent = image_moving
+
+        def mousePressEvent(self, event):
+            self.clickPos = event.globalPos()
+
+        def mouseReleaseEvent(self, event):
+            if self.moveImage:
+                self.moveX = event.x() - self.moveX
+                self.moveY = event.y() - self.moveY
+                print(event.globalPos())
+                print(self.moveX, self.moveY)
+                self.showPic(1, 1, "01372635", "5F327951")
+
+
+
+    # def mousePressEvent(self, event):
+    #     if self.moveImage:
+    #         self.clickPosition = event.globalPos()
+    #         self.moveX = event.x()
+    #         self.moveY = event.y()
+    #         print(event.globalPos())
+
+    # def mouseMoveEvent(self, event):
+    #     if event.buttons() & Qt.LeftButton:
+    #         self.destion = event.pos()
+    #         self.update()
+
+    # def mouseReleaseEvent(self, event):
+    #     if self.moveImage:
+    #         self.moveX = event.x() - self.moveX
+    #         self.moveY = event.y() - self.moveY
+    #         print(event.globalPos())
+    #         print(self.moveX, self.moveY)
+    #         self.showPic(1, 1, "01372635", "5F327951")
+
+
+
 
     # search
-    def addEntry(self): 
+    def addEntry(self):
         entryItem = self.ui.input_no.text()
         if entryItem != '':
             self.ui.input_no.clear()
@@ -253,7 +425,7 @@ class initialWidget(QtWidgets.QMainWindow):
 
         if not self.model.findItems(entryItem):
             self.model.insertRow(0, QStandardItem(entryItem))
-            
+
     # list item clicked
     def patient_listItemClicked(self, item):
         print(str(item.text()))
@@ -279,14 +451,22 @@ class initialWidget(QtWidgets.QMainWindow):
         ds = dcmread(dicom_path)
         arr = ds.pixel_array
         arr = np.uint8(arr)
-        qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], QtGui.QImage.Format_Grayscale8)
-        self.pic[i][j].setPixmap(QtGui.QPixmap(qimage))
-        self.pic[i][j].setGeometry(QtCore.QRect(0, 0, 400, 500))
+        self.qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], QtGui.QImage.Format_Grayscale8)
+
+        pixmap = QtGui.QPixmap(self.qimage)
+        # pixmap_resized = pixmap.scaled(self.pic_label_width * self.size, self.pic_label_height * self.size,QtCore.Qt.KeepAspectRatio)
+        # self.pic[i][j].move(200, 0)
+        self.pic[i][j].setPixmap(pixmap)
+        # self.pic[i][j].setGeometry(QtCore.QRect(100, 100, 400, 500))
         self.pic[i][j].mousePressEvent = lambda pressed: self.picMousePressed(pressed, i, j) # 讓每個pic的mousePressEvent可以傳出告訴自己是誰
         self.pic[i][j].mouseReleaseEvent = lambda released: self.picMouseReleased(released, i, j)
         self.pic[i][j].mouseMoveEvent = lambda moved: self.picMouseMove(moved, i, j)
-        self.pic[i][j].paintEvent = lambda painted: self.picPaint(painted, QtGui.QPixmap(qimage), i, j)
-        
+
+
+        # self.pic[i][j].paintEvent = lambda painted: self.picPaint(painted,  pixmap_resized, i, j)
+
+        self.pic[i][j].paintEvent = lambda painted: self.picPaint(painted, pixmap, i, j)
+
     def linkPage2Array(self, _MAXIMUM_PAGE = 5, _MAXIMUM_PIC = 4):
         # 把QtDesigner的一些重複的Widget用array對應
         # patient_page
@@ -353,14 +533,22 @@ class initialWidget(QtWidgets.QMainWindow):
         global WINDOW_SIZE
         win_status = WINDOW_SIZE
         if win_status == 0:
+            self.pic_1_1_pos_x = 700
+            self.pic_1_1_pos_y = 15
+            # self.showPic(1, 1, "01372635", "5F327951")
             WINDOW_SIZE = 1
             self.showMaximized()
-            self.ui.restore_button.setIcon(QtGui.QIcon(u":/icons/icons/cil-window-restore.png"))  # Show minized icon
+            self.ui.restore_button.setIcon(QtGui.QIcon(u":/icons/icons/window-restore.png"))  # Show minized icon
+
 
         else:
             WINDOW_SIZE = 0
+            self.pic_1_1_pos_x = 350
+            self.pic_1_1_pos_y = 15
+            # self.showPic(1, 1, "01372635", "5F327951")
             self.showNormal()
-            self.ui.restore_button.setIcon(QtGui.QIcon(u":/icons/icons/cil-window-maximize.png"))
+            self.ui.restore_button.setIcon(QtGui.QIcon(u":/icons/icons/window-maximize.png"))
+
 
 class Patient():
     def __init__(self, _pt_id, _pt_path):
@@ -384,6 +572,7 @@ class angleCoordinate():
         print("angle: ", self.angle)
         print("inner product: ", self.inner_product, "cos: ", self.cos_theda)
         print("length1: ", self.length_sp2mp, "length2: ", self.length_mp2ep)
+
 if __name__ == '__main__':
     import sys
     app = QtWidgets.QApplication(sys.argv)
