@@ -83,8 +83,6 @@ class initialWidget(QtWidgets.QMainWindow):
                             ))
                         self.angle_start_x[_i][_j] = self.angle_middle_x[_i][_j] = 0  
                         self.angle_start_y[_i][_j] = self.angle_middle_y[_i][_j] = 0
-                    print(self.angle_coordinate_list[_i][_j])  
-                    print(_i, _j, len(self.angle_coordinate_list[_i][_j]))
                     self.pic_released[_i][_j] = False
         elif(self.tool_lock == 'pen'):
             return
@@ -102,7 +100,6 @@ class initialWidget(QtWidgets.QMainWindow):
                     self.angle_start_y[self.pic_ith][self.pic_jth] = event.pos().y()
                 else:
                     self.pic_clicked[_i][_j] = False
-            # print("clicked:%d, released:%d" % (self.pic_clicked[_i][_j], self.pic_released[_i][_j]))
         elif(self.tool_lock == 'pen'):
             if event.button() == QtCore.Qt.LeftButton:
                 self.pen_end_x[_i][_j] = event.x()
@@ -137,6 +134,29 @@ class initialWidget(QtWidgets.QMainWindow):
         q = QtGui.QPainter(self.pic[_i][_j])
         q.drawPixmap(0, 0, 512, 512, pixmap)
         p = QtGui.QPainter(self.transparent_pix[_i][_j])
+        if (self.tool_lock == 'mouse'):
+            return
+
+        elif (self.tool_lock == 'angle'):
+            if (not self.pic_clicked[_i][_j] and not self.pic_released[_i][_j]):
+                pass
+            else:
+                self.pic[_i][_j].setMouseTracking(True)
+                pen = QtGui.QPen()
+                pen.setWidth(6)
+                q.setPen(pen)
+                q.drawLine(self.angle_middle_x[_i][_j], self.angle_middle_y[_i][_j], self.angle_start_x[_i][_j],
+                           self.angle_start_y[_i][_j])
+                q.drawLine(self.angle_end_x[_i][_j], self.angle_end_y[_i][_j], self.angle_middle_x[_i][_j],
+                           self.angle_middle_y[_i][_j])
+
+        elif (self.tool_lock == 'pen'):
+            self.pic[_i][_j].setMouseTracking(False)
+            pen = QtGui.QPen()
+            pen.setWidth(6)
+            p.setPen(pen)
+            p.drawLine(self.pen_end_x[_i][_j], self.pen_end_y[_i][_j], self.pen_start_x[_i][_j],
+                       self.pen_start_y[_i][_j])
         q.drawPixmap(0, 0, self.transparent_pix[_i][_j])
         # show every angle
         # for k in range(1, self.MAXIMUM_PAGE + 1):
@@ -148,27 +168,6 @@ class initialWidget(QtWidgets.QMainWindow):
             q.drawLine(w.mx, w.my, w.sx, w.sy)
             q.drawLine(w.ex, w.ey, w.mx, w.my)
 
-        if(self.tool_lock == 'mouse'):
-            return
-        
-        elif(self.tool_lock == 'angle'):
-            if(not self.pic_clicked[_i][_j] and not self.pic_released[_i][_j]):
-                #self.pic[_i][_j].setMouseTracking(False)
-                return
-            else:
-                self.pic[_i][_j].setMouseTracking(True)
-                pen = QtGui.QPen()
-                pen.setWidth(6)
-                q.setPen(pen)
-                q.drawLine(self.angle_middle_x[_i][_j], self.angle_middle_y[_i][_j], self.angle_start_x[_i][_j], self.angle_start_y[_i][_j])
-                q.drawLine(self.angle_end_x[_i][_j], self.angle_end_y[_i][_j], self.angle_middle_x[_i][_j], self.angle_middle_y[_i][_j])
-            
-        elif(self.tool_lock == 'pen'):
-            self.pic[_i][_j].setMouseTracking(False)
-            pen = QtGui.QPen()
-            pen.setWidth(6)
-            p.setPen(pen)
-            p.drawLine(self.pen_end_x[_i][_j], self.pen_end_y[_i][_j], self.pen_start_x[_i][_j], self.pen_start_y[_i][_j])
         q.end()
 
 #按鈕連結處--------------------------------------------------------------------------------------------------------
