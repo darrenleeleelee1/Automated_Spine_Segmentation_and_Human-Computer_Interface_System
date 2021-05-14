@@ -66,6 +66,8 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.pushButton_angle.clicked.connect(self.pushButtonAngleClicked) # 角度按鈕連結
         self.ui.pushButton_add_pic.clicked.connect(self.pushButtonAddPicClicked) # 加照片按鈕連結
         self.ui.pushButton_pen.clicked.connect(self.pushButtonPenClicked)
+        self.ui.pushButton_save.clicked.connect(self.pushButtonSaveClicked)
+
 #工具列-----------------------------------------------------------------------------------------------------------
     def picMouseReleased(self, event, _i, _j):
         if(self.tool_lock == 'mouse'):
@@ -167,7 +169,6 @@ class initialWidget(QtWidgets.QMainWindow):
             q.setPen(pen)
             q.drawLine(w.mx, w.my, w.sx, w.sy)
             q.drawLine(w.ex, w.ey, w.mx, w.my)
-
         q.end()
 
 #按鈕連結處--------------------------------------------------------------------------------------------------------
@@ -182,6 +183,17 @@ class initialWidget(QtWidgets.QMainWindow):
 
     def pushButtonPenClicked(self):
         self.tool_lock = 'pen'
+
+    def pushButtonSaveClicked(self):
+        # selecting file path
+        filePath, _ = QFileDialog.getSaveFileName(self.pic[1][1], "Save Image", "",
+                                                  "PNG(*.png);;JPEG(*.jpg *.jpeg);;All Files(*.*) ")
+        # if file path is blank return back
+        if filePath == "":
+            return
+        # saving canvas at desired path
+        self.pic[1][1].save(filePath)
+
 
     
 
@@ -366,6 +378,8 @@ class initialWidget(QtWidgets.QMainWindow):
             WINDOW_SIZE = 0
             self.showNormal()
             self.ui.restore_button.setIcon(QtGui.QIcon(u":/icons/icons/cil-window-maximize.png"))
+
+
 
 class Patient():
     def __init__(self, _pt_id, _pt_path):
