@@ -157,15 +157,12 @@ class initialWidget(QtWidgets.QMainWindow):
             p.drawLine(self.pen_end_x[_i][_j], self.pen_end_y[_i][_j], self.pen_start_x[_i][_j], self.pen_start_y[_i][_j])
         q.drawPixmap(0, 0, self.transparent_pix[_i][_j])
         # show every angle
-        # for k in range(1, self.MAXIMUM_PAGE + 1):
-        #     for v in range(1, (self.MAXIMUM_PIC + 1)):
         for w in self.angle_coordinate_list[_i][_j]:
             pen = QtGui.QPen()
             pen.setWidth(6)
             q.setPen(pen)
-            q.drawLine(w.mx, w.my, w.sx, w.sy)
-            q.drawLine(w.ex, w.ey, w.mx, w.my)
-            
+            q.drawPolyline(w.points)
+            w.printDetail()
         q.end()
 
 #按鈕連結處--------------------------------------------------------------------------------------------------------
@@ -371,13 +368,22 @@ class Patient():
         self.pt_path = __pt_path
 class angleCoordinate():
     def __init__(self, _sx, _sy, _mx, _my, _ex, _ey):
-        self.sx = _sx
-        self.sy = _sy
-        self.mx = _mx
-        self.my = _my
-        self.ex = _ex
-        self.ey = _ey
-
+        self.points = QtGui.QPolygonF()
+        self.sp = QtCore.QPointF(_sx, _sy)
+        self.mp = QtCore.QPointF(_mx, _my)
+        self.ep = QtCore.QPointF(_ex, _ey)
+        self.points.append(self.sp)
+        self.points.append(self.mp)
+        self.points.append(self.ep)
+        self.length_sp2mp = ((self.sp.x() - self.mp.x()) ** 2 + (self.sp.y() - self.mp.y()) ** 2) ** 0.5
+        self.length_mp2ep = ((self.mp.x() - self.ep.x()) ** 2 + (self.mp.y() - self.ep.y()) ** 2) ** 0.5
+        self.inner_product = (self.sp.x() - self.mp.x()) * (self.ep.x() - self.mp.x()) + (self.sp.y() - self.mp.y()) * (self.ep.y() - self.mp.y())
+        self.cos_theda = self.inner_product / self.length_sp2mp / self.length_mp2ep
+        self.angle = np.arccos(self.inner_product / self.length_sp2mp / self.length_mp2ep) * 180 / np.pi
+    def printDetail(self):
+        print("angle: ", self.angle)
+        print("inner product: ", self.inner_product, "cos: ", self.cos_theda)
+        print("length1: ", self.length_sp2mp, "length2: ", self.length_mp2ep)
 if __name__ == '__main__':
     import sys
     app = QtWidgets.QApplication(sys.argv)
