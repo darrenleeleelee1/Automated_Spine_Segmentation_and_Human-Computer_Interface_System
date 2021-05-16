@@ -201,7 +201,9 @@ class initialWidget(QtWidgets.QMainWindow):
             pen = QtGui.QPen()
             pen.setWidth(6)
             p.setPen(pen)
-            p.drawLine(self.pen_end_x[_i][_j], self.pen_end_y[_i][_j], self.pen_start_x[_i][_j], self.pen_start_y[_i][_j])
+            tpsx, tpsy = self.transitiveMatrix(self.pen_start_x[_i][_j], self.pen_start_y[_i][_j], self.angle)
+            tpex, tpey = self.transitiveMatrix(self.pen_end_x[_i][_j], self.pen_end_y[_i][_j], self.angle)
+            p.drawLine(tpex, tpey, tpsx, tpsy)
 
         q.drawPixmap(0, 0, self.transparent_pix[_i][_j])
         # show every angle
@@ -448,10 +450,8 @@ class initialWidget(QtWidgets.QMainWindow):
     def transitiveMatrix(self, _x, _y, theda):
         radi = np.deg2rad(theda)
         index = int((-self.angle % 360) / 90)
-        print("x, y:", _x, _y)
         tx = _x * np.cos(radi) + _y * np.sin(radi) + self.rotate_coordinate_system[index][0]
         ty = _x * np.sin(-radi) + _y * np.cos(radi) + self.rotate_coordinate_system[index][1]
-        print(tx, ty)
         return tx, ty
 
     def showPic(self, i, j, patient_no, patient_dics):
