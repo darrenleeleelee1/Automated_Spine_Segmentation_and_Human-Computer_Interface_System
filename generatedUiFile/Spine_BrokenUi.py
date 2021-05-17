@@ -398,6 +398,7 @@ class Ui_MainWindow(object):
         self.pic_frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.pic_frame.setFrameShadow(QtWidgets.QFrame.Raised)
         self.pic_frame.setObjectName("pic_frame")
+<<<<<<< HEAD
         self.gridLayout = QtWidgets.QGridLayout(self.pic_frame)
         self.gridLayout.setObjectName("gridLayout")
         self.pic_1_1 = QtWidgets.QLabel(self.pic_frame)
@@ -409,19 +410,42 @@ class Ui_MainWindow(object):
         self.pic_1_2.setMinimumSize(QtCore.QSize(512, 512))
         self.pic_1_2.setMaximumSize(QtCore.QSize(512, 512))
         self.pic_1_2.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+=======
+        self.pic_1_4 = QtWidgets.QLabel(self.pic_frame)
+        self.pic_1_4.setGeometry(QtCore.QRect(538, 304, 512, 512))
+        self.pic_1_4.setMinimumSize(QtCore.QSize(512, 512))
+        self.pic_1_4.setMaximumSize(QtCore.QSize(512, 512))
+        self.pic_1_4.setObjectName("pic_1_4")
+        self.pic_1_2 = QtWidgets.QLabel(self.pic_frame)
+        self.pic_1_2.setGeometry(QtCore.QRect(538, 13, 512, 512))
+        self.pic_1_2.setMinimumSize(QtCore.QSize(512, 512))
+        self.pic_1_2.setMaximumSize(QtCore.QSize(512, 512))
+        self.pic_1_2.setCursor(QtGui.QCursor(QtCore.Qt.SizeAllCursor))
+>>>>>>> jamie
         self.pic_1_2.setObjectName("pic_1_2")
-        self.gridLayout.addWidget(self.pic_1_2, 0, 1, 1, 1)
         self.pic_1_3 = QtWidgets.QLabel(self.pic_frame)
+<<<<<<< HEAD
+=======
+        self.pic_1_3.setGeometry(QtCore.QRect(13, 304, 512, 512))
+>>>>>>> jamie
         self.pic_1_3.setMinimumSize(QtCore.QSize(512, 512))
         self.pic_1_3.setMaximumSize(QtCore.QSize(512, 512))
         self.pic_1_3.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
         self.pic_1_3.setObjectName("pic_1_3")
+<<<<<<< HEAD
         self.gridLayout.addWidget(self.pic_1_3, 1, 0, 1, 1)
         self.pic_1_4 = QtWidgets.QLabel(self.pic_frame)
         self.pic_1_4.setMinimumSize(QtCore.QSize(512, 512))
         self.pic_1_4.setMaximumSize(QtCore.QSize(512, 512))
         self.pic_1_4.setObjectName("pic_1_4")
         self.gridLayout.addWidget(self.pic_1_4, 1, 1, 1, 1)
+=======
+        self.pic_1_1 = QtWidgets.QLabel(self.pic_frame)
+        self.pic_1_1.setGeometry(QtCore.QRect(13, 13, 512, 512))
+        self.pic_1_1.setMinimumSize(QtCore.QSize(512, 512))
+        self.pic_1_1.setMaximumSize(QtCore.QSize(512, 512))
+        self.pic_1_1.setObjectName("pic_1_1")
+>>>>>>> jamie
         self.horizontalLayout_6.addWidget(self.pic_frame)
         self.stackedWidget_patients.addWidget(self.patient_page_1)
         self.patient_page_2 = QtWidgets.QWidget()
