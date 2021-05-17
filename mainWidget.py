@@ -236,15 +236,9 @@ class initialWidget(QtWidgets.QMainWindow):
                 q.setPen(pen)
 
                 # tsx = transitved start x
-                self.tsx[_i][_j], self.tsy[_i][_j] = self.transitiveMatrix(self.angle_start_x[_i][_j], self.angle_start_y[_i][_j], self.rotate_angle[_i][_j])
-                self.tmx[_i][_j], self.tmy[_i][_j] = self.transitiveMatrix(self.angle_middle_x[_i][_j], self.angle_middle_y[_i][_j], self.rotate_angle[_i][_j])
-                self.tex[_i][_j], self.tey[_i][_j] = self.transitiveMatrix(self.angle_end_x[_i][_j], self.angle_end_y[_i][_j], self.rotate_angle[_i][_j])
-
-
-                # q.drawLine(self.angle_middle_x[_i][_j], self.angle_middle_y[_i][_j], self.angle_start_x[_i][_j], self.angle_start_y[_i][_j])
-                # q.drawLine(self.angle_end_x[_i][_j], self.angle_end_y[_i][_j], self.angle_middle_x[_i][_j], self.angle_middle_y[_i][_j])
-
-
+                self.tsx[_i][_j], self.tsy[_i][_j] = self.transitiveWithBiasMatrix(self.angle_start_x[_i][_j], self.angle_start_y[_i][_j], self.rotate_angle[_i][_j])
+                self.tmx[_i][_j], self.tmy[_i][_j] = self.transitiveWithBiasMatrix(self.angle_middle_x[_i][_j], self.angle_middle_y[_i][_j], self.rotate_angle[_i][_j])
+                self.tex[_i][_j], self.tey[_i][_j] = self.transitiveWithBiasMatrix(self.angle_end_x[_i][_j], self.angle_end_y[_i][_j], self.rotate_angle[_i][_j])
                 q.drawLine(self.tmx[_i][_j], self.tmy[_i][_j], self.tsx[_i][_j], self.tsy[_i][_j])
                 q.drawLine(self.tex[_i][_j], self.tey[_i][_j], self.tmx[_i][_j], self.tmy[_i][_j])
         elif(self.tool_lock == 'pen'):
@@ -252,8 +246,8 @@ class initialWidget(QtWidgets.QMainWindow):
             pen = QtGui.QPen()
             pen.setWidth(6)
             p.setPen(pen)
-            tpsx, tpsy = self.transitiveMatrix(self.pen_start_x[_i][_j], self.pen_start_y[_i][_j], self.rotate_angle[_i][_j])
-            tpex, tpey = self.transitiveMatrix(self.pen_end_x[_i][_j], self.pen_end_y[_i][_j], self.rotate_angle[_i][_j])
+            tpsx, tpsy = self.transitiveWithBiasMatrix(self.pen_start_x[_i][_j], self.pen_start_y[_i][_j], self.rotate_angle[_i][_j])
+            tpex, tpey = self.transitiveWithBiasMatrix(self.pen_end_x[_i][_j], self.pen_end_y[_i][_j], self.rotate_angle[_i][_j])
             p.drawLine(tpex, tpey, tpsx, tpsy)
 
         q.drawPixmap(0, 0, self.transparent_pix[_i][_j])
@@ -263,8 +257,20 @@ class initialWidget(QtWidgets.QMainWindow):
             pen.setWidth(6)
             q.setPen(pen)
             q.drawPolyline(w.points)
-
-
+            t_index = int((-self.rotate_angle[_i][_j] % 360) / 90)
+            print("original: ", w.mp.x(), w.mp.y())
+            t_x = w.mp.x() - self.rotate_coordinate_system[t_index][0]
+            t_y = w.mp.y() - self.rotate_coordinate_system[t_index][1]
+            t_x, t_y = self.transitiveMatrix(t_x, t_y, -self.rotate_angle[_i][_j])
+            print("transitive: ", t_x, t_y)
+            t_label = QtCore.QPointF(t_x + 10, t_y)
+            f = q.font()
+            f.setPixelSize(20)
+            q.setFont(f)
+            q.save()
+            q.resetTransform()
+            q.drawText(t_label, str(round(w.angle, 1)))
+            q.restore() 
         q.end()
         # q.resetTransform()
 
@@ -277,6 +283,7 @@ class initialWidget(QtWidgets.QMainWindow):
     def pushButtonAddPicClicked(self):
         pic_file_path, filetype = QFileDialog.getOpenFileName(self,"選取檔案","/Users/user/Documents/畢專/dicom_data","All Files (*);;Text Files (*.txt)")  #設定副檔名過濾,注意用雙分號間隔
         print(filetype)
+        # fileName2, ok2 = QFileDialog.getSaveFileName(6self,"檔案儲存","./","All Files (*);;Text Files (*.txt)")
         # copyfile(pic_file_path, dst)
         #backend
         # fileName2, ok2 = QFileDialog.getSaveFileName(self,"檔案儲存","./","All Files (*);;Text Files (*.txt)")
@@ -521,7 +528,7 @@ class initialWidget(QtWidgets.QMainWindow):
 # 其他/初始--------------------------------------------------------------------------------------------------------
     def myListWidgetContext(self,position): # 設定patient list 右鍵功能 關閉
         popMenu = QMenu()
-        closeAct =QAction("Close",self)
+        closeAct = QAction("Close",self)
         if self.ui.patient_list.itemAt(position): #查看右键是否點在item上面
             popMenu.addAction(closeAct)
         closeAct.triggered.connect(self.closePatient)
@@ -530,9 +537,15 @@ class initialWidget(QtWidgets.QMainWindow):
 #其他/初始--------------------------------------------------------------------------------------------------------
     def transitiveMatrix(self, _x, _y, theda):
         radi = np.deg2rad(theda)
-        index = int((-self.rotate_angle[self.pic_ith][self.pic_jth] % 360) / 90)
-        tx = _x * np.cos(radi) + _y * np.sin(radi) + self.rotate_coordinate_system[index][0]
-        ty = _x * np.sin(-radi) + _y * np.cos(radi) + self.rotate_coordinate_system[index][1]
+        tx = _x * np.cos(radi) + _y * np.sin(radi)
+        ty = _x * np.sin(-radi) + _y * np.cos(radi)
+        return tx, ty
+
+    def transitiveWithBiasMatrix(self, _x, _y, theda):
+        index = int((-theda % 360) / 90)
+        tx, ty = self.transitiveMatrix(_x, _y, theda)        
+        tx += self.rotate_coordinate_system[index][0]
+        ty += self.rotate_coordinate_system[index][1]
         return tx, ty
 
     def showPic(self, i, j, patient_no, patient_dics):
@@ -551,10 +564,6 @@ class initialWidget(QtWidgets.QMainWindow):
         self.pic[i][j].mousePressEvent = lambda pressed: self.picMousePressed(pressed, i, j) # 讓每個pic的mousePressEvent可以傳出告訴自己是誰
         self.pic[i][j].mouseReleaseEvent = lambda released: self.picMouseReleased(released, i, j)
         self.pic[i][j].mouseMoveEvent = lambda moved: self.picMouseMove(moved, i, j)
-
-
-        # self.pic[i][j].paintEvent = lambda painted: self.picPaint(painted,  pixmap_resized, i, j)
-
         self.pic[i][j].paintEvent = lambda painted: self.picPaint(painted, pixmap, i, j)
 
     def linkPage2Array(self, _MAXIMUM_PAGE = 5, _MAXIMUM_PIC = 4):
@@ -635,10 +644,10 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.transparent_pix[i][j].fill(Qt.transparent)
 
         # 暫時試試放照片
-        self.showPic(1, 1, "01372635","5F327951.dcm")
-        self.showPic(1, 2, "01372635","5F327951.dcm")
-        self.showPic(1, 3, "01372635","5F327951.dcm")
-        self.showPic(1, 4, "01372635","5F327951.dcm")
+        self.showPic(1, 1, "01372635","5F327951")
+        self.showPic(1, 2, "01372635","5F327951")
+        self.showPic(1, 3, "01372635","5F327951")
+        self.showPic(1, 4, "01372635","5F327951")
 
     def mousePressEvent(self, event):
         self.clickPosition = event.globalPos()
@@ -682,13 +691,9 @@ class angleCoordinate():
         self.length_sp2mp = ((self.sp.x() - self.mp.x()) ** 2 + (self.sp.y() - self.mp.y()) ** 2) ** 0.5
         self.length_mp2ep = ((self.mp.x() - self.ep.x()) ** 2 + (self.mp.y() - self.ep.y()) ** 2) ** 0.5
         self.inner_product = (self.sp.x() - self.mp.x()) * (self.ep.x() - self.mp.x()) + (self.sp.y() - self.mp.y()) * (self.ep.y() - self.mp.y())
-        self.cos_theda = self.inner_product / self.length_sp2mp / self.length_mp2ep
-        self.angle = np.arccos(self.inner_product / self.length_sp2mp / self.length_mp2ep) * 180 / np.pi
-    def printDetail(self):
-        print("angle: ", self.angle)
-        print("inner product: ", self.inner_product, "cos: ", self.cos_theda)
-        print("length1: ", self.length_sp2mp, "length2: ", self.length_mp2ep)
-
+        self.angle = 0
+        if(self.length_sp2mp != 0 and self.length_mp2ep != 0):
+            self.angle = np.arccos(self.inner_product / self.length_sp2mp / self.length_mp2ep) * 180 / np.pi
 if __name__ == '__main__':
     import sys
     app = QtWidgets.QApplication(sys.argv)
