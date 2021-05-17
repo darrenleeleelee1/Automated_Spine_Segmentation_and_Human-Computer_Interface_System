@@ -84,9 +84,9 @@ class initialWidget(QtWidgets.QMainWindow):
 
         self.ui.pushButton_angle.clicked.connect(self.pushButtonAngleClicked) # 角度按鈕連結
         self.ui.pushButton_add_pic.clicked.connect(self.pushButtonAddPicClicked) # 加照片按鈕連結
-
         self.ui.pushButton_pen.clicked.connect(self.pushButtonPenClicked) # 畫筆按鈕連結
-        self.ui.pushButton_save.clicked.connect(self.pushButtonSaveClicked) # 儲存按鈕連結
+        self.ui.pushButton_save.clicked.connect(self.pushButtonSaveClicked) # 儲存照片按鈕連結
+
         self.ui.pushButton_magnifier.clicked.connect(lambda: self.slideZoomInOrOut())  # 打開放大縮小的frame
         self.ui.pushButton_rotate.clicked.connect(lambda: self.slideRotateLeftOrRight())    # 打開旋轉的frame
         self.ui.pushButton_rotate_right.clicked.connect(self.rotate_image_right)    #向右旋轉
@@ -139,17 +139,6 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.pen_start_x[self.pic_ith][self.pic_jth] = event.pos().x()
                 self.pen_start_y[self.pic_ith][self.pic_jth] = event.pos().y()
 
-        elif (self.tool_lock == 'save'):
-            print("777")
-            image = ImageQt.fromqpixmap(self.pic[_i][_j].grab())
-            # selecting file path
-            filePath, _ = QFileDialog.getSaveFileName(self, "Save Image", "",
-                                                      "PNG(*.png);;JPEG(*.jpg *.jpeg);;All Files(*.*) ")
-            # if file path is blank return back
-            if filePath == "":
-                return
-            # saving canvas at desired pathrad
-            image.save(filePath)
 
     def picMouseMove(self, event, _i, _j):
         # distance_from_center = round(((event.y() - self.pic_start_y[self.pic_ith][self.pic_jth])**2 + (event.x() - self.pic_start_x[self.pic_ith][self.pic_jth])**2)**0.5)
@@ -240,8 +229,14 @@ class initialWidget(QtWidgets.QMainWindow):
     def pushButtonPenClicked(self):
         self.tool_lock = 'pen'
 
-    def pushButtonSaveClicked(self): # need i, j
-        self.tool_lock = 'save'
+    # save photo .png
+    def pushButtonSaveClicked(self):
+        image = ImageQt.fromqpixmap(self.pic[self.pic_ith][self.pic_jth].grab())
+        filePath, _ = QFileDialog.getSaveFileName(self, "Save Image", "",
+                                                  "PNG(*.png);;JPEG(*.jpg *.jpeg);;All Files(*.*) ")
+        if filePath == "":
+            return
+        image.save(filePath)
 
     def rotate_image_right(self):
         self.angle = self.angle + 90
