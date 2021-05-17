@@ -157,6 +157,7 @@ class initialWidget(QtWidgets.QMainWindow):
             self.size[_i][_j] = self.size_last[_i][_j] * 1.25
             self.magnifier_pad_x[_i][_j] = self.magnifier_pad_x[_i][_j] - (self.size[_i][_j] - self.size_last[_i][_j]) * event.pos().x()
             self.magnifier_pad_y[_i][_j] = self.magnifier_pad_y[_i][_j] - (self.size[_i][_j] - self.size_last[_i][_j]) * event.pos().y()
+            self.update()
 
         elif(self.tool_lock == 'zoom_out'):
             if (self.size[_i][_j] > 1):
@@ -167,12 +168,13 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.size[_i][_j] = self.size[_i][_j] * 0.8
                 self.magnifier_pad_x[_i][_j] = self.magnifier_pad_x[_i][_j] - (self.size[_i][_j] - self.size_last[_i][_j]) * event.pos().x()
                 self.magnifier_pad_y[_i][_j] = self.magnifier_pad_y[_i][_j] - (self.size[_i][_j] - self.size_last[_i][_j]) * event.pos().y()
+                self.update()
 
         elif(self.tool_lock == 'move'):
             if event.button() == QtCore.Qt.LeftButton:
                 self.move_start_x[_i][_j] = event.x()
                 self.move_start_y[_i][_j] = event.y()
-        # self.update()
+       
 
     def picMouseMove(self, event, _i, _j):
         # distance_from_center = round(((event.y() - self.pic_start_y[self.pic_ith][self.pic_jth])**2 + (event.x() - self.pic_start_x[self.pic_ith][self.pic_jth])**2)**0.5)
@@ -245,7 +247,6 @@ class initialWidget(QtWidgets.QMainWindow):
 
                 q.drawLine(self.tmx[_i][_j], self.tmy[_i][_j], self.tsx[_i][_j], self.tsy[_i][_j])
                 q.drawLine(self.tex[_i][_j], self.tey[_i][_j], self.tmx[_i][_j], self.tmy[_i][_j])
-# >>>>>>> 292a5c0c9137d159cc8f9d68b44cc46a07427000
         elif(self.tool_lock == 'pen'):
             self.pic[_i][_j].setMouseTracking(False)
             pen = QtGui.QPen()
