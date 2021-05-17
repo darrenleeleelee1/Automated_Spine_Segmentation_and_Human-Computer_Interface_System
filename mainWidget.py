@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import *
 from pydicom import dcmread
 from pydicom.filebase import DicomBytesIO
 import numpy as np
-from shutil import copyfile
+import shutil
 WINDOW_SIZE = 0
 
 
@@ -67,6 +67,7 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.search_no_button.clicked.connect(self.addEntry)  # 按 search_no
         completer = QCompleter(self.model, self)
         self.ui.patient_list.itemClicked.connect(self.patient_listItemClicked)
+        self.ui.no_list.itemClicked.connect(self.no_listItemClicked)
         self.ui.input_no.setCompleter(completer)  # 搜尋紀錄
         self.linkPage2Array() # 將影像處理頁面預設有五頁
         self.ui.pushButton_angle.clicked.connect(self.pushButtonAngleClicked)
@@ -183,6 +184,9 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
                 temp_page = self.patient_mapto_page[pt_id]
                 self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[temp_page])
+                # srcpath = '/Users/user/Desktop/Spine_Broken/tmp_database/' + pt_id
+                # dstpath = '/Users/user/Desktop/Spine_Broken/tmp/' + pt_id
+                # shutil.copytree(srcpath, dstpath)
                 
     def open_pt_page(self, pt_id): #記得要先檢查self.empty_page_stack空->Page滿->pageFull, 用在add和pt_list中打開
         temp = self.empty_page_stack[-1]
@@ -197,38 +201,12 @@ class initialWidget(QtWidgets.QMainWindow):
         x = pageFull_msg.exec_() 
 
     def duplicateAdd(self):
-        # print("test")
         duplicateAdd_msg = QMessageBox()
         duplicateAdd_msg.setWindowTitle("Warning")
         duplicateAdd_msg.setText("Patient already exist !")
         duplicateAdd_msg.setIcon(QMessageBox.Warning)
         x = duplicateAdd_msg.exec_() 
 
-    # search
-    def addEntry(self): 
-        entryItem = self.ui.input_no.text()
-        if entryItem != '':
-            self.ui.input_no.clear()
-            self.ui.no_list.clear()
-
-            for id in self.pt_list:
-                if id.startswith(entryItem):
-                    self.ui.no_list.addItem(id)
-        else:
-            self.ui.no_list.clear()
-            for id in self.pt_list:
-                self.ui.no_list.addItem(id)
-
-        list1 = []
-        list1.insert(0, entryItem)  # 也把 entryItem 存在 list1 裡傳給後端
-        # print("list = ", list1)
-
-        completer = QCompleter(self.model, self)
-        self.ui.input_no.setCompleter(completer)
-
-        if not self.model.findItems(entryItem):
-            self.model.insertRow(0, QStandardItem(entryItem))
-            
     # list item clicked
     def patient_listItemClicked(self, item):
         print(str(item.text()))
@@ -255,16 +233,90 @@ class initialWidget(QtWidgets.QMainWindow):
         self.animation.setEasingCurve(QtCore.QEasingCurve.InOutQuart)
         self.animation.start()
 
-    def closePatient(self): # 關閉patient編輯，tmp 也要刪除(未做)
+    def closePatient(self): # 關閉patient編輯，tmp 也要刪除
         curRow = self.ui.patient_list.currentRow()
         get_close_id = self.ui.patient_list.item(curRow)
         close_id = str(get_close_id.text())
         tmp = self.patient_mapto_page[close_id]
         self.empty_page_stack.append(tmp)
+        self.patient_mapto_page[close_id] = -1
         self.ui.patient_list.takeItem(self.ui.patient_list.currentRow())
+        close_path = "./tmp/" + close_id
+        for filename in os.listdir(close_path):
+            file_path = close_path + '/' + filename
+            print(file_path)
+            os.remove(file_path)
+        os.rmdir(close_path)
+# search page-----------------------------------------------------------------------------------------------------
+    # search
+    def addEntry(self): 
+        entryItem = self.ui.input_no.text()
+        if entryItem != '':
+            self.ui.input_no.clear()
+            self.ui.no_list.clear()
 
-#其他/初始--------------------------------------------------------------------------------------------------------
-    def myListWidgetContext(self,position): # patient list rught mouse -> close patient
+            for id in self.pt_list:
+                if id.startswith(entryItem):
+                    self.ui.no_list.addItem(id)
+        else:
+            self.ui.no_list.clear()
+            for id in self.pt_list:
+                self.ui.no_list.addItem(id)
+
+        list1 = []
+        list1.insert(0, entryItem)  # 也把 entryItem 存在 list1 裡傳給後端
+        # print("list = ", list1)
+
+        completer = QCompleter(self.model, self)
+        self.ui.input_no.setCompleter(completer)
+
+        if not self.model.findItems(entryItem):
+            self.model.insertRow(0, QStandardItem(entryItem))
+
+    def databaseToTmp(self, ptid):
+        srcPath = '/Users/user/Desktop/tmp_database/' + ptid
+        dstPath = '/Users/user/Desktop/tmp'
+        shutil.copytree(srcPath, dstPath)
+
+    # open patient
+    def no_listItemClicked(self, item):
+        #print(str(item.text()))
+        if(not self.empty_page_stack):
+                self.pageFull()
+        else:
+            pt_id = str(item.text())
+            if(self.patient_mapto_page[pt_id] == -1): # patient list還沒有 -> 打開新page並加到patient list
+                # 檔案加到tmp還沒做 ???
+                self.open_pt_page(pt_id)
+                self.ui.patient_list.addItem(pt_id)
+                #self.databaseToTmp(pt_id)
+            # patient list中已存在 直接打開
+            self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
+            temp_page = self.patient_mapto_page[pt_id]
+            self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[temp_page])
+            #dir_choose = QFileDialog.getExistingDirectory(self, "選取資料夾", "/Users/user/Documents/畢專/dicom_data")  # 第三參數是起始路徑
+            print(pt_id + "test")
+
+            # 至後端拿資料(未做)
+            # post
+            # url = 'http://127.0.0.1:8000/pdicom/' + pt_id
+            # #headers = {'accept': 'application/json', 'Content-Type': 'multipart/form-data'}
+            # myfiles = listdir(dir_choose)  # 檔案
+            # dic_file = []
+            # for f in myfiles:
+            #     # 產生檔案的絕對路徑
+            #     fullpath = join(dir_choose, f)
+            #     # dicom的名字
+            #     dicom_id = os.path.basename(fullpath)
+            #     print(dicom_id)
+            #     print(fullpath)
+            #     dic_file.append(('files', (dicom_id, open(fullpath, 'rb'))))
+            # response = requests.post(url, files=dic_file)
+            # print(response.reason)
+            # print(response.json())
+
+# 其他/初始--------------------------------------------------------------------------------------------------------
+    def myListWidgetContext(self,position): # 設定patient list 右鍵功能 關閉
         popMenu = QMenu()
         closeAct =QAction("Close",self)
         if self.ui.patient_list.itemAt(position): #查看右键是否點在item上面

@@ -25,7 +25,7 @@ os.system('chcp')
 async def get_dicom(medical_number: int):
     # dicom_path = "./01372635/5F3279B8"
     # return {"01372635", dicom_path}
-    root = './tmp'
+    root = './tmp_database'
     dicom_path = os.path.join(root, str(medical_number))
     item = []
     
@@ -37,14 +37,14 @@ async def get_dicom(medical_number: int):
     #     if os.path.exists(path):
     #         item.append({filename: open(path, 'rb').read()})
     # return item
-    dicom_path = './tmp/01372635/5F3279B8'
+    dicom_path = './tmp_database/01372635/5F3279B8'
     if os.path.exists(dicom_path):
         return FileResponse(dicom_path, media_type="application/dicom")
     return {'error': 'File not found.'}
 
 @app.post("/pdicom/{medical_number}") # save dicoms
 async def post_dicom(medical_number: str, files: List[UploadFile] = File(...)):
-    directory = f'./tmp/{medical_number}'
+    directory = f'./tmp_database/{medical_number}'
     if os.path.exists(directory):
         return {"Result": "Directory already exists."}
 
