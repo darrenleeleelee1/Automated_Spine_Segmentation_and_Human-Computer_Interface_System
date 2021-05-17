@@ -136,12 +136,12 @@ class initialWidget(QtWidgets.QMainWindow):
     def pushButtonAddPicClicked(self):
         pic_file_path, filetype = QFileDialog.getOpenFileName(self,"選取檔案","/Users/user/Documents/畢專/dicom_data","All Files (*);;Text Files (*.txt)")  #設定副檔名過濾,注意用雙分號間隔
         print(filetype)
-        copyfile(pic_file_path, dst)
+        # copyfile(pic_file_path, dst)
         #backend
         # fileName2, ok2 = QFileDialog.getSaveFileName(self,"檔案儲存","./","All Files (*);;Text Files (*.txt)")
 
+    # def pushButtonBrightnessClicked(self):
 #MENU選單---------------------------------------------------------------------------------------------------------
-    #add patient
     def addPatient(self): 
         if(not self.empty_page_stack):
                 self.pageFull()
@@ -184,9 +184,7 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
                 temp_page = self.patient_mapto_page[pt_id]
                 self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[temp_page])
-                # srcpath = '/Users/user/Desktop/Spine_Broken/tmp_database/' + pt_id
-                # dstpath = '/Users/user/Desktop/Spine_Broken/tmp/' + pt_id
-                # shutil.copytree(srcpath, dstpath)
+
                 
     def open_pt_page(self, pt_id): #記得要先檢查self.empty_page_stack空->Page滿->pageFull, 用在add和pt_list中打開
         temp = self.empty_page_stack[-1]
@@ -272,11 +270,6 @@ class initialWidget(QtWidgets.QMainWindow):
 
         if not self.model.findItems(entryItem):
             self.model.insertRow(0, QStandardItem(entryItem))
-
-    def databaseToTmp(self, ptid):
-        srcPath = '/Users/user/Desktop/tmp_database/' + ptid
-        dstPath = '/Users/user/Desktop/tmp'
-        shutil.copytree(srcPath, dstPath)
 
     # open patient
     def no_listItemClicked(self, item):
