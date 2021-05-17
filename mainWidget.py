@@ -1,10 +1,13 @@
 from os import listdir
+import math
 from os.path import join
 from PyQt5.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
                           QSize, QTime, QUrl, Qt, QEvent, QPointF)
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QCoreApplication, Qt
+
 from PyQt5.QtGui import QStandardItem, QStandardItemModel, QTransform, QPainter
+
 from generatedUiFile.Spine_BrokenUi import Ui_MainWindow
 import os, requests
 from PyQt5.QtWidgets import *
@@ -12,6 +15,8 @@ from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene
 from pydicom import dcmread
 from pydicom.filebase import DicomBytesIO
 import numpy as np
+from PIL import ImageQt
+import shutil
 WINDOW_SIZE = 0
 
 
@@ -24,15 +29,8 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.setupUi(self)
         self.pt_list = []
         self.model = QStandardItemModel()
-        self.angle = 0
-        self.size = 1
         self.pic_label_width = 512
         self.pic_label_height = 512
-        self.moveImage = False
-        self.moveX = 0
-        self.moveY = 0
-        self.clickPos = 0
-
 
         self.pt_list.append("0135678")
         self.pt_list.append("3847829")
@@ -46,6 +44,17 @@ class initialWidget(QtWidgets.QMainWindow):
 
         # 控制工具列現在選擇的工具為: mouse(defalut), pen, angle, ruler, move
         self.tool_lock = "mouse"
+         # patient num map to page
+        self.empty_page_stack = []
+        for i in range(5, 0, -1):
+            self.empty_page_stack.append(i)
+        self.patient_mapto_page = {}
+
+        self.ui.patient_list.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        #右键菜单
+        self.ui.patient_list.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.ui.patient_list.customContextMenuRequested.connect(self.myListWidgetContext)
+
         self.backend()
 
 
@@ -56,10 +65,7 @@ class initialWidget(QtWidgets.QMainWindow):
                     self.move(self.pos() + e.globalPos() - self.clickPosition)
                     self.clickPosition = e.globalPos()
                     e.accept()
-
         self.ui.header.mouseMoveEvent = moveWindow  # 移動視窗
-
-
         self.show()
 
 
@@ -75,28 +81,24 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.input_no.editingFinished.connect(self.addEntry)  # 按enter
         self.ui.search_no_button.clicked.connect(self.addEntry)  # 按 search_no
         completer = QCompleter(self.model, self)
-        self.ui.patient_list.itemClicked.connect(lambda: self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page))
+        self.ui.patient_list.itemClicked.connect(self.patient_listItemClicked)
+        self.ui.no_list.itemClicked.connect(self.no_listItemClicked)
         self.ui.input_no.setCompleter(completer)  # 搜尋紀錄
         self.linkPage2Array() # 將影像處理頁面預設有五頁
-
         self.ui.pushButton_angle.clicked.connect(self.pushButtonAngleClicked) # 角度按鈕連結
         self.ui.pushButton_add_pic.clicked.connect(self.pushButtonAddPicClicked) # 加照片按鈕連結
-        self.ui.pushButton_pen.clicked.connect(self.pushButtonPenClicked)
 
+        self.ui.pushButton_pen.clicked.connect(self.pushButtonPenClicked)   # 畫筆按鈕連結
+        self.ui.pushButton_save.clicked.connect(self.pushButtonSaveClicked) # 儲存照片按鈕連結
+        self.ui.pushButton_magnifier.clicked.connect(lambda: self.slideMagnifierZoomInOrOut())  # 打開放大縮小的frame
 
-        self.ui.pushButton_magnifier.clicked.connect(lambda: self.slideZoomInOrOut())  # 打開放大縮小的frame
         self.ui.pushButton_rotate.clicked.connect(lambda: self.slideRotateLeftOrRight())    # 打開旋轉的frame
         self.ui.pushButton_rotate_right.clicked.connect(self.rotate_image_right)    #向右旋轉
         self.ui.pushButton_rotate_left.clicked.connect(self.rotate_image_left)  #向左旋轉
         self.ui.zoomIn.clicked.connect(self.image_zoom_in)
         self.ui.zoomOut.clicked.connect(self.image_zoom_out)
-        self.ui.pushButton_move.clicked.connect(self.image_move)
+        self.ui.pushButton_move.clicked.connect(self.pushButtonMoveClicked)
         self.ui.patient_list.itemClicked.connect(self.patient_listItemClicked)
-        self.ui.pushButton_angle.clicked.connect(self.pushButtonAngleClicked)
-        self.ui.pushButton_add_pic.clicked.connect(self.pushButtonAddPicClicked)
-
-
-
 
 #工具列-----------------------------------------------------------------------------------------------------------
     def picMouseReleased(self, event, _i, _j):
@@ -118,12 +120,26 @@ class initialWidget(QtWidgets.QMainWindow):
                     self.pic_released[_i][_j] = False
         elif(self.tool_lock == 'pen'):
             return
+        elif(self.tool_lock == 'zoom_in'):
+            self.size_last[_i][_j] = self.size[_i][_j]
+            # print(self.size[self.pic_ith][self.pic_jth])
 
+        elif (self.tool_lock == 'zoom_out'):
+            self.size_last[_i][_j] = self.size[_i][_j]
+            # print(self.size[self.pic_ith][self.pic_jth])
+
+
+        elif(self.tool_lock == 'move'):
+
+            self.move_x[_i][_j] = self.move_x[_i][_j] + event.x() - self.move_start_x[_i][_j]
+            self.move_y[_i][_j] = self.move_y[_i][_j] + event.y() - self.move_start_y[_i][_j]
+            return
 
     def picMousePressed(self, event, _i, _j):
         self.pic_ith = _i
         self.pic_jth = _j
         if(self.tool_lock == 'mouse'):
+            # print(_i, _j)
             return
         elif(self.tool_lock == 'angle'):
             if event.button() == QtCore.Qt.LeftButton:
@@ -131,6 +147,7 @@ class initialWidget(QtWidgets.QMainWindow):
                     self.pic_clicked[_i][_j] = True
                     self.angle_start_x[self.pic_ith][self.pic_jth] = event.pos().x()
                     self.angle_start_y[self.pic_ith][self.pic_jth] = event.pos().y()
+                    print("i ", self.pic_ith, " j ", self.pic_jth)
                 else:
                     self.pic_clicked[_i][_j] = False
         elif(self.tool_lock == 'pen'):
@@ -139,6 +156,31 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.pen_end_y[_i][_j] = event.y()
                 self.pen_start_x[self.pic_ith][self.pic_jth] = event.pos().x()
                 self.pen_start_y[self.pic_ith][self.pic_jth] = event.pos().y()
+
+        elif (self.tool_lock == 'zoom_in'):
+            self.size[_i][_j] = self.size_last[_i][_j] * 1.25
+            self.magnifier_pad_x[_i][_j] = self.magnifier_pad_x[_i][_j] - (self.size[_i][_j] - self.size_last[_i][_j]) * event.pos().x()
+            self.magnifier_pad_y[_i][_j] = self.magnifier_pad_y[_i][_j] - (self.size[_i][_j] - self.size_last[_i][_j]) * event.pos().y()
+
+            print("size", self.size_last[_i][_j], self.size[_i][_j])
+        elif(self.tool_lock == 'zoom_out'):
+            if (self.size[_i][_j] > 1):
+                # self.size[_i][_j] = self.size[_i][_j] * 0.75
+                # self.move_moving_x[_i][_j] = self.move_moving_x[_i][_j] - (self.size[_i][_j] - self.size_last[_i][_j]) * event.pos().x()
+                # self.move_moving_y[_i][_j] = self.move_moving_y[_i][_j] - (self.size[_i][_j] - self.size_last[_i][_j]) * event.pos().y()
+
+                self.size[_i][_j] = self.size[_i][_j] * 0.8
+                self.magnifier_pad_x[_i][_j] = self.magnifier_pad_x[_i][_j] - (self.size[_i][_j] - self.size_last[_i][_j]) * event.pos().x()
+                self.magnifier_pad_y[_i][_j] = self.magnifier_pad_y[_i][_j] - (self.size[_i][_j] - self.size_last[_i][_j]) * event.pos().y()
+
+
+                # print(self.move_moving_x[_i][_j], self.move_moving_y[_i][_j])
+        elif(self.tool_lock == 'move'):
+            if event.button() == QtCore.Qt.LeftButton:
+                self.move_start_x[_i][_j] = event.x()
+                self.move_start_y[_i][_j] = event.y()
+        self.update()
+
     def picMouseMove(self, event, _i, _j):
         # distance_from_center = round(((event.y() - self.pic_start_y[self.pic_ith][self.pic_jth])**2 + (event.x() - self.pic_start_x[self.pic_ith][self.pic_jth])**2)**0.5)
         # self.label.setText('Coordinates: ( %d : %d )' % (event.x(), event.y()) + "Distance from center: " + str(distance_from_center))
@@ -160,34 +202,44 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.pen_start_y[self.pic_ith][self.pic_jth] = self.pen_end_y[_i][_j]
                 self.pen_end_x[_i][_j] = event.x()
                 self.pen_end_y[_i][_j] = event.y()
-
+        elif(self.tool_lock == 'move'):
+            if event.buttons() == QtCore.Qt.LeftButton:
+                self.move_end_x[_i][_j] = event.x()
+                self.move_end_y[_i][_j] = event.y()
+                self.move_moving_x[_i][_j] = self.move_end_x[_i][_j] - self.move_start_x[_i][_j] +self.move_x[_i][_j]
+                self.move_moving_y[_i][_j] = self.move_end_y[_i][_j] - self.move_start_y[_i][_j] +self.move_y[_i][_j]
         self.update()
 
+
+
     def picPaint(self, event, pixmap, _i, _j):
+        # if _i == self.pic_ith and _j == self.pic_jth:
+        #     self.rotate_angle[_i][_j] = self.rotate_angle[self.pic_ith][self.pic_jth]
         q = QtGui.QPainter(self.pic[_i][_j])
-        img_width = self.pic_label_width * self.size
-        img_height = self.pic_label_height * self.size
         q.resetTransform()
-        q.translate(self.pic_label_width / 2, self.pic_label_height / 2)   # 把旋轉中心設成（pic_label_width/2, pic_label_height/2）
-        q.rotate(self.angle)
+        q.translate(self.pic_label_width / 2, self.pic_label_height / 2)  # 把旋轉中心設成（pic_label_width/2, pic_label_height/2）
+        q.rotate(self.rotate_angle[_i][_j])
         q.translate(-self.pic_label_width / 2, -self.pic_label_height / 2)
+        img_width = self.pic_label_width * self.size[_i][_j]
+        img_height = self.pic_label_height * self.size[_i][_j]
 
-        q.drawPixmap(0, 0, img_width, img_height, pixmap)
-        # q.drawPixmap(0, 0, self.pic_label_width, self.pic_label_height, pixmap)
-
-
+        x = self.move_moving_x[_i][_j]+ self.magnifier_pad_x[_i][_j]
+        y = self.move_moving_y[_i][_j]+ self.magnifier_pad_y[_i][_j]
+        q.drawPixmap(x, y, img_width, img_height, pixmap)
         p = QtGui.QPainter(self.transparent_pix[_i][_j])
+
         if(self.tool_lock == 'mouse'):
             return
-
         elif(self.tool_lock == 'angle'):
             if(not self.pic_clicked[_i][_j] and not self.pic_released[_i][_j]):
                 pass
             else:
                 self.pic[_i][_j].setMouseTracking(True)
+
                 pen = QtGui.QPen()
                 pen.setWidth(6)
                 q.setPen(pen)
+
                 # tsx = transitved start x
                 self.tsx[_i][_j], self.tsy[_i][_j] = self.transitiveWithBiasMatrix(self.angle_start_x[_i][_j], self.angle_start_y[_i][_j], self.angle)
                 self.tmx[_i][_j], self.tmy[_i][_j] = self.transitiveWithBiasMatrix(self.angle_middle_x[_i][_j], self.angle_middle_y[_i][_j], self.angle)
@@ -225,6 +277,8 @@ class initialWidget(QtWidgets.QMainWindow):
             q.drawText(t_label, str(round(w.angle, 1)))
             q.restore() 
         q.end()
+        # q.resetTransform()
+
 
 #按鈕連結處--------------------------------------------------------------------------------------------------------
 
@@ -232,102 +286,63 @@ class initialWidget(QtWidgets.QMainWindow):
         self.tool_lock = 'angle'
 
     def pushButtonAddPicClicked(self):
-        fileName1, filetype = QFileDialog.getOpenFileName(self,"選取檔案","/Users/user/Documents/畢專/dicom_data","All Files (*);;Text Files (*.txt)")  #設定副檔名過濾,注意用雙分號間隔
+        pic_file_path, filetype = QFileDialog.getOpenFileName(self,"選取檔案","/Users/user/Documents/畢專/dicom_data","All Files (*);;Text Files (*.txt)")  #設定副檔名過濾,注意用雙分號間隔
         print(filetype)
         # fileName2, ok2 = QFileDialog.getSaveFileName(6self,"檔案儲存","./","All Files (*);;Text Files (*.txt)")
+        # copyfile(pic_file_path, dst)
+        #backend
+        # fileName2, ok2 = QFileDialog.getSaveFileName(self,"檔案儲存","./","All Files (*);;Text Files (*.txt)")
 
     def pushButtonPenClicked(self):
         self.tool_lock = 'pen'
 
+    # save photo .png
+    def pushButtonSaveClicked(self):
+        image = ImageQt.fromqpixmap(self.pic[self.pic_ith][self.pic_jth].grab())
+        filePath, _ = QFileDialog.getSaveFileName(self, "Save Image", "",
+                                                  "PNG(*.png)") # ;;JPEG(*.jpg *.jpeg);;All Files(*.*) 
+        if filePath == "":
+            return
+        image.save(filePath)
 
     def rotate_image_right(self):
-        self.angle = self.angle + 90
-        self.showPic(1, 1, "01372635", "5F327951")
-        self.showPic(1, 2, "01372635", "5F327951")
-        self.showPic(1, 3, "01372635", "5F327951")
-        self.showPic(1, 4, "01372635", "5F327951")
+        self.tool_lock = 'rotate'
+        self.rotate_angle[self.pic_ith][self.pic_jth] = self.rotate_angle[self.pic_ith][self.pic_jth] + 90
+        self.update()
 
 
     def rotate_image_left(self):
-        self.angle = self.angle - 90
-        self.showPic(1, 1, "01372635", "5F327951")
-        self.showPic(1, 2, "01372635", "5F327951")
-        self.showPic(1, 3, "01372635", "5F327951")
-        self.showPic(1, 4, "01372635", "5F327951")
+        self.tool_lock = 'rotate'
+        self.rotate_angle[self.pic_ith][self.pic_jth] = self.rotate_angle[self.pic_ith][self.pic_jth] - 90
+        self.update()
 
     def image_zoom_in(self):
-        # if self.size < ?: #上限
-
-        self.pic[1][3].setCursor(QtGui.QCursor(QtCore.Qt.CrossCursor))
-        self.size = self.size * 1.25
-        self.showPic(1, 1, "01372635", "5F327951")
-        self.showPic(1, 2, "01372635", "5F327951")
-        self.showPic(1, 3, "01372635", "5F327951")
-        self.showPic(1, 4, "01372635", "5F327951")
-
+        self.tool_lock = 'zoom_in'
 
     def image_zoom_out(self):
-        if self.size > 1:   #下限
-            self.size = self.size * 0.8
-            self.showPic(1, 1, "01372635", "5F327951")
-            self.showPic(1, 2, "01372635", "5F327951")
-            self.showPic(1, 3, "01372635", "5F327951")
-            self.showPic(1, 4, "01372635", "5F327951")
+        self.tool_lock = 'zoom_out'
 
-#MENU選單---------------------------------------------------------------------------------------------------------
+    def pushButtonMoveClicked(self):
+        self.tool_lock = 'move'
+
+    #MENU選單---------------------------------------------------------------------------------------------------------
     #add patient
-    def addPatient(self):
-        dir_choose = QFileDialog.getExistingDirectory(self, "選取資料夾", "/Users/user/Documents/畢專/dicom_data")  # 第三參數是起始路徑
-        if dir_choose == "":
-            print("\n取消")
-            return
-        print("\n選擇的資料夾:")
-        print(dir_choose)
-        pt_id = os.path.basename(dir_choose)
-
-        # post
-        url = 'http://127.0.0.1:8000/pdicom/' + pt_id
-        #headers = {'accept': 'application/json', 'Content-Type': 'multipart/form-data'}
-        myfiles = listdir(dir_choose)  # 檔案
-        dic_file = []
-        for f in myfiles:
-            # 產生檔案的絕對路徑
-            fullpath = join(dir_choose, f)
-            # dicom的名字
-            dicom_id = os.path.basename(fullpath)
-            print(dicom_id)
-            print(fullpath)
-            dic_file.append(('files', (dicom_id, open(fullpath, 'rb'))))
-
-        response = requests.post(url, files=dic_file)
-        print(response.reason)
-        print(response.json())
-        if(response.json()['Result'] == 'Directory already exists.'):
-            self.duplicateAdd()
-        else:
-            self.pt_list.append(pt_id)
-            self.ui.patient_list.addItem(pt_id)
-            self.ui.no_list.clear()
-            self.pt_list.sort()
-        for ptid in self.pt_list:
-            self.ui.no_list.addItem(ptid)
-        for i in self.pt_list:
-            print(i)
+    
 
 
-    def slideZoomInOrOut(self):
-        zoom_frame_width = self.ui.zoom_frame.width()
-        if zoom_frame_width == 0:
-            new_zoom_frame_width = 100
+    def slideMagnifierZoomInOrOut(self):
+            zoom_frame_width = self.ui.zoom_frame.width()
+            if zoom_frame_width == 0:
+                new_zoom_frame_width = 100
 
-        else:
-            new_zoom_frame_width = 0
-        self.animation = QPropertyAnimation(self.ui.zoom_frame, b"minimumWidth")
-        self.animation.setDuration(250)
-        self.animation.setStartValue(zoom_frame_width)
-        self.animation.setEndValue(new_zoom_frame_width)
-        self.animation.setEasingCurve(QtCore.QEasingCurve.InOutQuart)
-        self.animation.start()
+            else:
+                new_zoom_frame_width = 0
+            self.animation = QPropertyAnimation(self.ui.zoom_frame, b"minimumWidth")
+            self.animation.setDuration(250)
+            self.animation.setStartValue(zoom_frame_width)
+            self.animation.setEndValue(new_zoom_frame_width)
+            self.animation.setEasingCurve(QtCore.QEasingCurve.InOutQuart)
+            self.animation.start()
 
 
     def slideRotateLeftOrRight(self):
@@ -345,74 +360,114 @@ class initialWidget(QtWidgets.QMainWindow):
         self.animation.start()
 
 
+
+
+    # def pushButtonBrightnessClicked(self):
+#MENU選單---------------------------------------------------------------------------------------------------------
+    def addPatient(self): 
+        if(not self.empty_page_stack):
+                self.pageFull()
+        else:
+            dir_choose = QFileDialog.getExistingDirectory(self, "選取資料夾", "/Users/user/Documents/畢專/dicom_data")  # 第三參數是起始路徑
+            if dir_choose == "":
+                print("\n取消")
+                return
+            print("\n選擇的資料夾:")
+            print(dir_choose)
+            pt_id = os.path.basename(dir_choose)
+            # post
+            url = 'http://127.0.0.1:8000/pdicom/' + pt_id
+            #headers = {'accept': 'application/json', 'Content-Type': 'multipart/form-data'}
+            myfiles = listdir(dir_choose)  # 檔案
+            dic_file = []
+            for f in myfiles:
+                # 產生檔案的絕對路徑
+                fullpath = join(dir_choose, f)
+                # dicom的名字
+                dicom_id = os.path.basename(fullpath)
+                print(dicom_id)
+                print(fullpath)
+                dic_file.append(('files', (dicom_id, open(fullpath, 'rb'))))
+            response = requests.post(url, files=dic_file)
+            print(response.reason)
+            print(response.json())
+            if(response.json()['Result'] == 'Directory already exists.'):
+                self.duplicateAdd()
+            else:
+                self.open_pt_page(pt_id)
+                self.pt_list.append(pt_id)
+                self.ui.patient_list.addItem(pt_id)
+                self.ui.no_list.clear()
+                self.pt_list.sort()
+                for ptid in self.pt_list:
+                    self.ui.no_list.addItem(ptid)
+                for i in self.pt_list:
+                    print(i)    
+                self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
+                temp_page = self.patient_mapto_page[pt_id]
+                self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[temp_page])
+
+                
+    def open_pt_page(self, pt_id): #記得要先檢查self.empty_page_stack空->Page滿->pageFull, 用在add和pt_list中打開
+        temp = self.empty_page_stack[-1]
+        self.empty_page_stack.pop()
+        self.patient_mapto_page[pt_id] = temp
+
+    def pageFull(self):
+        pageFull_msg = QMessageBox()
+        pageFull_msg.setWindowTitle("Warning")
+        pageFull_msg.setText("Patient page full !\nPlease close some pages and try again.")
+        pageFull_msg.setIcon(QMessageBox.Warning)
+        x = pageFull_msg.exec_() 
+
     def duplicateAdd(self):
-        print("test")
-        msg = QMessageBox()
-        msg.setWindowTitle("Warning")
-        msg.setText("Patient already exist !")
-        msg.setIcon(QMessageBox.Warning)
-        x = msg.exec_()
+        duplicateAdd_msg = QMessageBox()
+        duplicateAdd_msg.setWindowTitle("Warning")
+        duplicateAdd_msg.setText("Patient already exist !")
+        duplicateAdd_msg.setIcon(QMessageBox.Warning)
+        x = duplicateAdd_msg.exec_() 
 
-    def image_move(self):
-        self.moveImage = True
+    # list item clicked
+    def patient_listItemClicked(self, item):
+        print(str(item.text()))
+        if(str(item.text()) == '1'):
+            self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
+            self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[0])
+        else:
+            self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
+            temp = str(item.text())
+            temp_page = self.patient_mapto_page[temp]
+            self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[temp_page])
 
-        # def mousePressEvent(self, event):
-        #     if self.moveImage:
-        #         self.ui.pic_1_3.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
-        #         self.clickPosition = event.globalPos()
-        #         self.moveX = event.x()
-        #         self.moveY = event.y()
-        #         print(event.globalPos())
-        #         print("sc")
+    # menu 伸縮
+    def slideLeftMenu(self):
+        width = self.ui.frame_left_menu.width()
+        if width == 50:
+            newWidth = 200
+        else:
+            newWidth = 50
+        self.animation = QPropertyAnimation(self.ui.frame_left_menu, b"minimumWidth")
+        self.animation.setDuration(250)
+        self.animation.setStartValue(width)
+        self.animation.setEndValue(newWidth)
+        self.animation.setEasingCurve(QtCore.QEasingCurve.InOutQuart)
+        self.animation.start()
 
-        def image_moving(e):
-            if self.moveImage and e.buttons() == Qt.LeftButton:
-                print(e.x(), e.y())
-                print(self.pos())
-
-                # self.move(self.pos() + e.globalPos() - self.clickPos)
-                self.clickPos = e.globalPos()
-                e.accept()
-
-
-        self.pic[1][1].mousePressEvent = image_moving
-
-        def mousePressEvent(self, event):
-            self.clickPos = event.globalPos()
-
-        def mouseReleaseEvent(self, event):
-            if self.moveImage:
-                self.moveX = event.x() - self.moveX
-                self.moveY = event.y() - self.moveY
-                print(event.globalPos())
-                print(self.moveX, self.moveY)
-                self.showPic(1, 1, "01372635", "5F327951")
-
-
-
-    # def mousePressEvent(self, event):
-    #     if self.moveImage:
-    #         self.clickPosition = event.globalPos()
-    #         self.moveX = event.x()
-    #         self.moveY = event.y()
-    #         print(event.globalPos())
-
-    # def mouseMoveEvent(self, event):
-    #     if event.buttons() & Qt.LeftButton:
-    #         self.destion = event.pos()
-    #         self.update()
-
-    # def mouseReleaseEvent(self, event):
-    #     if self.moveImage:
-    #         self.moveX = event.x() - self.moveX
-    #         self.moveY = event.y() - self.moveY
-    #         print(event.globalPos())
-    #         print(self.moveX, self.moveY)
-    #         self.showPic(1, 1, "01372635", "5F327951")
-
-
-
-
+    def closePatient(self): # 關閉patient編輯，tmp 也要刪除
+        curRow = self.ui.patient_list.currentRow()
+        get_close_id = self.ui.patient_list.item(curRow)
+        close_id = str(get_close_id.text())
+        tmp = self.patient_mapto_page[close_id]
+        self.empty_page_stack.append(tmp)
+        self.patient_mapto_page[close_id] = -1
+        self.ui.patient_list.takeItem(self.ui.patient_list.currentRow())
+        close_path = "./tmp/" + close_id
+        for filename in os.listdir(close_path):
+            file_path = close_path + '/' + filename
+            print(file_path)
+            os.remove(file_path)
+        os.rmdir(close_path)
+# search page-----------------------------------------------------------------------------------------------------
     # search
     def addEntry(self):
         entryItem = self.ui.input_no.text()
@@ -438,24 +493,51 @@ class initialWidget(QtWidgets.QMainWindow):
         if not self.model.findItems(entryItem):
             self.model.insertRow(0, QStandardItem(entryItem))
 
-    # list item clicked
-    def patient_listItemClicked(self, item):
-        print(str(item.text()))
-        self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
-
-    # menu 伸縮
-    def slideLeftMenu(self):
-        width = self.ui.frame_left_menu.width()
-        if width == 50:
-            newWidth = 200
+    # open patient
+    def no_listItemClicked(self, item):
+        #print(str(item.text()))
+        if(not self.empty_page_stack):
+                self.pageFull()
         else:
-            newWidth = 50
-        self.animation = QPropertyAnimation(self.ui.frame_left_menu, b"minimumWidth")
-        self.animation.setDuration(250)
-        self.animation.setStartValue(width)
-        self.animation.setEndValue(newWidth)
-        self.animation.setEasingCurve(QtCore.QEasingCurve.InOutQuart)
-        self.animation.start()
+            pt_id = str(item.text())
+            if(self.patient_mapto_page[pt_id] == -1): # patient list還沒有 -> 打開新page並加到patient list
+                # 檔案加到tmp還沒做 ???
+                self.open_pt_page(pt_id)
+                self.ui.patient_list.addItem(pt_id)
+                #self.databaseToTmp(pt_id)
+            # patient list中已存在 直接打開
+            self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
+            temp_page = self.patient_mapto_page[pt_id]
+            self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[temp_page])
+            #dir_choose = QFileDialog.getExistingDirectory(self, "選取資料夾", "/Users/user/Documents/畢專/dicom_data")  # 第三參數是起始路徑
+            print(pt_id + "test")
+
+            # 至後端拿資料(未做)
+            # post
+            # url = 'http://127.0.0.1:8000/pdicom/' + pt_id
+            # #headers = {'accept': 'application/json', 'Content-Type': 'multipart/form-data'}
+            # myfiles = listdir(dir_choose)  # 檔案
+            # dic_file = []
+            # for f in myfiles:
+            #     # 產生檔案的絕對路徑
+            #     fullpath = join(dir_choose, f)
+            #     # dicom的名字
+            #     dicom_id = os.path.basename(fullpath)
+            #     print(dicom_id)
+            #     print(fullpath)
+            #     dic_file.append(('files', (dicom_id, open(fullpath, 'rb'))))
+            # response = requests.post(url, files=dic_file)
+            # print(response.reason)
+            # print(response.json())
+
+# 其他/初始--------------------------------------------------------------------------------------------------------
+    def myListWidgetContext(self,position): # 設定patient list 右鍵功能 關閉
+        popMenu = QMenu()
+        closeAct = QAction("Close",self)
+        if self.ui.patient_list.itemAt(position): #查看右键是否點在item上面
+            popMenu.addAction(closeAct)
+        closeAct.triggered.connect(self.closePatient)
+        popMenu.exec_(self.ui.patient_list.mapToGlobal(position))
 
 #其他/初始--------------------------------------------------------------------------------------------------------
     def transitiveMatrix(self, _x, _y, theda):
@@ -472,6 +554,7 @@ class initialWidget(QtWidgets.QMainWindow):
         return tx, ty
 
     def showPic(self, i, j, patient_no, patient_dics):
+        # print("showpic")
         dicom_path = "./tmp/" + patient_no + "/" + patient_dics
         ds = dcmread(dicom_path)
         arr = ds.pixel_array
@@ -527,6 +610,20 @@ class initialWidget(QtWidgets.QMainWindow):
         self.pic_clicked = [ [False] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
         self.pic_released = [ [False] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
         self.angle_coordinate_list = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
+        self.rotate_angle = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
+        self.size = [[1] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
+        self.size_last = [[1] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
+        self.magnifier_pad_x = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
+        self.magnifier_pad_y = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
+        self.move_start_x = [ [0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
+        self.move_start_y = [ [0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
+        self.move_moving_x = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
+        self.move_moving_y = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
+        self.move_end_x = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
+        self.move_end_y = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
+        self.move_x = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
+        self.move_y = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
+
         var_array_pic = 'self.pic'
         for i in range(1, self.MAXIMUM_PAGE + 1):
             for j in range(1, (self.MAXIMUM_PIC + 1)):
@@ -552,10 +649,10 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.transparent_pix[i][j].fill(Qt.transparent)
 
         # 暫時試試放照片
-        self.showPic(1, 1, "01372635","5F327951")
-        self.showPic(1, 2, "01372635","5F327951")
-        self.showPic(1, 3, "01372635","5F327951")
-        self.showPic(1, 4, "01372635","5F327951")
+        self.showPic(1, 1, "01372635","5F327951.dcm")
+        self.showPic(1, 2, "01372635","5F327951.dcm")
+        self.showPic(1, 3, "01372635","5F327951.dcm")
+        self.showPic(1, 4, "01372635","5F327951.dcm")
 
     def mousePressEvent(self, event):
         self.clickPosition = event.globalPos()
@@ -579,6 +676,8 @@ class initialWidget(QtWidgets.QMainWindow):
             # self.showPic(1, 1, "01372635", "5F327951")
             self.showNormal()
             self.ui.restore_button.setIcon(QtGui.QIcon(u":/icons/icons/window-maximize.png"))
+
+
 
 
 class Patient():
