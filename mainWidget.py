@@ -84,7 +84,7 @@ class initialWidget(QtWidgets.QMainWindow):
 
         self.ui.pushButton_angle.clicked.connect(self.pushButtonAngleClicked) # 角度按鈕連結
         self.ui.pushButton_add_pic.clicked.connect(self.pushButtonAddPicClicked) # 加照片按鈕連結
-        self.ui.pushButton_pen.clicked.connect(self.pushButtonPenClicked) # 畫筆按鈕連結
+        self.ui.pushButton_pen.clicked.connect(self.pushButtonPenClicked)   # 畫筆按鈕連結
         self.ui.pushButton_save.clicked.connect(self.pushButtonSaveClicked) # 儲存照片按鈕連結
 
         self.ui.pushButton_magnifier.clicked.connect(lambda: self.slideZoomInOrOut())  # 打開放大縮小的frame
@@ -233,7 +233,7 @@ class initialWidget(QtWidgets.QMainWindow):
     def pushButtonSaveClicked(self):
         image = ImageQt.fromqpixmap(self.pic[self.pic_ith][self.pic_jth].grab())
         filePath, _ = QFileDialog.getSaveFileName(self, "Save Image", "",
-                                                  "PNG(*.png);;JPEG(*.jpg *.jpeg);;All Files(*.*) ")
+                                                  "PNG(*.png)") # ;;JPEG(*.jpg *.jpeg);;All Files(*.*) 
         if filePath == "":
             return
         image.save(filePath)
