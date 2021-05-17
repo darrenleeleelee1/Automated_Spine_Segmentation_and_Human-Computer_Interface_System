@@ -31,8 +31,8 @@ class Ui_MainWindow(object):
         # response = requests.get('http://127.0.0.1:8000/gdicom/13726235')
         # raw = DicomBytesIO(response.content)
         # ds = dcmread(raw)
-        
-        ds = dcmread('./tmp/5F329171')
+
+        ds = dcmread('./tmp/01372635/5F327951.dcm')
         arr = ds.pixel_array
         arr = np.uint8(arr)
         qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], QtGui.QImage.Format_Grayscale8)
