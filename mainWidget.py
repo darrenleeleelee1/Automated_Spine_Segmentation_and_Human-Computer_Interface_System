@@ -69,7 +69,6 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.patient_list.itemClicked.connect(lambda: self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page))
         self.ui.input_no.setCompleter(completer)  # 搜尋紀錄
         self.linkPage2Array() # 將影像處理頁面預設有五頁
-
         self.ui.pushButton_angle.clicked.connect(self.pushButtonAngleClicked) # 角度按鈕連結
         self.ui.pushButton_add_pic.clicked.connect(self.pushButtonAddPicClicked) # 加照片按鈕連結
         self.ui.pushButton_pen.clicked.connect(self.pushButtonPenClicked)
@@ -92,18 +91,14 @@ class initialWidget(QtWidgets.QMainWindow):
                 if(self.pic_clicked[_i][_j]):
                     self.pic_released[_i][_j] = True
                 else:
-                    if(self.angle_start_x[_i][_j] != self.angle_middle_x[_i][_j] and self.angle_start_y[_i][_j] != self.angle_middle_y[_i][_j]):
+                    if(self.tsx[_i][_j] != self.tmx[_i][_j] and self.tsy[_i][_j] != self.tmy[_i][_j]):
                         self.angle_coordinate_list[_i][_j].append(angleCoordinate(
-                            self.angle_start_x[_i][_j], self.angle_start_y[_i][_j],
-                            self.angle_middle_x[_i][_j], self.angle_middle_y[_i][_j],
-                            self.angle_end_x[_i][_j], self.angle_end_y[_i][_j]
+                            self.tsx[_i][_j], self.tsy[_i][_j],
+                            self.tmx[_i][_j], self.tmy[_i][_j],
+                            self.tex[_i][_j], self.tey[_i][_j]
                             ))
-                        self.angle_start_x[_i][_j] = self.angle_middle_x[_i][_j] = 0
-                        self.angle_start_y[_i][_j] = self.angle_middle_y[_i][_j] = 0
-
-                    print(self.angle_coordinate_list[_i][_j])
-                    print(_i, _j, len(self.angle_coordinate_list[_i][_j]))
-
+                        self.tsx[_i][_j] = self.tmx[_i][_j] = 0
+                        self.tsy[_i][_j] = self.tmy[_i][_j] = 0
                     self.pic_released[_i][_j] = False
         elif(self.tool_lock == 'pen'):
             return
@@ -202,30 +197,20 @@ class initialWidget(QtWidgets.QMainWindow):
 
 
     def picPaint(self, event, pixmap, _i, _j):
-        if _i == self.pic_ith and _j == self.pic_jth:
-            self.rotate_angle[_i][_j] = self.rotate_angle[self.pic_ith][self.pic_jth]
+        # if _i == self.pic_ith and _j == self.pic_jth:
+        #     self.rotate_angle[_i][_j] = self.rotate_angle[self.pic_ith][self.pic_jth]
         q = QtGui.QPainter(self.pic[_i][_j])
-
-        q.translate(self.pic_label_width / 2,
-        self.pic_label_height / 2)  # 把旋轉中心設成（pic_label_width/2, pic_label_height/2）
+        q.resetTransform()
+        q.translate(self.pic_label_width / 2, self.pic_label_height / 2)  # 把旋轉中心設成（pic_label_width/2, pic_label_height/2）
         q.rotate(self.rotate_angle[_i][_j])
         q.translate(-self.pic_label_width / 2, -self.pic_label_height / 2)
-        # print(_i, _j, self.size[_i][_j])
         img_width = self.pic_label_width * self.size[_i][_j]
         img_height = self.pic_label_height * self.size[_i][_j]
-        # print(_i, _j, self.size[_i][_j])
 
-        # print(_i, _j, self.move_moving_x[_i][_j], self.move_moving_y[_i][_j])
-
-
-
-        q.drawPixmap(self.move_moving_x[_i][_j]+ self.magnifier_pad_x[_i][_j],
-                     self.move_moving_y[_i][_j]+ self.magnifier_pad_y[_i][_j],
-                     img_width,
-                     img_height, pixmap)
+        x = self.move_moving_x[_i][_j]+ self.magnifier_pad_x[_i][_j]
+        y = self.move_moving_y[_i][_j]+ self.magnifier_pad_y[_i][_j]
+        q.drawPixmap(x, y, img_width, img_height, pixmap)
         p = QtGui.QPainter(self.transparent_pix[_i][_j])
-
-
 
         if(self.tool_lock == 'mouse'):
             return
@@ -239,25 +224,27 @@ class initialWidget(QtWidgets.QMainWindow):
                 pen.setWidth(6)
                 q.setPen(pen)
 
+                # tsx = transitved start x
+                self.tsx[_i][_j], self.tsy[_i][_j] = self.transitiveMatrix(self.angle_start_x[_i][_j], self.angle_start_y[_i][_j], self.rotate_angle[_i][_j])
+                self.tmx[_i][_j], self.tmy[_i][_j] = self.transitiveMatrix(self.angle_middle_x[_i][_j], self.angle_middle_y[_i][_j], self.rotate_angle[_i][_j])
+                self.tex[_i][_j], self.tey[_i][_j] = self.transitiveMatrix(self.angle_end_x[_i][_j], self.angle_end_y[_i][_j], self.rotate_angle[_i][_j])
 
-                q.drawLine(self.angle_middle_x[_i][_j], self.angle_middle_y[_i][_j], self.angle_start_x[_i][_j],self.angle_start_y[_i][_j])
-                q.drawLine(self.angle_end_x[_i][_j], self.angle_end_y[_i][_j], self.angle_middle_x[_i][_j], self.angle_middle_y[_i][_j])
+
+                # q.drawLine(self.angle_middle_x[_i][_j], self.angle_middle_y[_i][_j], self.angle_start_x[_i][_j], self.angle_start_y[_i][_j])
+                # q.drawLine(self.angle_end_x[_i][_j], self.angle_end_y[_i][_j], self.angle_middle_x[_i][_j], self.angle_middle_y[_i][_j])
 
 
-                q.drawLine(0 + self.angle_middle_y[_i][_j] * math.sin(math.pi / 2),
-                           512 + self.angle_middle_x[_i][_j] * math.sin(-math.pi / 2), 0+self.angle_start_y[_i][_j]* math.sin(math.pi / 2),
-                           512+self.angle_start_x[_i][_j] * math.sin(-math.pi / 2))
-
-                q.drawLine(0+self.angle_end_y[_i][_j]* math.sin(math.pi / 2),
-                           512+self.angle_end_x[_i][_j]* math.sin(-math.pi / 2), 0+self.angle_middle_y[_i][_j]* math.sin(math.pi / 2),
-                           512+self.angle_middle_x[_i][_j]* math.sin(-math.pi / 2))
-
+                q.drawLine(self.tmx[_i][_j], self.tmy[_i][_j], self.tsx[_i][_j], self.tsy[_i][_j])
+                q.drawLine(self.tex[_i][_j], self.tey[_i][_j], self.tmx[_i][_j], self.tmy[_i][_j])
+# >>>>>>> 292a5c0c9137d159cc8f9d68b44cc46a07427000
         elif(self.tool_lock == 'pen'):
             self.pic[_i][_j].setMouseTracking(False)
             pen = QtGui.QPen()
             pen.setWidth(6)
             p.setPen(pen)
-            p.drawLine(self.pen_end_x[_i][_j], self.pen_end_y[_i][_j], self.pen_start_x[_i][_j], self.pen_start_y[_i][_j])
+            tpsx, tpsy = self.transitiveMatrix(self.pen_start_x[_i][_j], self.pen_start_y[_i][_j], self.rotate_angle[_i][_j])
+            tpex, tpey = self.transitiveMatrix(self.pen_end_x[_i][_j], self.pen_end_y[_i][_j], self.rotate_angle[_i][_j])
+            p.drawLine(tpex, tpey, tpsx, tpsy)
 
         q.drawPixmap(0, 0, self.transparent_pix[_i][_j])
         # show every angle
@@ -266,7 +253,6 @@ class initialWidget(QtWidgets.QMainWindow):
             pen.setWidth(6)
             q.setPen(pen)
             q.drawPolyline(w.points)
-            w.printDetail()
 
 
         q.end()
@@ -435,6 +421,13 @@ class initialWidget(QtWidgets.QMainWindow):
         self.animation.start()
 
 #其他/初始--------------------------------------------------------------------------------------------------------
+    def transitiveMatrix(self, _x, _y, theda):
+        radi = np.deg2rad(theda)
+        index = int((-self.rotate_angle[self.pic_ith][self.pic_jth] % 360) / 90)
+        tx = _x * np.cos(radi) + _y * np.sin(radi) + self.rotate_coordinate_system[index][0]
+        ty = _x * np.sin(-radi) + _y * np.cos(radi) + self.rotate_coordinate_system[index][1]
+        return tx, ty
+
     def showPic(self, i, j, patient_no, patient_dics):
         # print("showpic")
         dicom_path = "./tmp/" + patient_no + "/" + patient_dics
@@ -486,6 +479,13 @@ class initialWidget(QtWidgets.QMainWindow):
         self.angle_middle_y = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
         self.angle_end_x = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
         self.angle_end_y = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
+        self.tsx = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
+        self.tsy = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
+        self.tmx = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
+        self.tmy = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
+        self.tex = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
+        self.tey = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
+        
         self.pic_clicked = [ [False] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
         self.pic_released = [ [False] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
         self.angle_coordinate_list = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
@@ -513,10 +513,13 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.angle_start_x[i][j] = self.angle_start_y[i][j] = 0
                 self.angle_middle_x[i][j] = self.angle_middle_y[i][j] = 0
                 self.angle_end_x[i][j] = self.angle_end_y[i][j] = 0
+                self.tsx[i][j] = self.tsy[i][j] = 0
+                self.tmx[i][j] = self.tmy[i][j] = 0
+                self.tex[i][j] = self.tey[i][j] = 0
                 self.angle_coordinate_list[i][j] = []
         self.pic_cnt = [0] * (self.MAXIMUM_PAGE + 1)
         self.pic_ith = self.pic_jth = 1
-
+        self.rotate_coordinate_system = [[0, 0], [512, 0], [512, 512], [0, 512]]
         # 畫圖透明canvas
         self.transparent_pix = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
         for i in range(1, self.MAXIMUM_PAGE + 1):
