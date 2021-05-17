@@ -241,9 +241,9 @@ class initialWidget(QtWidgets.QMainWindow):
                 q.setPen(pen)
 
                 # tsx = transitved start x
-                self.tsx[_i][_j], self.tsy[_i][_j] = self.transitiveWithBiasMatrix(self.angle_start_x[_i][_j], self.angle_start_y[_i][_j], self.angle)
-                self.tmx[_i][_j], self.tmy[_i][_j] = self.transitiveWithBiasMatrix(self.angle_middle_x[_i][_j], self.angle_middle_y[_i][_j], self.angle)
-                self.tex[_i][_j], self.tey[_i][_j] = self.transitiveWithBiasMatrix(self.angle_end_x[_i][_j], self.angle_end_y[_i][_j], self.angle)
+                self.tsx[_i][_j], self.tsy[_i][_j] = self.transitiveWithBiasMatrix(self.angle_start_x[_i][_j], self.angle_start_y[_i][_j], self.rotate_angle[_i][_j])
+                self.tmx[_i][_j], self.tmy[_i][_j] = self.transitiveWithBiasMatrix(self.angle_middle_x[_i][_j], self.angle_middle_y[_i][_j], self.rotate_angle[_i][_j])
+                self.tex[_i][_j], self.tey[_i][_j] = self.transitiveWithBiasMatrix(self.angle_end_x[_i][_j], self.angle_end_y[_i][_j], self.rotate_angle[_i][_j])
                 q.drawLine(self.tmx[_i][_j], self.tmy[_i][_j], self.tsx[_i][_j], self.tsy[_i][_j])
                 q.drawLine(self.tex[_i][_j], self.tey[_i][_j], self.tmx[_i][_j], self.tmy[_i][_j])
         elif(self.tool_lock == 'pen'):
@@ -251,8 +251,8 @@ class initialWidget(QtWidgets.QMainWindow):
             pen = QtGui.QPen()
             pen.setWidth(6)
             p.setPen(pen)
-            tpsx, tpsy = self.transitiveWithBiasMatrix(self.pen_start_x[_i][_j], self.pen_start_y[_i][_j], self.angle)
-            tpex, tpey = self.transitiveWithBiasMatrix(self.pen_end_x[_i][_j], self.pen_end_y[_i][_j], self.angle)
+            tpsx, tpsy = self.transitiveWithBiasMatrix(self.pen_start_x[_i][_j], self.pen_start_y[_i][_j], self.rotate_angle[_i][_j])
+            tpex, tpey = self.transitiveWithBiasMatrix(self.pen_end_x[_i][_j], self.pen_end_y[_i][_j], self.rotate_angle[_i][_j])
             p.drawLine(tpex, tpey, tpsx, tpsy)
 
         q.drawPixmap(0, 0, self.transparent_pix[_i][_j])
@@ -262,11 +262,11 @@ class initialWidget(QtWidgets.QMainWindow):
             pen.setWidth(6)
             q.setPen(pen)
             q.drawPolyline(w.points)
-            t_index = int((-self.angle % 360) / 90)
+            t_index = int((-self.rotate_angle[_i][_j] % 360) / 90)
             print("original: ", w.mp.x(), w.mp.y())
             t_x = w.mp.x() - self.rotate_coordinate_system[t_index][0]
             t_y = w.mp.y() - self.rotate_coordinate_system[t_index][1]
-            t_x, t_y = self.transitiveMatrix(t_x, t_y, -self.angle)
+            t_x, t_y = self.transitiveMatrix(t_x, t_y, -self.rotate_angle[_i][_j])
             print("transitive: ", t_x, t_y)
             t_label = QtCore.QPointF(t_x + 10, t_y)
             f = q.font()
@@ -547,7 +547,7 @@ class initialWidget(QtWidgets.QMainWindow):
         return tx, ty
 
     def transitiveWithBiasMatrix(self, _x, _y, theda):
-        index = int((-self.angle % 360) / 90)
+        index = int((-theda % 360) / 90)
         tx, ty = self.transitiveMatrix(_x, _y, theda)        
         tx += self.rotate_coordinate_system[index][0]
         ty += self.rotate_coordinate_system[index][1]
@@ -649,10 +649,10 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.transparent_pix[i][j].fill(Qt.transparent)
 
         # 暫時試試放照片
-        self.showPic(1, 1, "01372635","5F327951.dcm")
-        self.showPic(1, 2, "01372635","5F327951.dcm")
-        self.showPic(1, 3, "01372635","5F327951.dcm")
-        self.showPic(1, 4, "01372635","5F327951.dcm")
+        self.showPic(1, 1, "01372635","5F327951")
+        self.showPic(1, 2, "01372635","5F327951")
+        self.showPic(1, 3, "01372635","5F327951")
+        self.showPic(1, 4, "01372635","5F327951")
 
     def mousePressEvent(self, event):
         self.clickPosition = event.globalPos()
