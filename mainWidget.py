@@ -104,12 +104,9 @@ class initialWidget(QtWidgets.QMainWindow):
             return
         elif(self.tool_lock == 'zoom_in'):
             self.size_last[_i][_j] = self.size[_i][_j]
-            # print(self.size[self.pic_ith][self.pic_jth])
 
         elif (self.tool_lock == 'zoom_out'):
             self.size_last[_i][_j] = self.size[_i][_j]
-            # print(self.size[self.pic_ith][self.pic_jth])
-
 
         elif(self.tool_lock == 'move'):
 
@@ -122,7 +119,6 @@ class initialWidget(QtWidgets.QMainWindow):
         self.pic_ith = _i
         self.pic_jth = _j
         if(self.tool_lock == 'mouse'):
-            # print(_i, _j)
             return
         elif(self.tool_lock == 'angle'):
             if event.button() == QtCore.Qt.LeftButton:
@@ -145,7 +141,6 @@ class initialWidget(QtWidgets.QMainWindow):
             self.magnifier_pad_x[_i][_j] = self.magnifier_pad_x[_i][_j] - (self.size[_i][_j] - self.size_last[_i][_j]) * event.pos().x()
             self.magnifier_pad_y[_i][_j] = self.magnifier_pad_y[_i][_j] - (self.size[_i][_j] - self.size_last[_i][_j]) * event.pos().y()
 
-            print("size", self.size_last[_i][_j], self.size[_i][_j])
         elif(self.tool_lock == 'zoom_out'):
             if (self.size[_i][_j] > 1):
                 # self.size[_i][_j] = self.size[_i][_j] * 0.75
@@ -156,13 +151,11 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.magnifier_pad_x[_i][_j] = self.magnifier_pad_x[_i][_j] - (self.size[_i][_j] - self.size_last[_i][_j]) * event.pos().x()
                 self.magnifier_pad_y[_i][_j] = self.magnifier_pad_y[_i][_j] - (self.size[_i][_j] - self.size_last[_i][_j]) * event.pos().y()
 
-
-                # print(self.move_moving_x[_i][_j], self.move_moving_y[_i][_j])
         elif(self.tool_lock == 'move'):
             if event.button() == QtCore.Qt.LeftButton:
                 self.move_start_x[_i][_j] = event.x()
                 self.move_start_y[_i][_j] = event.y()
-        self.update()
+        # self.update()
 
 
     def picMouseMove(self, event, _i, _j):
