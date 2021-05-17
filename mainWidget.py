@@ -241,10 +241,6 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.tex[_i][_j], self.tey[_i][_j] = self.transitiveWithBiasMatrix(self.angle_end_x[_i][_j], self.angle_end_y[_i][_j], self.rotate_angle[_i][_j])
                 q.drawLine(self.tmx[_i][_j], self.tmy[_i][_j], self.tsx[_i][_j], self.tsy[_i][_j])
                 q.drawLine(self.tex[_i][_j], self.tey[_i][_j], self.tmx[_i][_j], self.tmy[_i][_j])
-<<<<<<< HEAD
-
-=======
->>>>>>> 20bd9c6b80726a554ab0cc3f66503dfc5d3fbb64
         elif(self.tool_lock == 'pen'):
             self.pic[_i][_j].setMouseTracking(False)
             pen = QtGui.QPen()
@@ -262,11 +258,9 @@ class initialWidget(QtWidgets.QMainWindow):
             q.setPen(pen)
             q.drawPolyline(w.points)
             t_index = int((-self.rotate_angle[_i][_j] % 360) / 90)
-            print("original: ", w.mp.x(), w.mp.y())
             t_x = w.mp.x() - self.rotate_coordinate_system[t_index][0]
             t_y = w.mp.y() - self.rotate_coordinate_system[t_index][1]
             t_x, t_y = self.transitiveMatrix(t_x, t_y, -self.rotate_angle[_i][_j])
-            print("transitive: ", t_x, t_y)
             t_label = QtCore.QPointF(t_x + 10, t_y)
             f = q.font()
             f.setPixelSize(20)
