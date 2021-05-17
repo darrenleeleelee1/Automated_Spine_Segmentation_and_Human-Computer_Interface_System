@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>489</width>
-    <height>458</height>
+    <width>802</width>
+    <height>696</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -155,8 +155,8 @@ QFrame{
              <string/>
             </property>
             <property name="icon">
-             <iconset resource="res/nike_app.qrc">
-              <normaloff>:/icons/icons/cil-minus.png</normaloff>:/icons/icons/cil-minus.png</iconset>
+             <iconset resource="res/icons.qrc">
+              <normaloff>:/icons/icons/minus.png</normaloff>:/icons/icons/minus.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -172,8 +172,8 @@ QFrame{
              <string/>
             </property>
             <property name="icon">
-             <iconset resource="res/nike_app.qrc">
-              <normaloff>:/icons/icons/cil-window-restore.png</normaloff>:/icons/icons/cil-window-restore.png</iconset>
+             <iconset resource="res/icons.qrc">
+              <normaloff>:/icons/icons/window-maximize.png</normaloff>:/icons/icons/window-maximize.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -189,8 +189,8 @@ QFrame{
              <string/>
             </property>
             <property name="icon">
-             <iconset resource="res/nike_app.qrc">
-              <normaloff>:/icons/icons/cil-x.png</normaloff>:/icons/icons/cil-x.png</iconset>
+             <iconset resource="res/icons.qrc">
+              <normaloff>:/icons/icons/x.png</normaloff>:/icons/icons/x.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -315,7 +315,7 @@ QLabel{
              <enum>Qt::LeftToRight</enum>
             </property>
             <property name="styleSheet">
-             <string notr="true">background-image:url(:/icons/icons/cil-menu.png);
+             <string notr="true">background-image:url(:/icons/icons/menu.png);
 background-repeat: none;
 padding-left: 30px;
 background-position: center left</string>
@@ -349,7 +349,7 @@ background-position: center left</string>
              </font>
             </property>
             <property name="styleSheet">
-             <string notr="true">background-image: url(:/icons/icons/cil-user-follow.png);
+             <string notr="true">background-image: url(:/icons/icons/user-follow.png);
 background-repeat: none;
 background-position: center left;
 padding-left:50px;</string>
@@ -408,7 +408,7 @@ padding-left:50px;</string>
              </font>
             </property>
             <property name="styleSheet">
-             <string notr="true">background-image: url(:/icons/icons/icons8-search-32.png);
+             <string notr="true">background-image: url(:/icons/icons/search-32.png);
 background-repeat: none;
 background-position: center left;</string>
             </property>
@@ -460,7 +460,7 @@ background-position: center left;</string>
              </font>
             </property>
             <property name="styleSheet">
-             <string notr="true">background-image: url(:/icons/icons/cil-people.png);
+             <string notr="true">background-image: url(:/icons/icons/people.png);
 background-repeat: none;
 background-position: center left;</string>
             </property>
@@ -757,7 +757,7 @@ background-position: center left;</string>
                   <string/>
                  </property>
                  <property name="icon">
-                  <iconset resource="res/nike_app.qrc">
+                  <iconset>
                    <normaloff>:/icons/icons/icons8-search-32.png</normaloff>:/icons/icons/icons8-search-32.png</iconset>
                  </property>
                  <property name="iconSize">
@@ -923,8 +923,8 @@ margin:50px;</string>
                   <widget class="QFrame" name="pic_frame">
                    <property name="minimumSize">
                     <size>
-                     <width>70</width>
-                     <height>0</height>
+                     <width>600</width>
+                     <height>600</height>
                     </size>
                    </property>
                    <property name="frameShape">
@@ -934,8 +934,20 @@ margin:50px;</string>
                     <enum>QFrame::Raised</enum>
                    </property>
                    <layout class="QGridLayout" name="gridLayout">
-                    <item row="1" column="1">
-                     <widget class="QLabel" name="pic_1_4">
+                    <item row="0" column="0">
+                     <widget class="QLabel" name="pic_1_1">
+                      <property name="minimumSize">
+                       <size>
+                        <width>512</width>
+                        <height>512</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>512</width>
+                        <height>512</height>
+                       </size>
+                      </property>
                       <property name="text">
                        <string>TextLabel</string>
                       </property>
@@ -943,6 +955,21 @@ margin:50px;</string>
                     </item>
                     <item row="0" column="1">
                      <widget class="QLabel" name="pic_1_2">
+                      <property name="minimumSize">
+                       <size>
+                        <width>512</width>
+                        <height>512</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>512</width>
+                        <height>512</height>
+                       </size>
+                      </property>
+                      <property name="cursor">
+                       <cursorShape>ArrowCursor</cursorShape>
+                      </property>
                       <property name="text">
                        <string>TextLabel</string>
                       </property>
@@ -950,13 +977,40 @@ margin:50px;</string>
                     </item>
                     <item row="1" column="0">
                      <widget class="QLabel" name="pic_1_3">
+                      <property name="minimumSize">
+                       <size>
+                        <width>512</width>
+                        <height>512</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>512</width>
+                        <height>512</height>
+                       </size>
+                      </property>
+                      <property name="cursor">
+                       <cursorShape>ArrowCursor</cursorShape>
+                      </property>
                       <property name="text">
                        <string>TextLabel</string>
                       </property>
                      </widget>
                     </item>
-                    <item row="0" column="0">
-                     <widget class="QLabel" name="pic_1_1">
+                    <item row="1" column="1">
+                     <widget class="QLabel" name="pic_1_4">
+                      <property name="minimumSize">
+                       <size>
+                        <width>512</width>
+                        <height>512</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>512</width>
+                        <height>512</height>
+                       </size>
+                      </property>
                       <property name="text">
                        <string>TextLabel</string>
                       </property>
@@ -1055,7 +1109,7 @@ margin:50px;</string>
                       </property>
                      </widget>
                     </item>
-                    <item row="0" column="1">
+                    <item row="0" column="0">
                      <widget class="QLabel" name="pic_2_2">
                       <property name="text">
                        <string>TextLabel</string>
@@ -1069,7 +1123,7 @@ margin:50px;</string>
                       </property>
                      </widget>
                     </item>
-                    <item row="0" column="0">
+                    <item row="0" column="1">
                      <widget class="QLabel" name="pic_2_1">
                       <property name="text">
                        <string>TextLabel</string>
@@ -1457,7 +1511,13 @@ QPushButton{
                <property name="frameShadow">
                 <enum>QFrame::Raised</enum>
                </property>
-               <layout class="QHBoxLayout" name="horizontalLayout_7">
+               <property name="lineWidth">
+                <number>1</number>
+               </property>
+               <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="0,0,0,0,1,0,0,0,0,0,0,0,0,0">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
                 <property name="leftMargin">
                  <number>12</number>
                 </property>
@@ -1472,17 +1532,23 @@ QPushButton{
                 </property>
                 <item>
                  <widget class="QPushButton" name="pushButton_record">
+                  <property name="minimumSize">
+                   <size>
+                    <width>50</width>
+                    <height>0</height>
+                   </size>
+                  </property>
                   <property name="text">
                    <string/>
                   </property>
                   <property name="icon">
-                   <iconset resource="res/nike_app.qrc">
-                    <normaloff>:/icons/icons/pngegg (13).png</normaloff>:/icons/icons/pngegg (13).png</iconset>
+                   <iconset resource="res/icons.qrc">
+                    <normaloff>:/icons/icons/record.png</normaloff>:/icons/icons/record.png</iconset>
                   </property>
                   <property name="iconSize">
                    <size>
-                    <width>24</width>
-                    <height>24</height>
+                    <width>30</width>
+                    <height>30</height>
                    </size>
                   </property>
                   <property name="flat">
@@ -1492,17 +1558,23 @@ QPushButton{
                 </item>
                 <item>
                  <widget class="QPushButton" name="pushButton_mouse">
+                  <property name="minimumSize">
+                   <size>
+                    <width>50</width>
+                    <height>0</height>
+                   </size>
+                  </property>
                   <property name="text">
                    <string/>
                   </property>
                   <property name="icon">
-                   <iconset resource="res/nike_app.qrc">
-                    <normaloff>:/icons/icons/pngegg (9).png</normaloff>:/icons/icons/pngegg (9).png</iconset>
+                   <iconset resource="res/icons.qrc">
+                    <normaloff>:/icons/icons/mouse.png</normaloff>:/icons/icons/mouse.png</iconset>
                   </property>
                   <property name="iconSize">
                    <size>
-                    <width>24</width>
-                    <height>24</height>
+                    <width>30</width>
+                    <height>30</height>
                    </size>
                   </property>
                   <property name="flat">
@@ -1512,17 +1584,23 @@ QPushButton{
                 </item>
                 <item>
                  <widget class="QPushButton" name="pushButton_move">
+                  <property name="minimumSize">
+                   <size>
+                    <width>50</width>
+                    <height>0</height>
+                   </size>
+                  </property>
                   <property name="text">
                    <string/>
                   </property>
                   <property name="icon">
-                   <iconset resource="res/nike_app.qrc">
-                    <normaloff>:/icons/icons/pngegg.png</normaloff>:/icons/icons/pngegg.png</iconset>
+                   <iconset resource="res/icons.qrc">
+                    <normaloff>:/icons/icons/move.png</normaloff>:/icons/icons/move.png</iconset>
                   </property>
                   <property name="iconSize">
                    <size>
-                    <width>24</width>
-                    <height>24</height>
+                    <width>30</width>
+                    <height>30</height>
                    </size>
                   </property>
                   <property name="flat">
@@ -1532,37 +1610,147 @@ QPushButton{
                 </item>
                 <item>
                  <widget class="QPushButton" name="pushButton_magnifier">
+                  <property name="minimumSize">
+                   <size>
+                    <width>50</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true"/>
+                  </property>
                   <property name="text">
                    <string/>
                   </property>
                   <property name="icon">
-                   <iconset resource="res/nike_app.qrc">
-                    <normaloff>:/icons/icons/pngegg (1).png</normaloff>:/icons/icons/pngegg (1).png</iconset>
+                   <iconset resource="res/icons.qrc">
+                    <normaloff>:/icons/icons/zoom.png</normaloff>:/icons/icons/zoom.png</iconset>
                   </property>
                   <property name="iconSize">
                    <size>
-                    <width>24</width>
-                    <height>24</height>
+                    <width>30</width>
+                    <height>30</height>
                    </size>
                   </property>
                   <property name="flat">
                    <bool>true</bool>
                   </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QFrame" name="zoom_frame">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>0</width>
+                    <height>50</height>
+                   </size>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">QFrame{
+	background-color: rgb(118, 165, 175);
+}
+QPushButton{
+	background-color: rgb(118, 165, 175);
+	color: #fff;
+}
+</string>
+                  </property>
+                  <property name="frameShape">
+                   <enum>QFrame::StyledPanel</enum>
+                  </property>
+                  <property name="frameShadow">
+                   <enum>QFrame::Raised</enum>
+                  </property>
+                  <layout class="QHBoxLayout" name="horizontalLayout_13">
+                   <property name="spacing">
+                    <number>0</number>
+                   </property>
+                   <property name="leftMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="topMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="rightMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="bottomMargin">
+                    <number>0</number>
+                   </property>
+                   <item>
+                    <widget class="QPushButton" name="zoomOut">
+                     <property name="styleSheet">
+                      <string notr="true">color:#fff;</string>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                     <property name="icon">
+                      <iconset resource="res/icons.qrc">
+                       <normaloff>:/icons/icons/zoom-out-black.png</normaloff>:/icons/icons/zoom-out-black.png</iconset>
+                     </property>
+                     <property name="iconSize">
+                      <size>
+                       <width>26</width>
+                       <height>26</height>
+                      </size>
+                     </property>
+                     <property name="flat">
+                      <bool>true</bool>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="zoomIn">
+                     <property name="styleSheet">
+                      <string notr="true"/>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                     <property name="icon">
+                      <iconset resource="res/icons.qrc">
+                       <normaloff>:/icons/icons/zoom-in-black.png</normaloff>:/icons/icons/zoom-in-black.png</iconset>
+                     </property>
+                     <property name="iconSize">
+                      <size>
+                       <width>26</width>
+                       <height>26</height>
+                      </size>
+                     </property>
+                     <property name="flat">
+                      <bool>true</bool>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
                  </widget>
                 </item>
                 <item>
                  <widget class="QPushButton" name="pushButton_rotate">
+                  <property name="minimumSize">
+                   <size>
+                    <width>50</width>
+                    <height>0</height>
+                   </size>
+                  </property>
                   <property name="text">
                    <string/>
                   </property>
                   <property name="icon">
-                   <iconset resource="res/nike_app.qrc">
-                    <normaloff>:/icons/icons/pngegg (6).png</normaloff>:/icons/icons/pngegg (6).png</iconset>
+                   <iconset resource="res/icons.qrc">
+                    <normaloff>:/icons/icons/rotate.png</normaloff>:/icons/icons/rotate.png</iconset>
                   </property>
                   <property name="iconSize">
                    <size>
-                    <width>24</width>
-                    <height>24</height>
+                    <width>30</width>
+                    <height>30</height>
                    </size>
                   </property>
                   <property name="flat">
@@ -1571,18 +1759,103 @@ QPushButton{
                  </widget>
                 </item>
                 <item>
+                 <widget class="QFrame" name="rotate_frame">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>50</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>0</width>
+                    <height>50</height>
+                   </size>
+                  </property>
+                  <property name="frameShape">
+                   <enum>QFrame::StyledPanel</enum>
+                  </property>
+                  <property name="frameShadow">
+                   <enum>QFrame::Raised</enum>
+                  </property>
+                  <layout class="QHBoxLayout" name="horizontalLayout_14">
+                   <property name="spacing">
+                    <number>0</number>
+                   </property>
+                   <property name="leftMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="topMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="rightMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="bottomMargin">
+                    <number>0</number>
+                   </property>
+                   <item>
+                    <widget class="QPushButton" name="pushButton_rotate_left">
+                     <property name="text">
+                      <string/>
+                     </property>
+                     <property name="icon">
+                      <iconset resource="res/icons.qrc">
+                       <normaloff>:/icons/icons/rotate-left.png</normaloff>:/icons/icons/rotate-left.png</iconset>
+                     </property>
+                     <property name="iconSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="flat">
+                      <bool>true</bool>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="pushButton_rotate_right">
+                     <property name="text">
+                      <string/>
+                     </property>
+                     <property name="icon">
+                      <iconset resource="res/icons.qrc">
+                       <normaloff>:/icons/icons/rotate-right.png</normaloff>:/icons/icons/rotate-right.png</iconset>
+                     </property>
+                     <property name="iconSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="flat">
+                      <bool>true</bool>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+                <item>
                  <widget class="QPushButton" name="pushButton_brightness">
+                  <property name="minimumSize">
+                   <size>
+                    <width>50</width>
+                    <height>0</height>
+                   </size>
+                  </property>
                   <property name="text">
                    <string/>
                   </property>
                   <property name="icon">
-                   <iconset resource="res/nike_app.qrc">
-                    <normaloff>:/icons/icons/pngegg (2).png</normaloff>:/icons/icons/pngegg (2).png</iconset>
+                   <iconset resource="res/icons.qrc">
+                    <normaloff>:/icons/icons/brightness.png</normaloff>:/icons/icons/brightness.png</iconset>
                   </property>
                   <property name="iconSize">
                    <size>
-                    <width>24</width>
-                    <height>24</height>
+                    <width>30</width>
+                    <height>30</height>
                    </size>
                   </property>
                   <property name="flat">
@@ -1592,17 +1865,23 @@ QPushButton{
                 </item>
                 <item>
                  <widget class="QPushButton" name="pushButton_angle">
+                  <property name="minimumSize">
+                   <size>
+                    <width>50</width>
+                    <height>0</height>
+                   </size>
+                  </property>
                   <property name="text">
                    <string/>
                   </property>
                   <property name="icon">
-                   <iconset resource="res/nike_app.qrc">
-                    <normaloff>:/icons/icons/pngegg (5).png</normaloff>:/icons/icons/pngegg (5).png</iconset>
+                   <iconset resource="res/icons.qrc">
+                    <normaloff>:/icons/icons/angle.png</normaloff>:/icons/icons/angle.png</iconset>
                   </property>
                   <property name="iconSize">
                    <size>
-                    <width>24</width>
-                    <height>24</height>
+                    <width>30</width>
+                    <height>30</height>
                    </size>
                   </property>
                   <property name="flat">
@@ -1612,17 +1891,23 @@ QPushButton{
                 </item>
                 <item>
                  <widget class="QPushButton" name="pushButton_ruler">
+                  <property name="minimumSize">
+                   <size>
+                    <width>50</width>
+                    <height>0</height>
+                   </size>
+                  </property>
                   <property name="text">
                    <string/>
                   </property>
                   <property name="icon">
-                   <iconset resource="res/nike_app.qrc">
-                    <normaloff>:/icons/icons/pngegg (4).png</normaloff>:/icons/icons/pngegg (4).png</iconset>
+                   <iconset resource="res/icons.qrc">
+                    <normaloff>:/icons/icons/ruler.png</normaloff>:/icons/icons/ruler.png</iconset>
                   </property>
                   <property name="iconSize">
                    <size>
-                    <width>24</width>
-                    <height>24</height>
+                    <width>30</width>
+                    <height>30</height>
                    </size>
                   </property>
                   <property name="flat">
@@ -1632,17 +1917,23 @@ QPushButton{
                 </item>
                 <item>
                  <widget class="QPushButton" name="pushButton_pen">
+                  <property name="minimumSize">
+                   <size>
+                    <width>50</width>
+                    <height>0</height>
+                   </size>
+                  </property>
                   <property name="text">
                    <string/>
                   </property>
                   <property name="icon">
-                   <iconset resource="res/nike_app.qrc">
-                    <normaloff>:/icons/icons/pngegg (7).png</normaloff>:/icons/icons/pngegg (7).png</iconset>
+                   <iconset resource="res/icons.qrc">
+                    <normaloff>:/icons/icons/pen.png</normaloff>:/icons/icons/pen.png</iconset>
                   </property>
                   <property name="iconSize">
                    <size>
-                    <width>24</width>
-                    <height>24</height>
+                    <width>30</width>
+                    <height>30</height>
                    </size>
                   </property>
                   <property name="flat">
@@ -1652,17 +1943,23 @@ QPushButton{
                 </item>
                 <item>
                  <widget class="QPushButton" name="pushButton_add_pic">
+                  <property name="minimumSize">
+                   <size>
+                    <width>50</width>
+                    <height>0</height>
+                   </size>
+                  </property>
                   <property name="text">
                    <string/>
                   </property>
                   <property name="icon">
-                   <iconset resource="res/nike_app.qrc">
-                    <normaloff>:/icons/icons/pngegg (11).png</normaloff>:/icons/icons/pngegg (11).png</iconset>
+                   <iconset resource="res/icons.qrc">
+                    <normaloff>:/icons/icons/add-pic.png</normaloff>:/icons/icons/add-pic.png</iconset>
                   </property>
                   <property name="iconSize">
                    <size>
-                    <width>24</width>
-                    <height>24</height>
+                    <width>30</width>
+                    <height>30</height>
                    </size>
                   </property>
                   <property name="flat">
@@ -1672,17 +1969,23 @@ QPushButton{
                 </item>
                 <item>
                  <widget class="QPushButton" name="pushButton_save">
+                  <property name="minimumSize">
+                   <size>
+                    <width>50</width>
+                    <height>0</height>
+                   </size>
+                  </property>
                   <property name="text">
                    <string/>
                   </property>
                   <property name="icon">
-                   <iconset resource="res/nike_app.qrc">
+                   <iconset resource="res/icons.qrc">
                     <normaloff>:/icons/icons/save.png</normaloff>:/icons/icons/save.png</iconset>
                   </property>
                   <property name="iconSize">
                    <size>
-                    <width>24</width>
-                    <height>24</height>
+                    <width>30</width>
+                    <height>30</height>
                    </size>
                   </property>
                   <property name="flat">
@@ -1730,7 +2033,7 @@ QPushButton{
   </widget>
  </widget>
  <resources>
-  <include location="res/nike_app.qrc"/>
+  <include location="res/icons.qrc"/>
  </resources>
  <connections/>
 </ui>
