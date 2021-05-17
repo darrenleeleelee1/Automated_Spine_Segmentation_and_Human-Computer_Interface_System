@@ -252,7 +252,7 @@ class initialWidget(QtWidgets.QMainWindow):
 
                 q.drawLine(self.tmx[_i][_j], self.tmy[_i][_j], self.tsx[_i][_j], self.tsy[_i][_j])
                 q.drawLine(self.tex[_i][_j], self.tey[_i][_j], self.tmx[_i][_j], self.tmy[_i][_j])
-# >>>>>>> 292a5c0c9137d159cc8f9d68b44cc46a07427000
+
         elif(self.tool_lock == 'pen'):
             self.pic[_i][_j].setMouseTracking(False)
             pen = QtGui.QPen()
@@ -641,10 +641,10 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.transparent_pix[i][j].fill(Qt.transparent)
 
         # 暫時試試放照片
-        self.showPic(1, 1, "01372635","5F327951.dcm")
-        self.showPic(1, 2, "01372635","5F327951.dcm")
-        self.showPic(1, 3, "01372635","5F327951.dcm")
-        self.showPic(1, 4, "01372635","5F327951.dcm")
+        self.showPic(1, 1, "01372635","5F327951")
+        self.showPic(1, 2, "01372635","5F327951")
+        self.showPic(1, 3, "01372635","5F327951")
+        self.showPic(1, 4, "01372635","5F327951")
 
     def mousePressEvent(self, event):
         self.clickPosition = event.globalPos()
