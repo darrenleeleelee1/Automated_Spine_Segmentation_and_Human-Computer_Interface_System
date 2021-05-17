@@ -4,13 +4,14 @@ from PyQt5.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime
                           QSize, QTime, QUrl, Qt, QEvent)
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QCoreApplication, Qt
-from PyQt5.QtGui import QStandardItem, QStandardItemModel
+from PyQt5.QtGui import QStandardItem, QStandardItemModel, QGuiApplication
 from generatedUiFile.Spine_BrokenUi import Ui_MainWindow
 import os, requests
 from PyQt5.QtWidgets import *
 from pydicom import dcmread
 from pydicom.filebase import DicomBytesIO
 import numpy as np
+from PIL import ImageQt
 WINDOW_SIZE = 0
 
 
@@ -65,8 +66,8 @@ class initialWidget(QtWidgets.QMainWindow):
         self.linkPage2Array() # 將影像處理頁面預設有五頁
         self.ui.pushButton_angle.clicked.connect(self.pushButtonAngleClicked) # 角度按鈕連結
         self.ui.pushButton_add_pic.clicked.connect(self.pushButtonAddPicClicked) # 加照片按鈕連結
-        self.ui.pushButton_pen.clicked.connect(self.pushButtonPenClicked)
-        self.ui.pushButton_save.clicked.connect(self.pushButtonSaveClicked)
+        self.ui.pushButton_pen.clicked.connect(self.pushButtonPenClicked) # 畫筆按鈕連結
+        self.ui.pushButton_save.clicked.connect(self.pushButtonSaveClicked) # 儲存按鈕連結
 
 #工具列-----------------------------------------------------------------------------------------------------------
     def picMouseReleased(self, event, _i, _j):
@@ -108,6 +109,18 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.pen_end_y[_i][_j] = event.y()
                 self.pen_start_x[self.pic_ith][self.pic_jth] = event.pos().x()
                 self.pen_start_y[self.pic_ith][self.pic_jth] = event.pos().y()
+
+        elif (self.tool_lock == 'save'):
+            print("777")
+            image = ImageQt.fromqpixmap(self.pic[_i][_j].grab())
+            # selecting file path
+            filePath, _ = QFileDialog.getSaveFileName(self, "Save Image", "",
+                                                      "PNG(*.png);;JPEG(*.jpg *.jpeg);;All Files(*.*) ")
+            # if file path is blank return back
+            if filePath == "":
+                return
+            # saving canvas at desired pathrad
+            image.save(filePath)
 
     def picMouseMove(self, event, _i, _j):
         # distance_from_center = round(((event.y() - self.pic_start_y[self.pic_ith][self.pic_jth])**2 + (event.x() - self.pic_start_x[self.pic_ith][self.pic_jth])**2)**0.5)
@@ -159,7 +172,9 @@ class initialWidget(QtWidgets.QMainWindow):
             p.setPen(pen)
             p.drawLine(self.pen_end_x[_i][_j], self.pen_end_y[_i][_j], self.pen_start_x[_i][_j],
                        self.pen_start_y[_i][_j])
-        q.drawPixmap(0, 0, self.transparent_pix[_i][_j])
+
+        q.drawPixmap(0, 0, 512, 512, self.transparent_pix[_i][_j])
+        #q.drawPixmap(0, 0, self.transparent_pix[_i][_j])
         # show every angle
         # for k in range(1, self.MAXIMUM_PAGE + 1):
         #     for v in range(1, (self.MAXIMUM_PIC + 1)):
@@ -184,16 +199,8 @@ class initialWidget(QtWidgets.QMainWindow):
     def pushButtonPenClicked(self):
         self.tool_lock = 'pen'
 
-    def pushButtonSaveClicked(self):
-        # selecting file path
-        filePath, _ = QFileDialog.getSaveFileName(self.pic[1][1], "Save Image", "",
-                                                  "PNG(*.png);;JPEG(*.jpg *.jpeg);;All Files(*.*) ")
-        # if file path is blank return back
-        if filePath == "":
-            return
-        # saving canvas at desired path
-        self.pic[1][1].save(filePath)
-
+    def pushButtonSaveClicked(self): # need i, j
+        self.tool_lock = 'save'
 
     
 
