@@ -12,7 +12,7 @@ from generatedUiFile.Spine_BrokenUi import Ui_MainWindow
 import os, requests
 from PyQt5.QtWidgets import *
 from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene
-from pydicom import dcmread
+from pydicom import dcmread, Dataset
 from pydicom.filebase import DicomBytesIO
 import numpy as np
 from PIL import ImageQt
@@ -221,7 +221,7 @@ class initialWidget(QtWidgets.QMainWindow):
         x = self.move_moving_x[_i][_j]+ self.magnifier_pad_x[_i][_j]
         y = self.move_moving_y[_i][_j]+ self.magnifier_pad_y[_i][_j]
 
-        self.qimage = QtGui.QImage(self.pic_pixels[_i][_j], self.pic_pixels[_i][_j].shape[1], self.pic_pixels[_i][_j].shape[0], QtGui.QImage.Format_Grayscale16)
+        self.qimage = QtGui.QImage(self.pic_adjust_pixels[_i][_j], self.pic_adjust_pixels[_i][_j].shape[1], self.pic_adjust_pixels[_i][_j].shape[0], QtGui.QImage.Format_Grayscale16)
         pixmap = QtGui.QPixmap(self.qimage)
         q.drawPixmap(x, y, img_width, img_height, pixmap)
         p = QtGui.QPainter(self.transparent_pix[_i][_j])
@@ -544,9 +544,11 @@ class initialWidget(QtWidgets.QMainWindow):
         ds = dcmread(dicom_path)
         arr = ds.pixel_array
         arr = np.uint16(arr)
+        pic_original_pixels[i][j] = arr
         rows = arr.shape[0]
         cols = arr.shape[1]
         tmp = 320
+        
         for x in range(0, rows):
             for y in range(0, cols):
                 if(arr[x, y]>tmp):
@@ -554,7 +556,7 @@ class initialWidget(QtWidgets.QMainWindow):
         for x in range(0, rows):
             for y in range(0, cols):
                 arr[x, y] = arr[x, y]/tmp * 65535
-        self.pic_pixels[i][j] = arr
+        self.pic_adjust_pixels[i][j] = arr
         
         # pixmap_resized = pixmap.scaled(self.pic_label_width * self.size, self.pic_label_height * self.size,QtCore.Qt.KeepAspectRatio)
         # self.pic[i][j].move(200, 0)
@@ -617,7 +619,8 @@ class initialWidget(QtWidgets.QMainWindow):
         self.move_end_y = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
         self.move_x = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
         self.move_y = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
-        self.pic_pixels = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 照片對比度須存pixel array用
+        self.pic_adjust_pixels = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 照片對比度須存改過的pixel array用
+        self.pic_original_pixels = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 照片對比度須存原本的pixel array用
         var_array_pic = 'self.pic'
         for i in range(1, self.MAXIMUM_PAGE + 1):
             for j in range(1, (self.MAXIMUM_PIC + 1)):
