@@ -86,6 +86,7 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.input_no.setCompleter(completer)  # 搜尋紀錄
         self.linkPage2Array() # 將影像處理頁面預設有五頁
         self.ui.pushButton_angle.clicked.connect(self.pushButtonAngleClicked) # 角度按鈕連結
+        self.ui.pushButton_ruler.clicked.connect(self.pushButtonRulerClicked)
         self.ui.pushButton_add_pic.clicked.connect(self.pushButtonAddPicClicked) # 加照片按鈕連結
 
         self.ui.pushButton_pen.clicked.connect(self.pushButtonPenClicked)   # 畫筆按鈕連結
@@ -95,12 +96,12 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.pushButton_rotate.clicked.connect(lambda: self.slideRotateLeftOrRight())    # 打開旋轉的frame
         self.ui.pushButton_rotate_right.clicked.connect(self.rotate_image_right)    #向右旋轉
         self.ui.pushButton_rotate_left.clicked.connect(self.rotate_image_left)  #向左旋轉
-        self.ui.zoomIn.clicked.connect(self.image_zoom_in)
-        self.ui.zoomOut.clicked.connect(self.image_zoom_out)
-        self.ui.pushButton_move.clicked.connect(self.pushButtonMoveClicked)
+        self.ui.zoomIn.clicked.connect(self.image_zoom_in) # 放大
+        self.ui.zoomOut.clicked.connect(self.image_zoom_out) # 縮小 
+        self.ui.pushButton_move.clicked.connect(self.pushButtonMoveClicked) # 移動
         self.ui.patient_list.itemClicked.connect(self.patient_listItemClicked)
 
-#工具列-----------------------------------------------------------------------------------------------------------
+#照片Pressed, Released, Mouse Track, Show Pic----------------------------------------------------------------------
     def picMouseReleased(self, event, _i, _j):
         if(self.tool_lock == 'mouse'):
             return
@@ -131,6 +132,11 @@ class initialWidget(QtWidgets.QMainWindow):
             self.move_x[_i][_j] = self.move_x[_i][_j] + event.x() - self.move_start_x[_i][_j]
             self.move_y[_i][_j] = self.move_y[_i][_j] + event.y() - self.move_start_y[_i][_j]
             return
+        elif(self.tool_lock == 'ruler'):
+            if event.button() == Qt.LeftButton:
+                if(self.pic_clicked[_i][_j]):
+                    self.pic_clicked[_i][_j] = False
+                    self.ruler_coordinate_list[_i][_j].append(rulerCoordinate(self.tsx[_i][_j], self.tsy[_i][_j], self.tex[_i][_j], self.tey[_i][_j]))
 
     def picMousePressed(self, event, _i, _j):
         self.pic_ith = _i
@@ -143,7 +149,6 @@ class initialWidget(QtWidgets.QMainWindow):
                     self.pic_clicked[_i][_j] = True
                     self.angle_start_x[self.pic_ith][self.pic_jth] = event.pos().x()
                     self.angle_start_y[self.pic_ith][self.pic_jth] = event.pos().y()
-                    print("i ", self.pic_ith, " j ", self.pic_jth)
                 else:
                     self.pic_clicked[_i][_j] = False
         elif(self.tool_lock == 'pen'):
@@ -174,12 +179,15 @@ class initialWidget(QtWidgets.QMainWindow):
             if event.button() == QtCore.Qt.LeftButton:
                 self.move_start_x[_i][_j] = event.x()
                 self.move_start_y[_i][_j] = event.y()
-       
+        
+        elif(self.tool_lock == 'ruler'):
+            if event.button() == QtCore.Qt.LeftButton:
+                if(not self.pic_clicked[_i][_j]):
+                    self.pic_clicked[_i][_j] = True
+                    self.ruler_start_x[self.pic_ith][self.pic_jth] = event.pos().x()
+                    self.ruler_start_y[self.pic_ith][self.pic_jth] = event.pos().y()
 
     def picMouseMove(self, event, _i, _j):
-        # distance_from_center = round(((event.y() - self.pic_start_y[self.pic_ith][self.pic_jth])**2 + (event.x() - self.pic_start_x[self.pic_ith][self.pic_jth])**2)**0.5)
-        # self.label.setText('Coordinates: ( %d : %d )' % (event.x(), event.y()) + "Distance from center: " + str(distance_from_center))
-        # print(distance_from_center)
         if(self.tool_lock == 'mouse'):
             return
         elif(self.tool_lock == 'angle'):
@@ -201,8 +209,12 @@ class initialWidget(QtWidgets.QMainWindow):
             if event.buttons() == QtCore.Qt.LeftButton:
                 self.move_end_x[_i][_j] = event.x()
                 self.move_end_y[_i][_j] = event.y()
-                self.move_moving_x[_i][_j] = self.move_end_x[_i][_j] - self.move_start_x[_i][_j] +self.move_x[_i][_j]
-                self.move_moving_y[_i][_j] = self.move_end_y[_i][_j] - self.move_start_y[_i][_j] +self.move_y[_i][_j]
+                self.move_moving_x[_i][_j] = self.move_end_x[_i][_j] - self.move_start_x[_i][_j] + self.move_x[_i][_j]
+                self.move_moving_y[_i][_j] = self.move_end_y[_i][_j] - self.move_start_y[_i][_j] + self.move_y[_i][_j]
+        elif(self.tool_lock == 'ruler'):
+            if event.buttons() == QtCore.Qt.LeftButton:
+                self.ruler_end_x[_i][_j] = event.x()
+                self.ruler_end_y[_i][_j] = event.y()
         self.update()
 
 
@@ -212,6 +224,7 @@ class initialWidget(QtWidgets.QMainWindow):
         #     self.rotate_angle[_i][_j] = self.rotate_angle[self.pic_ith][self.pic_jth]
         q = QtGui.QPainter(self.pic[_i][_j])
         q.resetTransform()
+        q.setRenderHint(QtGui.QPainter.Antialiasing)
         q.translate(self.pic_label_width / 2, self.pic_label_height / 2)  # 把旋轉中心設成（pic_label_width/2, pic_label_height/2）
         q.rotate(self.rotate_angle[_i][_j])
         q.translate(-self.pic_label_width / 2, -self.pic_label_height / 2)
@@ -230,11 +243,10 @@ class initialWidget(QtWidgets.QMainWindow):
                 pass
             else:
                 self.pic[_i][_j].setMouseTracking(True)
-
                 pen = QtGui.QPen()
-                pen.setWidth(6)
+                pen.setWidth(2)
+                pen.setColor(QtGui.QColor(5, 105, 25))
                 q.setPen(pen)
-
                 # tsx = transitved start x
                 self.tsx[_i][_j], self.tsy[_i][_j] = self.transitiveWithBiasMatrix(self.angle_start_x[_i][_j], self.angle_start_y[_i][_j], self.rotate_angle[_i][_j])
                 self.tmx[_i][_j], self.tmy[_i][_j] = self.transitiveWithBiasMatrix(self.angle_middle_x[_i][_j], self.angle_middle_y[_i][_j], self.rotate_angle[_i][_j])
@@ -249,25 +261,69 @@ class initialWidget(QtWidgets.QMainWindow):
             tpsx, tpsy = self.transitiveWithBiasMatrix(self.pen_start_x[_i][_j], self.pen_start_y[_i][_j], self.rotate_angle[_i][_j])
             tpex, tpey = self.transitiveWithBiasMatrix(self.pen_end_x[_i][_j], self.pen_end_y[_i][_j], self.rotate_angle[_i][_j])
             p.drawLine(tpex, tpey, tpsx, tpsy)
-
+        elif(self.tool_lock == 'ruler'):
+            if(self.pic_clicked[_i][_j]):
+                self.pic[_i][_j].setMouseTracking(True)
+                pen = QtGui.QPen()
+                pen.setWidth(2)
+                pen.setColor(QtGui.QColor(5, 105, 25))
+                q.setPen(pen)
+                self.tsx[_i][_j], self.tsy[_i][_j] = self.transitiveWithBiasMatrix(self.ruler_start_x[_i][_j], self.ruler_start_y[_i][_j], self.rotate_angle[_i][_j])
+                self.tex[_i][_j], self.tey[_i][_j] = self.transitiveWithBiasMatrix(self.ruler_end_x[_i][_j], self.ruler_end_y[_i][_j], self.rotate_angle[_i][_j])
+                print(self.ruler_start_x[self.pic_ith][self.pic_jth], self.ruler_start_y[self.pic_ith][self.pic_jth])
+                q.drawLine(self.tex[_i][_j], self.tey[_i][_j], self.tsx[_i][_j], self.tsy[_i][_j])
+                
         q.drawPixmap(0, 0, self.transparent_pix[_i][_j])
         # show every angle
         for w in self.angle_coordinate_list[_i][_j]:
             pen = QtGui.QPen()
-            pen.setWidth(6)
+            pen.setWidth(2)
+            pen.setColor(QtGui.QColor(5, 105, 25))
             q.setPen(pen)
             q.drawPolyline(w.points)
+            # 把旋轉過的點再轉回來
             t_index = int((-self.rotate_angle[_i][_j] % 360) / 90)
-            t_x = w.mp.x() - self.rotate_coordinate_system[t_index][0]
-            t_y = w.mp.y() - self.rotate_coordinate_system[t_index][1]
+            label_x = w.mp.x() - self.rotate_coordinate_system[t_index][0]
+            label_y = w.mp.y() - self.rotate_coordinate_system[t_index][1]
+            t_x = w.ep.x() - self.rotate_coordinate_system[t_index][0]
+            t_y = w.ep.y() - self.rotate_coordinate_system[t_index][1]
+            label_x, label_y = self.transitiveMatrix(label_x, label_y, -self.rotate_angle[_i][_j])
             t_x, t_y = self.transitiveMatrix(t_x, t_y, -self.rotate_angle[_i][_j])
-            t_label = QtCore.QPointF(t_x + 10, t_y)
-            f = q.font()
-            f.setPixelSize(20)
-            q.setFont(f)
-            q.save()
+            label_ybias = 12 if t_y < label_y else -12
+            t_label = QtCore.QPointF(label_x + 10, label_y + label_ybias)
+            q.save() # 要用來show出label，所以reset所有的transform
             q.resetTransform()
-            q.drawText(t_label, str(round(w.angle, 1)))
+            f = q.font()
+            f.setPixelSize(15)
+            q.setFont(f)
+            q.setPen(QtGui.QColor(210, 210, 10))            
+            q.drawText(t_label, str(round(w.angle, 1)) + "°")
+            q.restore() 
+        for w in self.ruler_coordinate_list[_i][_j]:
+            pen = QtGui.QPen()
+            pen.setWidth(2)
+            pen.setColor(QtGui.QColor(5, 105, 25))
+            q.setPen(pen)
+            q.drawLine(w.sp, w.ep)
+            # 把旋轉過的點再轉回來
+            t_index = int((-self.rotate_angle[_i][_j] % 360) / 90)
+            ts_x = w.sp.x() - self.rotate_coordinate_system[t_index][0]
+            ts_y = w.sp.y() - self.rotate_coordinate_system[t_index][1]
+            te_x = w.ep.x() - self.rotate_coordinate_system[t_index][0]
+            te_y = w.ep.y() - self.rotate_coordinate_system[t_index][1]
+            ts_x, ts_y = self.transitiveMatrix(ts_x, ts_y, -self.rotate_angle[_i][_j])
+            te_x, te_y = self.transitiveMatrix(te_x, te_y, -self.rotate_angle[_i][_j])
+            if ts_x > te_x:
+                t_label = QtCore.QPointF(ts_x + 10, ts_y)
+            else:
+                t_label = QtCore.QPointF(te_x + 10, te_y) 
+            q.save() # 要用來show出label，所以reset所有的transform
+            q.resetTransform()
+            f = q.font()
+            f.setPixelSize(15)
+            q.setFont(f)
+            q.setPen(QtGui.QColor(210, 210, 10))            
+            q.drawText(t_label, str(round(w.length, 2)) + "pixels")
             q.restore() 
         q.end()
         # q.resetTransform()
@@ -276,6 +332,9 @@ class initialWidget(QtWidgets.QMainWindow):
 #按鈕連結處--------------------------------------------------------------------------------------------------------
 
     def pushButtonAngleClicked(self):
+        if(self.tool_lock == 'ruler'):
+            self.pic_clicked[self.pic_ith][self.pic_jth] = False
+            self.pic_released[self.pic_ith][self.pic_jth] = False
         self.tool_lock = 'angle'
 
     def pushButtonAddPicClicked(self):
@@ -317,11 +376,12 @@ class initialWidget(QtWidgets.QMainWindow):
 
     def pushButtonMoveClicked(self):
         self.tool_lock = 'move'
-
-    #MENU選單---------------------------------------------------------------------------------------------------------
-    #add patient
     
-
+    def pushButtonRulerClicked(self):
+        if(self.tool_lock == 'angle'):
+            self.pic_clicked[self.pic_ith][self.pic_jth] = False
+            self.pic_released[self.pic_ith][self.pic_jth] = False
+        self.tool_lock = 'ruler'
 
     def slideMagnifierZoomInOrOut(self):
             zoom_frame_width = self.ui.zoom_frame.width()
@@ -351,9 +411,6 @@ class initialWidget(QtWidgets.QMainWindow):
         self.animation.setEndValue(new_rotate_frame_width)
         self.animation.setEasingCurve(QtCore.QEasingCurve.InOutQuart)
         self.animation.start()
-
-
-
 
     # def pushButtonBrightnessClicked(self):
 #MENU選單---------------------------------------------------------------------------------------------------------
@@ -532,7 +589,6 @@ class initialWidget(QtWidgets.QMainWindow):
         closeAct.triggered.connect(self.closePatient)
         popMenu.exec_(self.ui.patient_list.mapToGlobal(position))
 
-#其他/初始--------------------------------------------------------------------------------------------------------
     def transitiveMatrix(self, _x, _y, theda):
         radi = np.deg2rad(theda)
         tx = _x * np.cos(radi) + _y * np.sin(radi)
@@ -552,9 +608,9 @@ class initialWidget(QtWidgets.QMainWindow):
         ds = dcmread(dicom_path)
         arr = ds.pixel_array
         arr = np.uint8(arr)
-        self.qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], QtGui.QImage.Format_Grayscale8)
+        qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], QtGui.QImage.Format_Grayscale8)
 
-        pixmap = QtGui.QPixmap(self.qimage)
+        pixmap = QtGui.QPixmap(qimage)
         # pixmap_resized = pixmap.scaled(self.pic_label_width * self.size, self.pic_label_height * self.size,QtCore.Qt.KeepAspectRatio)
         # self.pic[i][j].move(200, 0)
         self.pic[i][j].setPixmap(pixmap)
@@ -582,12 +638,16 @@ class initialWidget(QtWidgets.QMainWindow):
             exec("%s[%d] = %s_%d" % (var_array_thumbnail_list, i, var_thumbnail_list, i))
         # pics
         var_pic = 'self.ui.pic'
-        self.pic = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
-        self.pen_start_x = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
+        self.pic = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 對應到照片的label array
+        self.pen_start_x = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] #---筆---
         self.pen_start_y = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
         self.pen_end_x = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
-        self.pen_end_y = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
-        self.angle_start_x = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
+        self.pen_end_y = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] #---筆---
+        self.ruler_start_x = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] #---尺---
+        self.ruler_start_y = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
+        self.ruler_end_x = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
+        self.ruler_end_y = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] #---尺---
+        self.angle_start_x = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] #---角度---
         self.angle_start_y = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
         self.angle_middle_x = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
         self.angle_middle_y = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
@@ -598,11 +658,11 @@ class initialWidget(QtWidgets.QMainWindow):
         self.tmx = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
         self.tmy = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
         self.tex = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
-        self.tey = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
-        
-        self.pic_clicked = [ [False] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
-        self.pic_released = [ [False] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
-        self.angle_coordinate_list = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
+        self.tey = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] #---角度---
+        self.pic_clicked = [ [False] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 哪張照片被clicked
+        self.pic_released = [ [False] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 哪張照片被 released
+        self.ruler_coordinate_list = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 每張照片中的所有尺存在[][]中
+        self.angle_coordinate_list = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 每張照片中的所有角度存在[][]中
         self.rotate_angle = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
         self.size = [[1] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
         self.size_last = [[1] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
@@ -624,6 +684,8 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.pic[i][j].setText("%d-%d" % (i, j))
                 self.pen_start_x[i][j] = self.pen_start_y[i][j] = 0
                 self.pen_end_x[i][j] = self.pen_end_y[i][j] = 0
+                self.ruler_start_x[i][j] = self.ruler_start_y[i][j] = 0
+                self.ruler_end_x[i][j] = self.ruler_end_y[i][j] = 0                
                 self.angle_start_x[i][j] = self.angle_start_y[i][j] = 0
                 self.angle_middle_x[i][j] = self.angle_middle_y[i][j] = 0
                 self.angle_end_x[i][j] = self.angle_end_y[i][j] = 0
@@ -631,6 +693,7 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.tmx[i][j] = self.tmy[i][j] = 0
                 self.tex[i][j] = self.tey[i][j] = 0
                 self.angle_coordinate_list[i][j] = []
+                self.ruler_coordinate_list[i][j] = []
         self.pic_cnt = [0] * (self.MAXIMUM_PAGE + 1)
         self.pic_ith = self.pic_jth = 1
         self.rotate_coordinate_system = [[0, 0], [512, 0], [512, 512], [0, 512]]
@@ -676,7 +739,12 @@ class initialWidget(QtWidgets.QMainWindow):
 class Patient():
     def __init__(self, _pt_id, _pt_path):
         self.pt_id = _pt_id
-        self.pt_path = __pt_path
+        self.pt_path = _pt_path
+class rulerCoordinate():
+    def __init__(self, _sx, _sy, _ex, _ey):
+        self.sp = QtCore.QPointF(_sx, _sy)
+        self.ep = QtCore.QPointF(_ex, _ey)
+        self.length = ((_sx - _ex) ** 2 + (_sy - _ey) ** 2) ** 0.5
 class angleCoordinate():
     def __init__(self, _sx, _sy, _mx, _my, _ex, _ey):
         self.points = QtGui.QPolygonF()
