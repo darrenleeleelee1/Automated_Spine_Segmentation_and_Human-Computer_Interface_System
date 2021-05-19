@@ -283,8 +283,6 @@ class initialWidget(QtWidgets.QMainWindow):
         print(filetype)
         # fileName2, ok2 = QFileDialog.getSaveFileName(6self,"檔案儲存","./","All Files (*);;Text Files (*.txt)")
         # copyfile(pic_file_path, dst)
-        #backend
-        # fileName2, ok2 = QFileDialog.getSaveFileName(self,"檔案儲存","./","All Files (*);;Text Files (*.txt)")
 
     def pushButtonPenClicked(self):
         self.tool_lock = 'pen'
@@ -292,8 +290,7 @@ class initialWidget(QtWidgets.QMainWindow):
     # save photo .png
     def pushButtonSaveClicked(self):
         image = ImageQt.fromqpixmap(self.pic[self.pic_ith][self.pic_jth].grab())
-        filePath, _ = QFileDialog.getSaveFileName(self, "Save Image", "",
-                                                  "PNG(*.png)") # ;;JPEG(*.jpg *.jpeg);;All Files(*.*) 
+        filePath, _ = QFileDialog.getSaveFileName(self, "Save Image", "", "PNG(*.png)") # ;;JPEG(*.jpg *.jpeg);;All Files(*.*) 
         if filePath == "":
             return
         image.save(filePath)
@@ -318,11 +315,11 @@ class initialWidget(QtWidgets.QMainWindow):
     def pushButtonMoveClicked(self):
         self.tool_lock = 'move'
 
-    #MENU選單---------------------------------------------------------------------------------------------------------
-    #add patient
-    
+    def pushButtonBrightnessClicked(self):
 
 
+        return 
+#MENU選單---------------------------------------------------------------------------------------------------------
     def slideMagnifierZoomInOrOut(self):
             zoom_frame_width = self.ui.zoom_frame.width()
             if zoom_frame_width == 0:
@@ -352,11 +349,6 @@ class initialWidget(QtWidgets.QMainWindow):
         self.animation.setEasingCurve(QtCore.QEasingCurve.InOutQuart)
         self.animation.start()
 
-
-
-
-    # def pushButtonBrightnessClicked(self):
-#MENU選單---------------------------------------------------------------------------------------------------------
     def addPatient(self): 
         if(not self.empty_page_stack):
                 self.pageFull()
@@ -531,8 +523,7 @@ class initialWidget(QtWidgets.QMainWindow):
             popMenu.addAction(closeAct)
         closeAct.triggered.connect(self.closePatient)
         popMenu.exec_(self.ui.patient_list.mapToGlobal(position))
-
-#其他/初始--------------------------------------------------------------------------------------------------------
+    
     def transitiveMatrix(self, _x, _y, theda):
         radi = np.deg2rad(theda)
         tx = _x * np.cos(radi) + _y * np.sin(radi)
@@ -551,9 +542,19 @@ class initialWidget(QtWidgets.QMainWindow):
         dicom_path = "./tmp/" + patient_no + "/" + patient_dics
         ds = dcmread(dicom_path)
         arr = ds.pixel_array
-        arr = np.uint8(arr)
-        self.qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], QtGui.QImage.Format_Grayscale8)
-
+        arr = np.uint16(arr)
+        rows = arr.shape[0]
+        cols = arr.shape[1]
+        tmp = 320
+        for x in range(0, rows):
+            for y in range(0, cols):
+                if(arr[x, y]>tmp):
+                    arr[x, y] = tmp
+        for x in range(0, rows):
+            for y in range(0, cols):
+                arr[x, y] = arr[x, y]/tmp * 65535
+        
+        self.qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], QtGui.QImage.Format_Grayscale16)
         pixmap = QtGui.QPixmap(self.qimage)
         # pixmap_resized = pixmap.scaled(self.pic_label_width * self.size, self.pic_label_height * self.size,QtCore.Qt.KeepAspectRatio)
         # self.pic[i][j].move(200, 0)
@@ -676,7 +677,7 @@ class initialWidget(QtWidgets.QMainWindow):
 class Patient():
     def __init__(self, _pt_id, _pt_path):
         self.pt_id = _pt_id
-        self.pt_path = __pt_path
+        self.pt_path = _pt_path
 class angleCoordinate():
     def __init__(self, _sx, _sy, _mx, _my, _ex, _ey):
         self.points = QtGui.QPolygonF()
