@@ -207,7 +207,7 @@ class initialWidget(QtWidgets.QMainWindow):
 
 
 
-    def picPaint(self, event, pixmap, _i, _j):
+    def picPaint(self, event, _i, _j):
         # if _i == self.pic_ith and _j == self.pic_jth:
         #     self.rotate_angle[_i][_j] = self.rotate_angle[self.pic_ith][self.pic_jth]
         q = QtGui.QPainter(self.pic[_i][_j])
@@ -220,6 +220,9 @@ class initialWidget(QtWidgets.QMainWindow):
 
         x = self.move_moving_x[_i][_j]+ self.magnifier_pad_x[_i][_j]
         y = self.move_moving_y[_i][_j]+ self.magnifier_pad_y[_i][_j]
+
+        self.qimage = QtGui.QImage(self.pic_pixels[_i][_j], self.pic_pixels[_i][_j].shape[1], self.pic_pixels[_i][_j].shape[0], QtGui.QImage.Format_Grayscale16)
+        pixmap = QtGui.QPixmap(self.qimage)
         q.drawPixmap(x, y, img_width, img_height, pixmap)
         p = QtGui.QPainter(self.transparent_pix[_i][_j])
 
@@ -316,8 +319,6 @@ class initialWidget(QtWidgets.QMainWindow):
         self.tool_lock = 'move'
 
     def pushButtonBrightnessClicked(self):
-
-
         return 
 #MENU選單---------------------------------------------------------------------------------------------------------
     def slideMagnifierZoomInOrOut(self):
@@ -553,17 +554,16 @@ class initialWidget(QtWidgets.QMainWindow):
         for x in range(0, rows):
             for y in range(0, cols):
                 arr[x, y] = arr[x, y]/tmp * 65535
+        self.pic_pixels[i][j] = arr
         
-        self.qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], QtGui.QImage.Format_Grayscale16)
-        pixmap = QtGui.QPixmap(self.qimage)
         # pixmap_resized = pixmap.scaled(self.pic_label_width * self.size, self.pic_label_height * self.size,QtCore.Qt.KeepAspectRatio)
         # self.pic[i][j].move(200, 0)
-        self.pic[i][j].setPixmap(pixmap)
+        # self.pic[i][j].setPixmap(pixmap)
         # self.pic[i][j].setGeometry(QtCore.QRect(100, 100, 400, 500))
         self.pic[i][j].mousePressEvent = lambda pressed: self.picMousePressed(pressed, i, j) # 讓每個pic的mousePressEvent可以傳出告訴自己是誰
         self.pic[i][j].mouseReleaseEvent = lambda released: self.picMouseReleased(released, i, j)
         self.pic[i][j].mouseMoveEvent = lambda moved: self.picMouseMove(moved, i, j)
-        self.pic[i][j].paintEvent = lambda painted: self.picPaint(painted, pixmap, i, j)
+        self.pic[i][j].paintEvent = lambda painted: self.picPaint(painted, i, j)
 
     def linkPage2Array(self, _MAXIMUM_PAGE = 5, _MAXIMUM_PIC = 4):
         # 把QtDesigner的一些重複的Widget用array對應
@@ -617,7 +617,7 @@ class initialWidget(QtWidgets.QMainWindow):
         self.move_end_y = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
         self.move_x = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
         self.move_y = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
-
+        self.pic_pixels = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 照片對比度須存pixel array用
         var_array_pic = 'self.pic'
         for i in range(1, self.MAXIMUM_PAGE + 1):
             for j in range(1, (self.MAXIMUM_PIC + 1)):
