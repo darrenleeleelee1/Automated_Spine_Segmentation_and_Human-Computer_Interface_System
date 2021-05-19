@@ -19,9 +19,6 @@ from PIL import ImageQt
 import shutil
 WINDOW_SIZE = 0
 
-
-
-
 class initialWidget(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -55,6 +52,10 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.patient_list.setContextMenuPolicy(Qt.CustomContextMenu)
         self.ui.patient_list.customContextMenuRequested.connect(self.myListWidgetContext)
 
+        #brightness相關
+        self.aboutBrightness()
+        
+
         self.backend()
 
 
@@ -67,8 +68,18 @@ class initialWidget(QtWidgets.QMainWindow):
                     e.accept()
         self.ui.header.mouseMoveEvent = moveWindow  # 移動視窗
         self.show()
-
-
+    def aboutBrightness(self): # 對比度選單設定
+        self.ui.pushButton_brightness.setStyleSheet("::menu-indicator{ image: none; }") #remove triangle
+        self.window_menu = QtWidgets.QMenu()
+        self.window_menu.addAction('Default window', lambda: self.getWindow(0, 0, self.pic_ith, self.pic_jth))
+        self.window_menu.addAction('[160/320]', lambda: self.getWindow(160, 320, self.pic_ith, self.pic_jth))
+        self.window_menu.addAction('[320/640]', lambda: self.getWindow(320, 640, self.pic_ith, self.pic_jth))
+        self.window_menu.addAction('[640/1280]', lambda: self.getWindow(640, 1280, self.pic_ith, self.pic_jth))
+        self.window_menu.addAction('[1280/2560]', lambda: self.getWindow(1280, 2560, self.pic_ith, self.pic_jth))
+        self.window_menu.addAction('[2560/5120]', lambda: self.getWindow(2560, 5120, self.pic_ith, self.pic_jth))
+        self.window_menu.addAction('Custom window', lambda: self.getWindow(1, 1, self.pic_ith, self.pic_jth))
+        self.ui.pushButton_brightness.setMenu(self.window_menu)
+        
     def backend(self):
         self.ui.stackedWidget_right.setCurrentWidget(self.ui.recently_viewed_page)
         self.ui.close_button.clicked.connect(QCoreApplication.instance().quit)  # 叉叉
@@ -275,6 +286,28 @@ class initialWidget(QtWidgets.QMainWindow):
         q.end()
         # q.resetTransform()
 
+    #brightness menu
+    def getWindow(self, WL, WW, _i, _j):
+        print(WL, WW, _i, _j)
+        self.pic_adjust_pixels[_i][_j] = self.pic_original_pixels[_i][_j]
+        arr = self.pic_adjust_pixels[_i][_j]
+        # if(WL == 0 & WW == 0): # default 存dicom中的WW WL
+
+        # elif(WL == 1 & WW == 1): # custom 跳出小視窗輸入
+
+        vMappingWindow = np.vectorize(lambda x : self.mappingWindow(x, WL, WW))
+        arr = vMappingWindow(arr)
+        self.pic_adjust_pixels[_i][_j] = arr
+
+    def mappingWindow(self, x, WL, WW):
+        pixel_max = WL + WW/2
+        pixel_min = WL - WW/2
+        if(x > pixel_max):
+            x = pixel_max
+        elif(x < pixel_min):
+            x = pixel_min
+        x = (x - pixel_min) / (pixel_max - pixel_min) * 65535
+        return x
 
 #按鈕連結處--------------------------------------------------------------------------------------------------------
 
@@ -538,25 +571,49 @@ class initialWidget(QtWidgets.QMainWindow):
         ty += self.rotate_coordinate_system[index][1]
         return tx, ty
 
+    def picPixelMapping(self, arr,  WL, WW):
+        pixel_max = WL + WW/2
+        pixel_min = WL - WW/2
+
+        rows = arr.shape[0]
+        cols = arr.shape[1]
+        for x in range(0, rows):
+            for y in range(0, cols):
+                if(arr[x, y]>pixel_max):
+                    arr[x, y] = pixel_max
+                elif(arr[x, y] < pixel_min):
+                    arr[x, y] = pixel_min
+        for x in range(0, rows):
+            for y in range(0, cols):
+                arr[x, y] = (arr[x, y] - pixel_min) / (pixel_max - pixel_min) * 65535
+        return arr
+
     def showPic(self, i, j, patient_no, patient_dics):
         # print("showpic")
         dicom_path = "./tmp/" + patient_no + "/" + patient_dics
         ds = dcmread(dicom_path)
         arr = ds.pixel_array
         arr = np.uint16(arr)
-        pic_original_pixels[i][j] = arr
-        rows = arr.shape[0]
-        cols = arr.shape[1]
-        tmp = 320
+        self.pic_original_pixels[i][j] = arr
+        dicom_WL = ds[0x0028, 0x1050].value
+        dicom_WW = ds[0x0028, 0x1051].value
+        # print(dicom_WW)
+        # print(dicom_WL)
+        self.pic_adjust_pixels[i][j] = self.picPixelMapping(arr, dicom_WL, dicom_WW)
+        #
+        # rows = arr.shape[0]
+        # cols = arr.shape[1]
+        # tmp = 320
         
-        for x in range(0, rows):
-            for y in range(0, cols):
-                if(arr[x, y]>tmp):
-                    arr[x, y] = tmp
-        for x in range(0, rows):
-            for y in range(0, cols):
-                arr[x, y] = arr[x, y]/tmp * 65535
-        self.pic_adjust_pixels[i][j] = arr
+        # for x in range(0, rows):
+        #     for y in range(0, cols):
+        #         if(arr[x, y]>tmp):
+        #             arr[x, y] = tmp
+        # for x in range(0, rows):
+        #     for y in range(0, cols):
+        #         arr[x, y] = arr[x, y]/tmp * 65535
+        #
+        # self.pic_adjust_pixels[i][j] = arr
         
         # pixmap_resized = pixmap.scaled(self.pic_label_width * self.size, self.pic_label_height * self.size,QtCore.Qt.KeepAspectRatio)
         # self.pic[i][j].move(200, 0)
