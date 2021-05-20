@@ -28,7 +28,7 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.pt_list = []
-        self.model = QStandardItemModel()
+        self.search_record = QStandardItemModel()
         self.pic_label_width = 512
         self.pic_label_height = 512
 
@@ -54,7 +54,6 @@ class initialWidget(QtWidgets.QMainWindow):
         #右键菜单
         self.ui.patient_list.setContextMenuPolicy(Qt.CustomContextMenu)
         self.ui.patient_list.customContextMenuRequested.connect(self.myListWidgetContext)
-
         self.backend()
 
 
@@ -68,19 +67,25 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.header.mouseMoveEvent = moveWindow  # 移動視窗
         self.show()
 
+    
+    def closeEvent(self,event):
+        print("Closing")
+        self.saveSearchRecord()
+        event.accept()
 
     def backend(self):
         self.ui.stackedWidget_right.setCurrentWidget(self.ui.recently_viewed_page)
-        self.ui.close_button.clicked.connect(QCoreApplication.instance().quit)  # 叉叉
+        self.ui.close_button.clicked.connect(self.close)  # 叉叉
         self.ui.minimize_button.clicked.connect(lambda: self.showMinimized())  # minimize window
         self.ui.restore_button.clicked.connect(lambda: self.restoreOrMaximizeWindow())  # restore window
         self.setWindowFlag(QtCore.Qt.FramelessWindowHint)  # 隱藏邊框
         self.ui.menu_toggle.clicked.connect(lambda: self.slideLeftMenu())  # slide menu
         self.ui.add_patient.clicked.connect(self.addPatient)
         self.ui.search.clicked.connect(lambda: self.ui.stackedWidget_right.setCurrentWidget(self.ui.search_page))
+        self.loadSearchRecord() # 載入搜尋紀錄
         self.ui.input_no.editingFinished.connect(self.addEntry)  # 按enter
         self.ui.search_no_button.clicked.connect(self.addEntry)  # 按 search_no
-        completer = QCompleter(self.model, self)
+        completer = QCompleter(self.search_record, self)
         self.ui.patient_list.itemClicked.connect(self.patient_listItemClicked)
         self.ui.no_list.itemClicked.connect(self.no_listItemClicked)
         self.ui.input_no.setCompleter(completer)  # 搜尋紀錄
@@ -519,6 +524,23 @@ class initialWidget(QtWidgets.QMainWindow):
         os.rmdir(close_path)
 # search page-----------------------------------------------------------------------------------------------------
     # search
+    def loadSearchRecord(self):
+        self.search_record_cnt = 0
+        with open('C:/Users/Darren/Documents/Projects/Spine_Broken/tmp/search_record.txt', 'r') as f:
+            medical_numbers = f.read().splitlines()
+            for k in medical_numbers:
+                self.search_record.insertRow(self.search_record_cnt, QStandardItem(k))
+                self.search_record_cnt += 1
+        # print(self.search_record_cnt)
+        
+
+    def saveSearchRecord(self):
+        with open('C:/Users/Darren/Documents/Projects/Spine_Broken/tmp/search_record.txt', 'w') as f:
+            print(self.search_record_cnt)
+            for i in range(self.search_record_cnt):
+                print(self.search_record.item(i).text())
+                f.write(self.search_record.item(i).text() + "\n")
+
     def addEntry(self):
         entryItem = self.ui.input_no.text()
         if entryItem != '':
@@ -532,16 +554,14 @@ class initialWidget(QtWidgets.QMainWindow):
             self.ui.no_list.clear()
             for id in self.pt_list:
                 self.ui.no_list.addItem(id)
+       
 
-        list1 = []
-        list1.insert(0, entryItem)  # 也把 entryItem 存在 list1 裡傳給後端
-        # print("list = ", list1)
-
-        completer = QCompleter(self.model, self)
+        completer = QCompleter(self.search_record, self)
         self.ui.input_no.setCompleter(completer)
 
-        if not self.model.findItems(entryItem):
-            self.model.insertRow(0, QStandardItem(entryItem))
+        if not self.search_record.findItems(entryItem) and len(entryItem) != 0:
+            self.search_record_cnt += 1
+            self.search_record.insertRow(0, QStandardItem(entryItem))
 
     # open patient
     def no_listItemClicked(self, item):
