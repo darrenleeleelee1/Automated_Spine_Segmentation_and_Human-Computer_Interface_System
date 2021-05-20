@@ -1,26 +1,19 @@
 from os import listdir
-import math
 from os.path import join
 from PyQt5.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
                           QSize, QTime, QUrl, Qt, QEvent, QPointF)
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QCoreApplication, Qt
-
 from PyQt5.QtGui import QStandardItem, QStandardItemModel, QTransform, QPainter
-
 from generatedUiFile.Spine_BrokenUi import Ui_MainWindow
 import os, requests
 from PyQt5.QtWidgets import *
-from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene
 from pydicom import dcmread
 from pydicom.filebase import DicomBytesIO
 import numpy as np
 from PIL import ImageQt
 import shutil
 WINDOW_SIZE = 0
-
-
-
 
 class initialWidget(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
@@ -42,7 +35,7 @@ class initialWidget(QtWidgets.QMainWindow):
 
         self.tmp_cnt = 0
 
-        # 控制工具列現在選擇的工具為: mouse(defalut), pen, angle, ruler, move
+        # 控制工具列現在選擇的工具為: mouse(defalut), pen, angle, ruler, move, magnifier
         self.tool_lock = "mouse"
          # patient num map to page
         self.empty_page_stack = []
@@ -54,20 +47,16 @@ class initialWidget(QtWidgets.QMainWindow):
         #右键菜单
         self.ui.patient_list.setContextMenuPolicy(Qt.CustomContextMenu)
         self.ui.patient_list.customContextMenuRequested.connect(self.myListWidgetContext)
-
         self.backend()
-
 
         def moveWindow(e):
             if self.isMaximized() == False:  # Not maximized
-
                 if e.buttons() == Qt.LeftButton:
                     self.move(self.pos() + e.globalPos() - self.clickPosition)
                     self.clickPosition = e.globalPos()
                     e.accept()
         self.ui.header.mouseMoveEvent = moveWindow  # 移動視窗
         self.show()
-
 
     def backend(self):
         self.ui.stackedWidget_right.setCurrentWidget(self.ui.recently_viewed_page)
@@ -87,11 +76,9 @@ class initialWidget(QtWidgets.QMainWindow):
         self.linkPage2Array() # 將影像處理頁面預設有五頁
         self.ui.pushButton_angle.clicked.connect(self.pushButtonAngleClicked) # 角度按鈕連結
         self.ui.pushButton_add_pic.clicked.connect(self.pushButtonAddPicClicked) # 加照片按鈕連結
-
         self.ui.pushButton_pen.clicked.connect(self.pushButtonPenClicked)   # 畫筆按鈕連結
         self.ui.pushButton_save.clicked.connect(self.pushButtonSaveClicked) # 儲存照片按鈕連結
         self.ui.pushButton_magnifier.clicked.connect(lambda: self.slideMagnifierZoomInOrOut())  # 打開放大縮小的frame
-
         self.ui.pushButton_rotate.clicked.connect(lambda: self.slideRotateLeftOrRight())    # 打開旋轉的frame
         self.ui.pushButton_rotate_right.clicked.connect(self.rotate_image_right)    #向右旋轉
         self.ui.pushButton_rotate_left.clicked.connect(self.rotate_image_left)  #向左旋轉
@@ -113,8 +100,7 @@ class initialWidget(QtWidgets.QMainWindow):
                         self.angle_coordinate_list[_i][_j].append(angleCoordinate(
                             self.tsx[_i][_j], self.tsy[_i][_j],
                             self.tmx[_i][_j], self.tmy[_i][_j],
-                            self.tex[_i][_j], self.tey[_i][_j]
-                            ))
+                            self.tex[_i][_j], self.tey[_i][_j]))
                         self.tsx[_i][_j] = self.tmx[_i][_j] = 0
                         self.tsy[_i][_j] = self.tmy[_i][_j] = 0
                     self.pic_released[_i][_j] = False
@@ -127,7 +113,6 @@ class initialWidget(QtWidgets.QMainWindow):
             self.size_last[_i][_j] = self.size[_i][_j]
 
         elif(self.tool_lock == 'move'):
-
             self.move_x[_i][_j] = self.move_x[_i][_j] + event.x() - self.move_start_x[_i][_j]
             self.move_y[_i][_j] = self.move_y[_i][_j] + event.y() - self.move_start_y[_i][_j]
             return
@@ -143,7 +128,6 @@ class initialWidget(QtWidgets.QMainWindow):
                     self.pic_clicked[_i][_j] = True
                     self.angle_start_x[self.pic_ith][self.pic_jth] = event.pos().x()
                     self.angle_start_y[self.pic_ith][self.pic_jth] = event.pos().y()
-                    print("i ", self.pic_ith, " j ", self.pic_jth)
                 else:
                     self.pic_clicked[_i][_j] = False
         elif(self.tool_lock == 'pen'):
@@ -164,7 +148,6 @@ class initialWidget(QtWidgets.QMainWindow):
                 # self.size[_i][_j] = self.size[_i][_j] * 0.75
                 # self.move_moving_x[_i][_j] = self.move_moving_x[_i][_j] - (self.size[_i][_j] - self.size_last[_i][_j]) * event.pos().x()
                 # self.move_moving_y[_i][_j] = self.move_moving_y[_i][_j] - (self.size[_i][_j] - self.size_last[_i][_j]) * event.pos().y()
-
                 self.size[_i][_j] = self.size[_i][_j] * 0.8
                 self.magnifier_pad_x[_i][_j] = self.magnifier_pad_x[_i][_j] - (self.size[_i][_j] - self.size_last[_i][_j]) * event.pos().x()
                 self.magnifier_pad_y[_i][_j] = self.magnifier_pad_y[_i][_j] - (self.size[_i][_j] - self.size_last[_i][_j]) * event.pos().y()
@@ -174,7 +157,6 @@ class initialWidget(QtWidgets.QMainWindow):
             if event.button() == QtCore.Qt.LeftButton:
                 self.move_start_x[_i][_j] = event.x()
                 self.move_start_y[_i][_j] = event.y()
-       
 
     def picMouseMove(self, event, _i, _j):
         # distance_from_center = round(((event.y() - self.pic_start_y[self.pic_ith][self.pic_jth])**2 + (event.x() - self.pic_start_x[self.pic_ith][self.pic_jth])**2)**0.5)
@@ -199,17 +181,11 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.pen_end_y[_i][_j] = event.y()
         elif(self.tool_lock == 'move'):
             if event.buttons() == QtCore.Qt.LeftButton:
-                self.move_end_x[_i][_j] = event.x()
-                self.move_end_y[_i][_j] = event.y()
-                self.move_moving_x[_i][_j] = self.move_end_x[_i][_j] - self.move_start_x[_i][_j] +self.move_x[_i][_j]
-                self.move_moving_y[_i][_j] = self.move_end_y[_i][_j] - self.move_start_y[_i][_j] +self.move_y[_i][_j]
+                self.move_moving_x[_i][_j] = event.x() - self.move_start_x[_i][_j] +self.move_x[_i][_j]
+                self.move_moving_y[_i][_j] = event.y() - self.move_start_y[_i][_j] +self.move_y[_i][_j]
         self.update()
 
-
-
     def picPaint(self, event, pixmap, _i, _j):
-        # if _i == self.pic_ith and _j == self.pic_jth:
-        #     self.rotate_angle[_i][_j] = self.rotate_angle[self.pic_ith][self.pic_jth]
         q = QtGui.QPainter(self.pic[_i][_j])
         q.resetTransform()
         q.translate(self.pic_label_width / 2, self.pic_label_height / 2)  # 把旋轉中心設成（pic_label_width/2, pic_label_height/2）
@@ -218,8 +194,11 @@ class initialWidget(QtWidgets.QMainWindow):
         img_width = self.pic_label_width * self.size[_i][_j]
         img_height = self.pic_label_height * self.size[_i][_j]
 
-        x = self.move_moving_x[_i][_j]+ self.magnifier_pad_x[_i][_j]
-        y = self.move_moving_y[_i][_j]+ self.magnifier_pad_y[_i][_j]
+        self.tmmx[_i][_j], self.tmmy[_i][_j] = self.transitiveWithBiasMatrix(self.move_moving_x[_i][_j], self.move_moving_y[_i][_j], self.rotate_angle[_i][_j])
+        t_index = int((-self.rotate_angle[_i][_j] % 360) / 90)
+        x = self.tmmx[_i][_j] + self.magnifier_pad_x[_i][_j] - self.rotate_coordinate_system[t_index][0]
+        y = self.tmmy[_i][_j] + self.magnifier_pad_y[_i][_j] - self.rotate_coordinate_system[t_index][1]
+
         q.drawPixmap(x, y, img_width, img_height, pixmap)
         p = QtGui.QPainter(self.transparent_pix[_i][_j])
 
@@ -230,7 +209,6 @@ class initialWidget(QtWidgets.QMainWindow):
                 pass
             else:
                 self.pic[_i][_j].setMouseTracking(True)
-
                 pen = QtGui.QPen()
                 pen.setWidth(6)
                 q.setPen(pen)
@@ -270,11 +248,8 @@ class initialWidget(QtWidgets.QMainWindow):
             q.drawText(t_label, str(round(w.angle, 1)))
             q.restore() 
         q.end()
-        # q.resetTransform()
-
 
 #按鈕連結處--------------------------------------------------------------------------------------------------------
-
     def pushButtonAngleClicked(self):
         self.tool_lock = 'angle'
 
@@ -303,7 +278,6 @@ class initialWidget(QtWidgets.QMainWindow):
         self.rotate_angle[self.pic_ith][self.pic_jth] = self.rotate_angle[self.pic_ith][self.pic_jth] + 90
         self.update()
 
-
     def rotate_image_left(self):
         self.tool_lock = 'rotate'
         self.rotate_angle[self.pic_ith][self.pic_jth] = self.rotate_angle[self.pic_ith][self.pic_jth] - 90
@@ -320,14 +294,11 @@ class initialWidget(QtWidgets.QMainWindow):
 
     #MENU選單---------------------------------------------------------------------------------------------------------
     #add patient
-    
-
 
     def slideMagnifierZoomInOrOut(self):
             zoom_frame_width = self.ui.zoom_frame.width()
             if zoom_frame_width == 0:
                 new_zoom_frame_width = 100
-
             else:
                 new_zoom_frame_width = 0
             self.animation = QPropertyAnimation(self.ui.zoom_frame, b"minimumWidth")
@@ -337,12 +308,10 @@ class initialWidget(QtWidgets.QMainWindow):
             self.animation.setEasingCurve(QtCore.QEasingCurve.InOutQuart)
             self.animation.start()
 
-
     def slideRotateLeftOrRight(self):
         rotate_frame_width = self.ui.rotate_frame.width()
         if rotate_frame_width == 0:
             new_rotate_frame_width = 100
-
         else:
             new_rotate_frame_width = 0
         self.animation = QPropertyAnimation(self.ui.rotate_frame, b"minimumWidth")
@@ -351,9 +320,6 @@ class initialWidget(QtWidgets.QMainWindow):
         self.animation.setEndValue(new_rotate_frame_width)
         self.animation.setEasingCurve(QtCore.QEasingCurve.InOutQuart)
         self.animation.start()
-
-
-
 
     # def pushButtonBrightnessClicked(self):
 #MENU選單---------------------------------------------------------------------------------------------------------
@@ -478,11 +444,13 @@ class initialWidget(QtWidgets.QMainWindow):
 
         list1 = []
         list1.insert(0, entryItem)  # 也把 entryItem 存在 list1 裡傳給後端
+        for li in list1:
+            print(li)
         # print("list = ", list1)
 
         completer = QCompleter(self.model, self)
         self.ui.input_no.setCompleter(completer)
-
+        print("m", self.model)
         if not self.model.findItems(entryItem):
             self.model.insertRow(0, QStandardItem(entryItem))
 
@@ -532,7 +500,6 @@ class initialWidget(QtWidgets.QMainWindow):
         closeAct.triggered.connect(self.closePatient)
         popMenu.exec_(self.ui.patient_list.mapToGlobal(position))
 
-#其他/初始--------------------------------------------------------------------------------------------------------
     def transitiveMatrix(self, _x, _y, theda):
         radi = np.deg2rad(theda)
         tx = _x * np.cos(radi) + _y * np.sin(radi)
@@ -547,18 +514,12 @@ class initialWidget(QtWidgets.QMainWindow):
         return tx, ty
 
     def showPic(self, i, j, patient_no, patient_dics):
-        # print("showpic")
         dicom_path = "./tmp/" + patient_no + "/" + patient_dics
         ds = dcmread(dicom_path)
         arr = ds.pixel_array
         arr = np.uint8(arr)
         self.qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], QtGui.QImage.Format_Grayscale8)
-
         pixmap = QtGui.QPixmap(self.qimage)
-        # pixmap_resized = pixmap.scaled(self.pic_label_width * self.size, self.pic_label_height * self.size,QtCore.Qt.KeepAspectRatio)
-        # self.pic[i][j].move(200, 0)
-        self.pic[i][j].setPixmap(pixmap)
-        # self.pic[i][j].setGeometry(QtCore.QRect(100, 100, 400, 500))
         self.pic[i][j].mousePressEvent = lambda pressed: self.picMousePressed(pressed, i, j) # 讓每個pic的mousePressEvent可以傳出告訴自己是誰
         self.pic[i][j].mouseReleaseEvent = lambda released: self.picMouseReleased(released, i, j)
         self.pic[i][j].mouseMoveEvent = lambda moved: self.picMouseMove(moved, i, j)
@@ -599,7 +560,7 @@ class initialWidget(QtWidgets.QMainWindow):
         self.tmy = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
         self.tex = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
         self.tey = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
-        
+
         self.pic_clicked = [ [False] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
         self.pic_released = [ [False] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
         self.angle_coordinate_list = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
@@ -612,8 +573,9 @@ class initialWidget(QtWidgets.QMainWindow):
         self.move_start_y = [ [0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
         self.move_moving_x = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
         self.move_moving_y = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
-        self.move_end_x = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
-        self.move_end_y = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
+        self.tmmx = [[None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
+        self.tmmy = [[None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
+
         self.move_x = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
         self.move_y = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
 
@@ -631,6 +593,7 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.tmx[i][j] = self.tmy[i][j] = 0
                 self.tex[i][j] = self.tey[i][j] = 0
                 self.angle_coordinate_list[i][j] = []
+                self.tmmx[i][j] = self.tmmy[i][j] = 0
         self.pic_cnt = [0] * (self.MAXIMUM_PAGE + 1)
         self.pic_ith = self.pic_jth = 1
         self.rotate_coordinate_system = [[0, 0], [512, 0], [512, 512], [0, 512]]
@@ -676,7 +639,7 @@ class initialWidget(QtWidgets.QMainWindow):
 class Patient():
     def __init__(self, _pt_id, _pt_path):
         self.pt_id = _pt_id
-        self.pt_path = __pt_path
+        self.pt_path = _pt_path
 class angleCoordinate():
     def __init__(self, _sx, _sy, _mx, _my, _ex, _ey):
         self.points = QtGui.QPolygonF()
