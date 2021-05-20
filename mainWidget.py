@@ -71,14 +71,15 @@ class initialWidget(QtWidgets.QMainWindow):
     def aboutBrightness(self): # 對比度選單設定
         self.ui.pushButton_brightness.setStyleSheet("::menu-indicator{ image: none; }") #remove triangle
         self.window_menu = QtWidgets.QMenu()
-        self.window_menu.addAction('Default window', lambda: self.getWindow(0, 0, self.pic_ith, self.pic_jth))
-        self.window_menu.addAction('[160/320]', lambda: self.getWindow(160, 320, self.pic_ith, self.pic_jth))
-        self.window_menu.addAction('[320/640]', lambda: self.getWindow(320, 640, self.pic_ith, self.pic_jth))
-        self.window_menu.addAction('[640/1280]', lambda: self.getWindow(640, 1280, self.pic_ith, self.pic_jth))
-        self.window_menu.addAction('[1280/2560]', lambda: self.getWindow(1280, 2560, self.pic_ith, self.pic_jth))
-        self.window_menu.addAction('[2560/5120]', lambda: self.getWindow(2560, 5120, self.pic_ith, self.pic_jth))
-        self.window_menu.addAction('Custom window', lambda: self.getWindow(1, 1, self.pic_ith, self.pic_jth))
+        self.window_menu.addAction('Default window', lambda: self.getWindow(0, 0))
+        self.window_menu.addAction('[160/320]', lambda: self.getWindow(160, 320))
+        self.window_menu.addAction('[320/640]', lambda: self.getWindow(320, 640))
+        self.window_menu.addAction('[640/1280]', lambda: self.getWindow(640, 1280))
+        self.window_menu.addAction('[1280/2560]', lambda: self.getWindow(1280, 2560))
+        self.window_menu.addAction('[2560/5120]', lambda: self.getWindow(2560, 5120))
+        self.window_menu.addAction('Custom window', lambda: self.getWindow(1, 1))
         self.ui.pushButton_brightness.setMenu(self.window_menu)
+        
         
     def backend(self):
         self.ui.stackedWidget_right.setCurrentWidget(self.ui.recently_viewed_page)
@@ -244,11 +245,9 @@ class initialWidget(QtWidgets.QMainWindow):
                 pass
             else:
                 self.pic[_i][_j].setMouseTracking(True)
-
                 pen = QtGui.QPen()
                 pen.setWidth(6)
                 q.setPen(pen)
-
                 # tsx = transitved start x
                 self.tsx[_i][_j], self.tsy[_i][_j] = self.transitiveWithBiasMatrix(self.angle_start_x[_i][_j], self.angle_start_y[_i][_j], self.rotate_angle[_i][_j])
                 self.tmx[_i][_j], self.tmy[_i][_j] = self.transitiveWithBiasMatrix(self.angle_middle_x[_i][_j], self.angle_middle_y[_i][_j], self.rotate_angle[_i][_j])
@@ -287,27 +286,19 @@ class initialWidget(QtWidgets.QMainWindow):
         # q.resetTransform()
 
     #brightness menu
-    def getWindow(self, WL, WW, _i, _j):
-        print(WL, WW, _i, _j)
-        self.pic_adjust_pixels[_i][_j] = self.pic_original_pixels[_i][_j]
-        arr = self.pic_adjust_pixels[_i][_j]
-        # if(WL == 0 & WW == 0): # default 存dicom中的WW WL
+    def getWindow(self, WL, WW):
+        print(WL, WW)
+        self.pic_adjust_pixels[self.pic_ith][self.pic_jth] = np.copy(self.pic_original_pixels[self.pic_ith][self.pic_jth])
+        arr = self.pic_adjust_pixels[self.pic_ith][self.pic_jth]
+        self.pic_adjust_pixels[self.pic_ith][self.pic_jth] = np.copy(np.uint16(self.mappingWindow(arr, WL, WW)))
+        self.update()
 
-        # elif(WL == 1 & WW == 1): # custom 跳出小視窗輸入
-
-        vMappingWindow = np.vectorize(lambda x : self.mappingWindow(x, WL, WW))
-        arr = vMappingWindow(arr)
-        self.pic_adjust_pixels[_i][_j] = arr
-
-    def mappingWindow(self, x, WL, WW):
+    def mappingWindow(self, arr, WL, WW):
         pixel_max = WL + WW/2
         pixel_min = WL - WW/2
-        if(x > pixel_max):
-            x = pixel_max
-        elif(x < pixel_min):
-            x = pixel_min
-        x = (x - pixel_min) / (pixel_max - pixel_min) * 65535
-        return x
+        arr = np.clip(arr, pixel_min, pixel_max)
+        arr = (arr - pixel_min) / (pixel_max - pixel_min) * 65535
+        return np.copy(np.uint16(arr))
 
 #按鈕連結處--------------------------------------------------------------------------------------------------------
 
@@ -586,20 +577,23 @@ class initialWidget(QtWidgets.QMainWindow):
         for x in range(0, rows):
             for y in range(0, cols):
                 arr[x, y] = (arr[x, y] - pixel_min) / (pixel_max - pixel_min) * 65535
-        return arr
+        return np.copy(arr)
 
     def showPic(self, i, j, patient_no, patient_dics):
         # print("showpic")
         dicom_path = "./tmp/" + patient_no + "/" + patient_dics
         ds = dcmread(dicom_path)
+        self.dicoms[i][j] = ds
         arr = ds.pixel_array
         arr = np.uint16(arr)
-        self.pic_original_pixels[i][j] = arr
+        self.pic_original_pixels[i][j] = np.copy(arr)
+        self.pic_ith = i
+        self.pic_jth = j
         dicom_WL = ds[0x0028, 0x1050].value
         dicom_WW = ds[0x0028, 0x1051].value
         # print(dicom_WW)
         # print(dicom_WL)
-        self.pic_adjust_pixels[i][j] = self.picPixelMapping(arr, dicom_WL, dicom_WW)
+        self.pic_adjust_pixels[i][j] = self.mappingWindow(arr, dicom_WL, dicom_WW)
         #
         # rows = arr.shape[0]
         # cols = arr.shape[1]
@@ -678,6 +672,7 @@ class initialWidget(QtWidgets.QMainWindow):
         self.move_y = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
         self.pic_adjust_pixels = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 照片對比度須存改過的pixel array用
         self.pic_original_pixels = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 照片對比度須存原本的pixel array用
+        self.dicoms = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 存Dicoms
         var_array_pic = 'self.pic'
         for i in range(1, self.MAXIMUM_PAGE + 1):
             for j in range(1, (self.MAXIMUM_PIC + 1)):
