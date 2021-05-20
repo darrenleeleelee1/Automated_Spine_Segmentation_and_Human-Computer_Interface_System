@@ -9,9 +9,10 @@ from PyQt5.QtCore import QCoreApplication, Qt
 from PyQt5.QtGui import QStandardItem, QStandardItemModel, QTransform, QPainter
 
 from generatedUiFile.Spine_BrokenUi import Ui_MainWindow
+from generatedUiFile.customUi import Ui_Dialog
 import os, requests
 from PyQt5.QtWidgets import *
-from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene
+from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QInputDialog, QLineEdit, QDialog
 from pydicom import dcmread, Dataset
 from pydicom.filebase import DicomBytesIO
 import numpy as np
@@ -55,9 +56,7 @@ class initialWidget(QtWidgets.QMainWindow):
         #brightness相關
         self.aboutBrightness()
         
-
         self.backend()
-
 
         def moveWindow(e):
             if self.isMaximized() == False:  # Not maximized
@@ -68,17 +67,8 @@ class initialWidget(QtWidgets.QMainWindow):
                     e.accept()
         self.ui.header.mouseMoveEvent = moveWindow  # 移動視窗
         self.show()
-    def aboutBrightness(self): # 對比度選單設定
-        self.ui.pushButton_brightness.setStyleSheet("::menu-indicator{ image: none; }") #remove triangle
-        self.window_menu = QtWidgets.QMenu()
-        self.window_menu.addAction('Default window', lambda: self.getWindow(0, 0))
-        self.window_menu.addAction('[160/320]', lambda: self.getWindow(160, 320))
-        self.window_menu.addAction('[320/640]', lambda: self.getWindow(320, 640))
-        self.window_menu.addAction('[640/1280]', lambda: self.getWindow(640, 1280))
-        self.window_menu.addAction('[1280/2560]', lambda: self.getWindow(1280, 2560))
-        self.window_menu.addAction('[2560/5120]', lambda: self.getWindow(2560, 5120))
-        self.window_menu.addAction('Custom window', lambda: self.getWindow(1, 1))
-        self.ui.pushButton_brightness.setMenu(self.window_menu)
+
+
         
         
     def backend(self):
@@ -285,14 +275,37 @@ class initialWidget(QtWidgets.QMainWindow):
         q.end()
         # q.resetTransform()
 
-    #brightness menu
+    #brightness 
     def getWindow(self, WL, WW):
         print(WL, WW)
+        if(WL == 0 & WW == 0): # default
+            ds = self.dicoms[self.pic_ith][self.pic_jth]
+            WL = ds[0x0028, 0x1050].value
+            WW = ds[0x0028, 0x1051].value
+        elif(WL == 1 & WW == 1): # custom
+            self.showCustom()
+            #self.customWindow()
+
         self.pic_adjust_pixels[self.pic_ith][self.pic_jth] = np.copy(self.pic_original_pixels[self.pic_ith][self.pic_jth])
         arr = self.pic_adjust_pixels[self.pic_ith][self.pic_jth]
         self.pic_adjust_pixels[self.pic_ith][self.pic_jth] = np.copy(np.uint16(self.mappingWindow(arr, WL, WW)))
         self.update()
 
+    def showCustom(self):
+        self.custom_window = custom()
+        
+        # self.custom_window.buttonBox.accepted.connect(self.custom_window.accept)
+        if(self.custom_window.exec()):
+            # values = self.custom_window.WWinput.value()
+            print("test")
+            
+        
+        # print(valueWW)
+    # def customWindow(self):
+    #     btn.clicked.connect()
+
+    # def enterWindow(self):
+    #     print("test")
     def mappingWindow(self, arr, WL, WW):
         pixel_max = WL + WW/2
         pixel_min = WL - WW/2
@@ -342,8 +355,17 @@ class initialWidget(QtWidgets.QMainWindow):
     def pushButtonMoveClicked(self):
         self.tool_lock = 'move'
 
-    def pushButtonBrightnessClicked(self):
-        return 
+    def aboutBrightness(self): # 對比度的選單設定
+        self.ui.pushButton_brightness.setStyleSheet("::menu-indicator{ image: none; }") #remove triangle
+        self.window_menu = QtWidgets.QMenu()
+        self.window_menu.addAction('Default window', lambda: self.getWindow(0, 0))
+        self.window_menu.addAction('[160/320]', lambda: self.getWindow(160, 320))
+        self.window_menu.addAction('[320/640]', lambda: self.getWindow(320, 640))
+        self.window_menu.addAction('[640/1280]', lambda: self.getWindow(640, 1280))
+        self.window_menu.addAction('[1280/2560]', lambda: self.getWindow(1280, 2560))
+        self.window_menu.addAction('[2560/5120]', lambda: self.getWindow(2560, 5120))
+        self.window_menu.addAction('Custom window', lambda: self.getWindow(1, 1))
+        self.ui.pushButton_brightness.setMenu(self.window_menu)
 #MENU選單---------------------------------------------------------------------------------------------------------
     def slideMagnifierZoomInOrOut(self):
             zoom_frame_width = self.ui.zoom_frame.width()
@@ -580,7 +602,6 @@ class initialWidget(QtWidgets.QMainWindow):
         return np.copy(arr)
 
     def showPic(self, i, j, patient_no, patient_dics):
-        # print("showpic")
         dicom_path = "./tmp/" + patient_no + "/" + patient_dics
         ds = dcmread(dicom_path)
         self.dicoms[i][j] = ds
@@ -591,23 +612,7 @@ class initialWidget(QtWidgets.QMainWindow):
         self.pic_jth = j
         dicom_WL = ds[0x0028, 0x1050].value
         dicom_WW = ds[0x0028, 0x1051].value
-        # print(dicom_WW)
-        # print(dicom_WL)
         self.pic_adjust_pixels[i][j] = self.mappingWindow(arr, dicom_WL, dicom_WW)
-        #
-        # rows = arr.shape[0]
-        # cols = arr.shape[1]
-        # tmp = 320
-        
-        # for x in range(0, rows):
-        #     for y in range(0, cols):
-        #         if(arr[x, y]>tmp):
-        #             arr[x, y] = tmp
-        # for x in range(0, rows):
-        #     for y in range(0, cols):
-        #         arr[x, y] = arr[x, y]/tmp * 65535
-        #
-        # self.pic_adjust_pixels[i][j] = arr
         
         # pixmap_resized = pixmap.scaled(self.pic_label_width * self.size, self.pic_label_height * self.size,QtCore.Qt.KeepAspectRatio)
         # self.pic[i][j].move(200, 0)
@@ -726,7 +731,18 @@ class initialWidget(QtWidgets.QMainWindow):
             self.showNormal()
             self.ui.restore_button.setIcon(QtGui.QIcon(u":/icons/icons/window-maximize.png"))
 
+class custom(QDialog):
+  def __init__(self):
+    super().__init__()
+    self.customui = Ui_Dialog()
+    self.customui.setupUi(self)
 
+
+# class customDialog(QDialog):
+#     def __init__(self):
+#         QDialog.__init__(self)
+#         self.custom = Ui_Dialog()
+#         self.custom.setupUi(self)
 
 
 class Patient():
@@ -752,5 +768,6 @@ if __name__ == '__main__':
     import sys
     app = QtWidgets.QApplication(sys.argv)
     mw = initialWidget()
+    # custom = customDialog()
     mw.show()
     sys.exit(app.exec_())
