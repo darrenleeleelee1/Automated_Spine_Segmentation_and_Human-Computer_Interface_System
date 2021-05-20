@@ -8,10 +8,10 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets, Qt
 
-
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.resize(340, 160)
+        Dialog.setWindowFlags(QtCore.Qt.WindowCloseButtonHint)
         self.buttonBox = QtWidgets.QDialogButtonBox(Dialog)
         self.buttonBox.setGeometry(QtCore.QRect(130, 110, 180, 32))
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
@@ -34,6 +34,7 @@ class Ui_Dialog(object):
         self.WLinput = QtWidgets.QSpinBox(self.widget)
         self.WLinput.setMinimumSize(QtCore.QSize(80, 0))
         self.WLinput.setObjectName("WLinput")
+        self.WLinput.setMaximum(100000)
         self.horizontalLayout.addWidget(self.WLinput)
         self.widget1 = QtWidgets.QWidget(Dialog)
         self.widget1.setGeometry(QtCore.QRect(30, 70, 280, 22))
@@ -52,6 +53,7 @@ class Ui_Dialog(object):
         self.WWinput = QtWidgets.QSpinBox(self.widget1)
         self.WWinput.setMinimumSize(QtCore.QSize(80, 0))
         self.WWinput.setObjectName("WWinput")
+        self.WWinput.setMaximum(100000)
         self.horizontalLayout_2.addWidget(self.WWinput)
 
         self.retranslateUi(Dialog)

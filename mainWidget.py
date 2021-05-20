@@ -54,8 +54,9 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.patient_list.customContextMenuRequested.connect(self.myListWidgetContext)
 
         #brightness相關
+        self.custom_window = custom()
         self.aboutBrightness()
-        
+
         self.backend()
 
         def moveWindow(e):
@@ -283,29 +284,24 @@ class initialWidget(QtWidgets.QMainWindow):
             WL = ds[0x0028, 0x1050].value
             WW = ds[0x0028, 0x1051].value
         elif(WL == 1 & WW == 1): # custom
-            self.showCustom()
-            #self.customWindow()
-
+            WL, WW = self.showCustom()
+            if(WL == 0 & WW == 0):
+                return
         self.pic_adjust_pixels[self.pic_ith][self.pic_jth] = np.copy(self.pic_original_pixels[self.pic_ith][self.pic_jth])
         arr = self.pic_adjust_pixels[self.pic_ith][self.pic_jth]
         self.pic_adjust_pixels[self.pic_ith][self.pic_jth] = np.copy(np.uint16(self.mappingWindow(arr, WL, WW)))
         self.update()
 
     def showCustom(self):
-        self.custom_window = custom()
-        
-        # self.custom_window.buttonBox.accepted.connect(self.custom_window.accept)
-        if(self.custom_window.exec()):
-            # values = self.custom_window.WWinput.value()
-            print("test")
-            
-        
-        # print(valueWW)
-    # def customWindow(self):
-    #     btn.clicked.connect()
+        self.custom_window.show()
+        if(self.custom_window.exec() == 1):
+            WL = self.custom_window.customui.WLinput.value()
+            WW = self.custom_window.customui.WWinput.value()
+        else:
+            WL = 0
+            WW = 0
+        return WL, WW
 
-    # def enterWindow(self):
-    #     print("test")
     def mappingWindow(self, arr, WL, WW):
         pixel_max = WL + WW/2
         pixel_min = WL - WW/2
@@ -736,15 +732,7 @@ class custom(QDialog):
     super().__init__()
     self.customui = Ui_Dialog()
     self.customui.setupUi(self)
-
-
-# class customDialog(QDialog):
-#     def __init__(self):
-#         QDialog.__init__(self)
-#         self.custom = Ui_Dialog()
-#         self.custom.setupUi(self)
-
-
+    
 class Patient():
     def __init__(self, _pt_id, _pt_path):
         self.pt_id = _pt_id
