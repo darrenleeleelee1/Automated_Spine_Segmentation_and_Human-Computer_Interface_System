@@ -357,8 +357,8 @@ class initialWidget(QtWidgets.QMainWindow):
         self.angle_coordinate_list[self.pic_ith][self.pic_jth].clear()
         self.update()
         # 清除後必須將畫筆設為初始位置，否則會存到上次最後的位置，而有一小黑點
-        self.pen_start_x[self.pic_ith][self.pic_jth] = self.pen_start_y[self.pic_ith][self.pic_jth] = 0
-        self.pen_end_x[self.pic_ith][self.pic_jth] = self.pen_end_y[self.pic_ith][self.pic_jth] = 0
+        self.pen_start_x[self.pic_ith][self.pic_jth] = self.pen_start_y[self.pic_ith][self.pic_jth] = -10
+        self.pen_end_x[self.pic_ith][self.pic_jth] = self.pen_end_y[self.pic_ith][self.pic_jth] = -10
 
     def pushButtonPenClicked(self):
         self.tool_lock = 'pen'
@@ -713,8 +713,8 @@ class initialWidget(QtWidgets.QMainWindow):
             for j in range(1, (self.MAXIMUM_PIC + 1)):
                 exec("%s[%d][%d] = %s_%d_%d" % (var_array_pic, i, j, var_pic, i, j))
                 self.pic[i][j].setText("%d-%d" % (i, j))
-                self.pen_start_x[i][j] = self.pen_start_y[i][j] = 0
-                self.pen_end_x[i][j] = self.pen_end_y[i][j] = 0
+                self.pen_start_x[i][j] = self.pen_start_y[i][j] = -10
+                self.pen_end_x[i][j] = self.pen_end_y[i][j] = -10
                 self.ruler_start_x[i][j] = self.ruler_start_y[i][j] = 0
                 self.ruler_end_x[i][j] = self.ruler_end_y[i][j] = 0                
                 self.angle_start_x[i][j] = self.angle_start_y[i][j] = 0
@@ -736,10 +736,10 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.transparent_pix[i][j].fill(Qt.transparent)
 
         # 暫時試試放照片
-        self.showPic(1, 1, "01372635","5F327951")
-        self.showPic(1, 2, "01372635","5F327951")
-        self.showPic(1, 3, "01372635","5F327951")
-        self.showPic(1, 4, "01372635","5F327951")
+        self.showPic(1, 1, "01372635","5F327951.dcm")
+        self.showPic(1, 2, "01372635","5F327951.dcm")
+        self.showPic(1, 3, "01372635","5F327951.dcm")
+        self.showPic(1, 4, "01372635","5F327951.dcm")
 
     def mousePressEvent(self, event):
         self.clickPosition = event.globalPos()
