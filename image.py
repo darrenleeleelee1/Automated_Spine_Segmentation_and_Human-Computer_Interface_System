@@ -15,6 +15,10 @@ class Ui_MainWindow(object):
         self.photo.setText("")
         self.photo.setScaledContents(True)
         self.photo.setObjectName("photo")
+<<<<<<< HEAD
+=======
+
+>>>>>>> main
         MainWindow.setCentralWidget(self.centralwidget)
 
         # self.retranslateUi(MainWindow)
@@ -37,10 +41,11 @@ class Ui_MainWindow(object):
         qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], QtGui.QImage.Format_Grayscale8)
         self.photo.setPixmap(QtGui.QPixmap(qimage))
         self.photo.setGeometry(QtCore.QRect(0, 0, 400, 500))
-    
+
 
 if __name__ == "__main__":
     import sys
+
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
