@@ -93,9 +93,10 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.pushButton_angle.clicked.connect(self.pushButtonAngleClicked) # 角度按鈕連結
         self.ui.pushButton_ruler.clicked.connect(self.pushButtonRulerClicked)
         self.ui.pushButton_add_pic.clicked.connect(self.pushButtonAddPicClicked) # 加照片按鈕連結
-
         self.ui.pushButton_pen.clicked.connect(self.pushButtonPenClicked)   # 畫筆按鈕連結
         self.ui.pushButton_save.clicked.connect(self.pushButtonSaveClicked) # 儲存照片按鈕連結
+        self.ui.pushButton_mouse.clicked.connect(self.pushButtonMouseClicked) # 鼠標
+        self.ui.pushButton_erase.clicked.connect(self.pushButtonEraseClicked) # 清除畫筆、角度
         self.ui.pushButton_magnifier.clicked.connect(lambda: self.slideMagnifierZoomInOrOut())  # 打開放大縮小的frame
 
         self.ui.pushButton_rotate.clicked.connect(lambda: self.slideRotateLeftOrRight())    # 打開旋轉的frame
@@ -242,7 +243,7 @@ class initialWidget(QtWidgets.QMainWindow):
         p = QtGui.QPainter(self.transparent_pix[_i][_j])
 
         if(self.tool_lock == 'mouse'):
-            return
+            pass
         elif(self.tool_lock == 'angle'):
             if(not self.pic_clicked[_i][_j] and not self.pic_released[_i][_j]):
                 pass
@@ -280,6 +281,7 @@ class initialWidget(QtWidgets.QMainWindow):
                 
         q.drawPixmap(0, 0, self.transparent_pix[_i][_j])
         # show every angle
+
         for w in self.angle_coordinate_list[_i][_j]:
             pen = QtGui.QPen()
             pen.setWidth(2)
@@ -350,8 +352,20 @@ class initialWidget(QtWidgets.QMainWindow):
         #backend
         # fileName2, ok2 = QFileDialog.getSaveFileName(self,"檔案儲存","./","All Files (*);;Text Files (*.txt)")
 
+    # 清除
+    def pushButtonEraseClicked(self):
+        self.transparent_pix[self.pic_ith][self.pic_jth].fill(Qt.transparent)
+        self.angle_coordinate_list[self.pic_ith][self.pic_jth].clear()
+        self.update()
+        # 清除後必須將畫筆設為初始位置，否則會存到上次最後的位置，而有一小黑點
+        self.pen_start_x[self.pic_ith][self.pic_jth] = self.pen_start_y[self.pic_ith][self.pic_jth] = 0
+        self.pen_end_x[self.pic_ith][self.pic_jth] = self.pen_end_y[self.pic_ith][self.pic_jth] = 0
+
     def pushButtonPenClicked(self):
         self.tool_lock = 'pen'
+
+    def pushButtonMouseClicked(self):
+        self.tool_lock = 'mouse'
 
     # save photo .png
     def pushButtonSaveClicked(self):
@@ -725,10 +739,10 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.transparent_pix[i][j].fill(Qt.transparent)
 
         # 暫時試試放照片
-        self.showPic(1, 1, "01372635","5F327951")
-        self.showPic(1, 2, "01372635","5F327951")
-        self.showPic(1, 3, "01372635","5F327951")
-        self.showPic(1, 4, "01372635","5F327951")
+        self.showPic(1, 1, "01372635","5F327951.dcm")
+        self.showPic(1, 2, "01372635","5F327951.dcm")
+        self.showPic(1, 3, "01372635","5F327951.dcm")
+        self.showPic(1, 4, "01372635","5F327951.dcm")
 
     def mousePressEvent(self, event):
         self.clickPosition = event.globalPos()
@@ -780,6 +794,7 @@ class angleCoordinate():
         self.angle = 0
         if(self.length_sp2mp != 0 and self.length_mp2ep != 0):
             self.angle = np.arccos(self.inner_product / self.length_sp2mp / self.length_mp2ep) * 180 / np.pi
+
 if __name__ == '__main__':
     import sys
     app = QtWidgets.QApplication(sys.argv)
