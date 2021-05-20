@@ -69,7 +69,6 @@ class initialWidget(QtWidgets.QMainWindow):
 
     
     def closeEvent(self,event):
-        print("Closing")
         self.saveSearchRecord()
         event.accept()
 
@@ -540,19 +539,17 @@ class initialWidget(QtWidgets.QMainWindow):
     # search
     def loadSearchRecord(self):
         self.search_record_cnt = 0
-        with open('C:/Users/Darren/Documents/Projects/Spine_Broken/tmp/search_record.txt', 'r') as f:
+        with open('./tmp/search_record.txt', 'r') as f:
             medical_numbers = f.read().splitlines()
             for k in medical_numbers:
                 self.search_record.insertRow(self.search_record_cnt, QStandardItem(k))
                 self.search_record_cnt += 1
-        # print(self.search_record_cnt)
         
 
     def saveSearchRecord(self):
-        with open('C:/Users/Darren/Documents/Projects/Spine_Broken/tmp/search_record.txt', 'w') as f:
+        with open('./tmp/search_record.txt', 'w') as f:
             print(self.search_record_cnt)
             for i in range(self.search_record_cnt):
-                print(self.search_record.item(i).text())
                 f.write(self.search_record.item(i).text() + "\n")
 
     def addEntry(self):
@@ -739,10 +736,10 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.transparent_pix[i][j].fill(Qt.transparent)
 
         # 暫時試試放照片
-        self.showPic(1, 1, "01372635","5F327951.dcm")
-        self.showPic(1, 2, "01372635","5F327951.dcm")
-        self.showPic(1, 3, "01372635","5F327951.dcm")
-        self.showPic(1, 4, "01372635","5F327951.dcm")
+        self.showPic(1, 1, "01372635","5F327951")
+        self.showPic(1, 2, "01372635","5F327951")
+        self.showPic(1, 3, "01372635","5F327951")
+        self.showPic(1, 4, "01372635","5F327951")
 
     def mousePressEvent(self, event):
         self.clickPosition = event.globalPos()
