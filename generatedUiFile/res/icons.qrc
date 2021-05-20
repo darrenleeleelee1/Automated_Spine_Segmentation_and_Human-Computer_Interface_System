@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/erase.png</file>
     <file>icons/3d.png</file>
     <file>icons/4k.png</file>
     <file>icons/add-pic.png</file>
