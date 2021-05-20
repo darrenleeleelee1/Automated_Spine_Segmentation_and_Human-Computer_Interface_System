@@ -90,7 +90,7 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.pushButton_pen.clicked.connect(self.pushButtonPenClicked)   # 畫筆按鈕連結
         self.ui.pushButton_save.clicked.connect(self.pushButtonSaveClicked) # 儲存照片按鈕連結
         self.ui.pushButton_mouse.clicked.connect(self.pushButtonMouseClicked) # 鼠標
-        self.ui.pushButton_erase.clicked.connect(self.pushButtonEraseClicked) # 清除
+        self.ui.pushButton_erase.clicked.connect(self.pushButtonEraseClicked) # 清除畫筆、角度
         self.ui.pushButton_magnifier.clicked.connect(lambda: self.slideMagnifierZoomInOrOut())  # 打開放大縮小的frame
 
         self.ui.pushButton_rotate.clicked.connect(lambda: self.slideRotateLeftOrRight())    # 打開旋轉的frame
@@ -288,7 +288,7 @@ class initialWidget(QtWidgets.QMainWindow):
         #backend
         # fileName2, ok2 = QFileDialog.getSaveFileName(self,"檔案儲存","./","All Files (*);;Text Files (*.txt)")
 
-    # 清除畫布
+    # 清除
     def pushButtonEraseClicked(self):
         self.transparent_pix[self.pic_ith][self.pic_jth].fill(Qt.transparent)
         self.angle_coordinate_list[self.pic_ith][self.pic_jth].clear()
