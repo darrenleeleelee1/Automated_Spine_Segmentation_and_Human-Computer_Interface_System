@@ -37,5 +37,5 @@ pyuic5 -o ____.py ____.ui
 ## qrc file to py file
 * Shell
 ```
-Pyrcc5 ____.qrc -o ____.py
+pyrcc5 ____.qrc -o ____.py
 ```
