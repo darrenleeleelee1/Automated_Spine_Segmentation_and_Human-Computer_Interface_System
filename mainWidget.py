@@ -520,6 +520,11 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
                 temp_page = self.patient_mapto_page[pt_id]
                 self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[temp_page])
+                src = './tmp_database/' + pt_id
+                dst = './tmp/' + pt_id
+                if(not os.path.exists(dst)):
+                    os.makedirs(dst)
+                copytree(src, dst)
 
                 
     def open_pt_page(self, pt_id): #記得要先檢查self.empty_page_stack空->Page滿->pageFull, 用在add和pt_list中打開
