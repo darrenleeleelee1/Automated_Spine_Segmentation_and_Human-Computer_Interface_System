@@ -186,6 +186,9 @@ class initialWidget(QtWidgets.QMainWindow):
             if event.buttons() == QtCore.Qt.LeftButton:
                 self.move_moving_x[_i][_j] = event.x() - self.move_start_x[_i][_j] +self.move_x[_i][_j]
                 self.move_moving_y[_i][_j] = event.y() - self.move_start_y[_i][_j] +self.move_y[_i][_j]
+                self.moving_pen_x[_i][_j] = self.move_moving_x[_i][_j]
+                self.moving_pen_y[_i][_j] = self.move_moving_y[_i][_j]
+
         self.update()
 
     def picPaint(self, event, pixmap, _i, _j):
@@ -201,7 +204,7 @@ class initialWidget(QtWidgets.QMainWindow):
         t_index = int((-self.rotate_angle[_i][_j] % 360) / 90)
         x = self.tmmx[_i][_j] + self.magnifier_pad_x[_i][_j] - self.rotate_coordinate_system[t_index][0]
         y = self.tmmy[_i][_j] + self.magnifier_pad_y[_i][_j] - self.rotate_coordinate_system[t_index][1]
-
+        # print(x, y)
         q.drawPixmap(x, y, img_width, img_height, pixmap)
         p = QtGui.QPainter(self.transparent_pix[_i][_j])
 
@@ -209,6 +212,7 @@ class initialWidget(QtWidgets.QMainWindow):
             pass
         elif(self.tool_lock == 'angle'):
             if(not self.pic_clicked[_i][_j] and not self.pic_released[_i][_j]):
+
                 pass
             else:
                 self.pic[_i][_j].setMouseTracking(True)
@@ -222,6 +226,8 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.tex[_i][_j], self.tey[_i][_j] = self.transitiveWithBiasMatrix(self.angle_end_x[_i][_j], self.angle_end_y[_i][_j], self.rotate_angle[_i][_j])
                 q.drawLine(self.tmx[_i][_j], self.tmy[_i][_j], self.tsx[_i][_j], self.tsy[_i][_j])
                 q.drawLine(self.tex[_i][_j], self.tey[_i][_j], self.tmx[_i][_j], self.tmy[_i][_j])
+
+
         elif(self.tool_lock == 'pen'):
             self.pic[_i][_j].setMouseTracking(False)
             pen = QtGui.QPen()
@@ -230,6 +236,7 @@ class initialWidget(QtWidgets.QMainWindow):
             tpsx, tpsy = self.transitiveWithBiasMatrix(self.pen_start_x[_i][_j], self.pen_start_y[_i][_j], self.rotate_angle[_i][_j])
             tpex, tpey = self.transitiveWithBiasMatrix(self.pen_end_x[_i][_j], self.pen_end_y[_i][_j], self.rotate_angle[_i][_j])
             p.drawLine(tpex, tpey, tpsx, tpsy)
+
 
         q.drawPixmap(0, 0, self.transparent_pix[_i][_j])
         # show every angle
@@ -578,7 +585,10 @@ class initialWidget(QtWidgets.QMainWindow):
         self.tmy = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
         self.tex = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
         self.tey = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
-
+        self.moving_angle_x = [ [0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
+        self.moving_angle_y = [ [0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
+        self.moving_pen_x = [ [0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
+        self.moving_pen_y = [ [0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
         self.pic_clicked = [ [False] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
         self.pic_released = [ [False] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
         self.angle_coordinate_list = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
