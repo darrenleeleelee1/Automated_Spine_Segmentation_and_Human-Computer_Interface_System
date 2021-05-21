@@ -282,7 +282,6 @@ class initialWidget(QtWidgets.QMainWindow):
                 q.setPen(pen)
                 self.tsx[_i][_j], self.tsy[_i][_j] = self.transitiveWithBiasMatrix(self.ruler_start_x[_i][_j], self.ruler_start_y[_i][_j], self.rotate_angle[_i][_j])
                 self.tex[_i][_j], self.tey[_i][_j] = self.transitiveWithBiasMatrix(self.ruler_end_x[_i][_j], self.ruler_end_y[_i][_j], self.rotate_angle[_i][_j])
-                print(self.ruler_start_x[self.pic_ith][self.pic_jth], self.ruler_start_y[self.pic_ith][self.pic_jth])
                 q.drawLine(self.tex[_i][_j], self.tey[_i][_j], self.tsx[_i][_j], self.tsy[_i][_j])
                 
         q.drawPixmap(0, 0, self.transparent_pix[_i][_j])
