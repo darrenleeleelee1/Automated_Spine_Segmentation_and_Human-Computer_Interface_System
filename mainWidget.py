@@ -9,18 +9,16 @@ from PyQt5.QtCore import QCoreApplication, Qt
 from PyQt5.QtGui import QStandardItem, QStandardItemModel, QTransform, QPainter
 
 from generatedUiFile.Spine_BrokenUi import Ui_MainWindow
+from generatedUiFile.customUi import Ui_Dialog
 import os, requests
 from PyQt5.QtWidgets import *
-from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene
-from pydicom import dcmread
+from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QInputDialog, QLineEdit, QDialog
+from pydicom import dcmread, Dataset
 from pydicom.filebase import DicomBytesIO
 import numpy as np
 from PIL import ImageQt
 import shutil
 WINDOW_SIZE = 0
-
-
-
 
 class initialWidget(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
@@ -54,8 +52,12 @@ class initialWidget(QtWidgets.QMainWindow):
         #右键菜单
         self.ui.patient_list.setContextMenuPolicy(Qt.CustomContextMenu)
         self.ui.patient_list.customContextMenuRequested.connect(self.myListWidgetContext)
-        self.backend()
 
+        #brightness相關
+        self.custom_window = custom()
+        self.aboutBrightness()
+
+        self.backend()
 
         def moveWindow(e):
             if self.isMaximized() == False:  # Not maximized
@@ -72,6 +74,8 @@ class initialWidget(QtWidgets.QMainWindow):
         self.saveSearchRecord()
         event.accept()
 
+        
+        
     def backend(self):
         self.ui.stackedWidget_right.setCurrentWidget(self.ui.recently_viewed_page)
         self.ui.close_button.clicked.connect(self.close)  # 叉叉
@@ -224,7 +228,7 @@ class initialWidget(QtWidgets.QMainWindow):
 
 
 
-    def picPaint(self, event, pixmap, _i, _j):
+    def picPaint(self, event, _i, _j):
         # if _i == self.pic_ith and _j == self.pic_jth:
         #     self.rotate_angle[_i][_j] = self.rotate_angle[self.pic_ith][self.pic_jth]
         q = QtGui.QPainter(self.pic[_i][_j])
@@ -238,6 +242,9 @@ class initialWidget(QtWidgets.QMainWindow):
 
         x = self.move_moving_x[_i][_j]+ self.magnifier_pad_x[_i][_j]
         y = self.move_moving_y[_i][_j]+ self.magnifier_pad_y[_i][_j]
+
+        self.qimage = QtGui.QImage(self.pic_adjust_pixels[_i][_j], self.pic_adjust_pixels[_i][_j].shape[1], self.pic_adjust_pixels[_i][_j].shape[0], QtGui.QImage.Format_Grayscale16)
+        pixmap = QtGui.QPixmap(self.qimage)
         q.drawPixmap(x, y, img_width, img_height, pixmap)
         p = QtGui.QPainter(self.transparent_pix[_i][_j])
 
@@ -334,6 +341,38 @@ class initialWidget(QtWidgets.QMainWindow):
         q.end()
         # q.resetTransform()
 
+    #brightness 
+    def getWindow(self, WL, WW):
+        print(WL, WW)
+        if(WL == 0 & WW == 0): # default
+            ds = self.dicoms[self.pic_ith][self.pic_jth]
+            WL = ds[0x0028, 0x1050].value
+            WW = ds[0x0028, 0x1051].value
+        elif(WL == 1 & WW == 1): # custom
+            WL, WW = self.showCustom()
+            if(WL == 0 & WW == 0):
+                return
+        self.pic_adjust_pixels[self.pic_ith][self.pic_jth] = np.copy(self.pic_original_pixels[self.pic_ith][self.pic_jth])
+        arr = self.pic_adjust_pixels[self.pic_ith][self.pic_jth]
+        self.pic_adjust_pixels[self.pic_ith][self.pic_jth] = np.copy(np.uint16(self.mappingWindow(arr, WL, WW)))
+        self.update()
+
+    def showCustom(self):
+        self.custom_window.show()
+        if(self.custom_window.exec() == 1):
+            WL = self.custom_window.customui.WLinput.value()
+            WW = self.custom_window.customui.WWinput.value()
+        else:
+            WL = 0
+            WW = 0
+        return WL, WW
+
+    def mappingWindow(self, arr, WL, WW):
+        pixel_max = WL + WW/2
+        pixel_min = WL - WW/2
+        arr = np.clip(arr, pixel_min, pixel_max)
+        arr = (arr - pixel_min) / (pixel_max - pixel_min) * 65535
+        return np.copy(np.uint16(arr))
 
 #按鈕連結處--------------------------------------------------------------------------------------------------------
 
@@ -348,8 +387,6 @@ class initialWidget(QtWidgets.QMainWindow):
         print(filetype)
         # fileName2, ok2 = QFileDialog.getSaveFileName(6self,"檔案儲存","./","All Files (*);;Text Files (*.txt)")
         # copyfile(pic_file_path, dst)
-        #backend
-        # fileName2, ok2 = QFileDialog.getSaveFileName(self,"檔案儲存","./","All Files (*);;Text Files (*.txt)")
 
     # 清除
     def pushButtonEraseClicked(self):
@@ -369,8 +406,7 @@ class initialWidget(QtWidgets.QMainWindow):
     # save photo .png
     def pushButtonSaveClicked(self):
         image = ImageQt.fromqpixmap(self.pic[self.pic_ith][self.pic_jth].grab())
-        filePath, _ = QFileDialog.getSaveFileName(self, "Save Image", "",
-                                                  "PNG(*.png)") # ;;JPEG(*.jpg *.jpeg);;All Files(*.*) 
+        filePath, _ = QFileDialog.getSaveFileName(self, "Save Image", "", "PNG(*.png)") # ;;JPEG(*.jpg *.jpeg);;All Files(*.*) 
         if filePath == "":
             return
         image.save(filePath)
@@ -394,6 +430,19 @@ class initialWidget(QtWidgets.QMainWindow):
 
     def pushButtonMoveClicked(self):
         self.tool_lock = 'move'
+
+    def aboutBrightness(self): # 對比度的選單設定
+        self.ui.pushButton_brightness.setStyleSheet("::menu-indicator{ image: none; }") #remove triangle
+        self.window_menu = QtWidgets.QMenu()
+        self.window_menu.addAction('Default window', lambda: self.getWindow(0, 0))
+        self.window_menu.addAction('[160/320]', lambda: self.getWindow(160, 320))
+        self.window_menu.addAction('[320/640]', lambda: self.getWindow(320, 640))
+        self.window_menu.addAction('[640/1280]', lambda: self.getWindow(640, 1280))
+        self.window_menu.addAction('[1280/2560]', lambda: self.getWindow(1280, 2560))
+        self.window_menu.addAction('[2560/5120]', lambda: self.getWindow(2560, 5120))
+        self.window_menu.addAction('Custom window', lambda: self.getWindow(1, 1))
+        self.ui.pushButton_brightness.setMenu(self.window_menu)
+#MENU選單---------------------------------------------------------------------------------------------------------
     
     def pushButtonRulerClicked(self):
         if(self.tool_lock == 'angle'):
@@ -430,8 +479,6 @@ class initialWidget(QtWidgets.QMainWindow):
         self.animation.setEasingCurve(QtCore.QEasingCurve.InOutQuart)
         self.animation.start()
 
-    # def pushButtonBrightnessClicked(self):
-#MENU選單---------------------------------------------------------------------------------------------------------
     def addPatient(self): 
         if(not self.empty_page_stack):
                 self.pageFull()
@@ -619,7 +666,7 @@ class initialWidget(QtWidgets.QMainWindow):
             popMenu.addAction(closeAct)
         closeAct.triggered.connect(self.closePatient)
         popMenu.exec_(self.ui.patient_list.mapToGlobal(position))
-
+    
     def transitiveMatrix(self, _x, _y, theda):
         radi = np.deg2rad(theda)
         tx = _x * np.cos(radi) + _y * np.sin(radi)
@@ -633,23 +680,44 @@ class initialWidget(QtWidgets.QMainWindow):
         ty += self.rotate_coordinate_system[index][1]
         return tx, ty
 
+    def picPixelMapping(self, arr,  WL, WW):
+        pixel_max = WL + WW/2
+        pixel_min = WL - WW/2
+
+        rows = arr.shape[0]
+        cols = arr.shape[1]
+        for x in range(0, rows):
+            for y in range(0, cols):
+                if(arr[x, y]>pixel_max):
+                    arr[x, y] = pixel_max
+                elif(arr[x, y] < pixel_min):
+                    arr[x, y] = pixel_min
+        for x in range(0, rows):
+            for y in range(0, cols):
+                arr[x, y] = (arr[x, y] - pixel_min) / (pixel_max - pixel_min) * 65535
+        return np.copy(arr)
+
     def showPic(self, i, j, patient_no, patient_dics):
-        # print("showpic")
         dicom_path = "./tmp/" + patient_no + "/" + patient_dics
         ds = dcmread(dicom_path)
+        self.dicoms[i][j] = ds
         arr = ds.pixel_array
-        arr = np.uint8(arr)
-        qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], QtGui.QImage.Format_Grayscale8)
-
-        pixmap = QtGui.QPixmap(qimage)
+        arr = np.uint16(arr)
+        self.pic_original_pixels[i][j] = np.copy(arr)
+        self.pic_ith = i
+        self.pic_jth = j
+        dicom_WL = ds[0x0028, 0x1050].value
+        dicom_WW = ds[0x0028, 0x1051].value
+        self.pic_adjust_pixels[i][j] = self.mappingWindow(arr, dicom_WL, dicom_WW)
+        
         # pixmap_resized = pixmap.scaled(self.pic_label_width * self.size, self.pic_label_height * self.size,QtCore.Qt.KeepAspectRatio)
         # self.pic[i][j].move(200, 0)
-        self.pic[i][j].setPixmap(pixmap)
+        # self.pic[i][j].setPixmap(pixmap)
         # self.pic[i][j].setGeometry(QtCore.QRect(100, 100, 400, 500))
         self.pic[i][j].mousePressEvent = lambda pressed: self.picMousePressed(pressed, i, j) # 讓每個pic的mousePressEvent可以傳出告訴自己是誰
         self.pic[i][j].mouseReleaseEvent = lambda released: self.picMouseReleased(released, i, j)
         self.pic[i][j].mouseMoveEvent = lambda moved: self.picMouseMove(moved, i, j)
-        self.pic[i][j].paintEvent = lambda painted: self.picPaint(painted, pixmap, i, j)
+        self.pic[i][j].paintEvent = lambda painted: self.picPaint(painted, i, j)
 
     def linkPage2Array(self, _MAXIMUM_PAGE = 5, _MAXIMUM_PIC = 4):
         # 把QtDesigner的一些重複的Widget用array對應
@@ -707,7 +775,9 @@ class initialWidget(QtWidgets.QMainWindow):
         self.move_end_y = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
         self.move_x = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
         self.move_y = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
-
+        self.pic_adjust_pixels = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 照片對比度須存改過的pixel array用
+        self.pic_original_pixels = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 照片對比度須存原本的pixel array用
+        self.dicoms = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 存Dicoms
         var_array_pic = 'self.pic'
         for i in range(1, self.MAXIMUM_PAGE + 1):
             for j in range(1, (self.MAXIMUM_PIC + 1)):
@@ -764,13 +834,17 @@ class initialWidget(QtWidgets.QMainWindow):
             self.showNormal()
             self.ui.restore_button.setIcon(QtGui.QIcon(u":/icons/icons/window-maximize.png"))
 
-
-
-
+class custom(QDialog):
+  def __init__(self):
+    super().__init__()
+    self.customui = Ui_Dialog()
+    self.customui.setupUi(self)
+    
 class Patient():
     def __init__(self, _pt_id, _pt_path):
         self.pt_id = _pt_id
         self.pt_path = _pt_path
+
 class rulerCoordinate():
     def __init__(self, _sx, _sy, _ex, _ey):
         self.sp = QtCore.QPointF(_sx, _sy)
@@ -796,5 +870,6 @@ if __name__ == '__main__':
     import sys
     app = QtWidgets.QApplication(sys.argv)
     mw = initialWidget()
+    # custom = customDialog()
     mw.show()
     sys.exit(app.exec_())
