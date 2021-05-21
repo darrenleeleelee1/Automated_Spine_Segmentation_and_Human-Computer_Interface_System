@@ -499,8 +499,8 @@ class initialWidget(QtWidgets.QMainWindow):
                 fullpath = join(dir_choose, f)
                 # dicom的名字
                 dicom_id = os.path.basename(fullpath)
-                print(dicom_id)
-                print(fullpath)
+                # print(dicom_id)
+                # print(fullpath)
                 dic_file.append(('files', (dicom_id, open(fullpath, 'rb'))))
             response = requests.post(url, files=dic_file)
             print(response.reason)
@@ -832,6 +832,15 @@ class initialWidget(QtWidgets.QMainWindow):
             # self.showPic(1, 1, "01372635", "5F327951")
             self.showNormal()
             self.ui.restore_button.setIcon(QtGui.QIcon(u":/icons/icons/window-maximize.png"))
+
+def copytree(src, dst, symlinks=False, ignore=None):
+    for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s):
+            shutil.copytree(s, d, symlinks, ignore)
+        else:
+            shutil.copy2(s, d)
 
 class custom(QDialog):
   def __init__(self):
