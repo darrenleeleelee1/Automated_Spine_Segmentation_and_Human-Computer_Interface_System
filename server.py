@@ -44,7 +44,7 @@ async def get_dicom(medical_number: int):
 
 @app.post("/pdicom/{medical_number}") # save dicoms
 async def post_dicom(medical_number: str, files: List[UploadFile] = File(...)):
-    directory = f'./tmp/{medical_number}'
+    directory = f'./tmp_database/{medical_number}'
     if os.path.exists(directory):
         return {"Result": "Directory already exists."}
 
