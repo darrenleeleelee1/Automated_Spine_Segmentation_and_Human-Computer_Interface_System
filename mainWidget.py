@@ -633,10 +633,14 @@ class initialWidget(QtWidgets.QMainWindow):
         else:
             pt_id = str(item.text())
             if(self.patient_mapto_page[pt_id] == -1): # patient list還沒有 -> 打開新page並加到patient list
-                # 檔案加到tmp還沒做 ???
+                # 檔案 from tmpDatabase -> tmp
                 self.open_pt_page(pt_id)
                 self.ui.patient_list.addItem(pt_id)
-                #self.databaseToTmp(pt_id)
+                src = './tmp_database/' + pt_id
+                dst = './tmp/' + pt_id
+                if(not os.path.exists(dst)):
+                    os.makedirs(dst)
+                copytree(src, dst)
             # patient list中已存在 直接打開
             self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
             temp_page = self.patient_mapto_page[pt_id]
@@ -644,23 +648,7 @@ class initialWidget(QtWidgets.QMainWindow):
             #dir_choose = QFileDialog.getExistingDirectory(self, "選取資料夾", "/Users/user/Documents/畢專/dicom_data")  # 第三參數是起始路徑
             print(pt_id + "test")
 
-            # 至後端拿資料(未做)
-            # post
-            # url = 'http://127.0.0.1:8000/pdicom/' + pt_id
-            # #headers = {'accept': 'application/json', 'Content-Type': 'multipart/form-data'}
-            # myfiles = listdir(dir_choose)  # 檔案
-            # dic_file = []
-            # for f in myfiles:
-            #     # 產生檔案的絕對路徑
-            #     fullpath = join(dir_choose, f)
-            #     # dicom的名字
-            #     dicom_id = os.path.basename(fullpath)
-            #     print(dicom_id)
-            #     print(fullpath)
-            #     dic_file.append(('files', (dicom_id, open(fullpath, 'rb'))))
-            # response = requests.post(url, files=dic_file)
-            # print(response.reason)
-            # print(response.json())
+
 
 # 其他/初始--------------------------------------------------------------------------------------------------------
     def myListWidgetContext(self,position): # 設定patient list 右鍵功能 關閉
