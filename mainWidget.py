@@ -25,15 +25,12 @@ class initialWidget(QtWidgets.QMainWindow):
         super().__init__(*args, **kwargs)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.pt_list = []
         self.search_record = QStandardItemModel()
         self.pic_label_width = 512
         self.pic_label_height = 512
 
-        self.pt_list.append("0135678")
-        self.pt_list.append("3847829")
-        self.pt_list.append("2342422")
-
+        
+        self.loadPtList()
         self.pt_list.sort()
         for ptid in self.pt_list:
             self.ui.no_list.addItem(ptid)
@@ -47,6 +44,9 @@ class initialWidget(QtWidgets.QMainWindow):
         for i in range(5, 0, -1):
             self.empty_page_stack.append(i)
         self.patient_mapto_page = {}
+
+        self.opened_list = [] # 紀錄打開順序
+        self.recent_list = [] # 記錄倒過來
 
         self.ui.patient_list.setEditTriggers(QAbstractItemView.NoEditTriggers)
         #右键菜单
@@ -72,6 +72,7 @@ class initialWidget(QtWidgets.QMainWindow):
     
     def closeEvent(self,event):
         self.saveSearchRecord()
+        self.saveOpened()
         event.accept()
 
         
@@ -85,8 +86,8 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.menu_toggle.clicked.connect(lambda: self.slideLeftMenu())  # slide menu
         self.ui.add_patient.clicked.connect(self.addPatient)
         self.ui.search.clicked.connect(lambda: self.ui.stackedWidget_right.setCurrentWidget(self.ui.search_page))
-        self.loadNoList()
         self.loadSearchRecord() # 載入搜尋紀錄
+        self.loadOpened() # 載入上次開啟紀錄
         self.ui.input_no.editingFinished.connect(self.addEntry)  # 按enter
         self.ui.search_no_button.clicked.connect(self.addEntry)  # 按 search_no
         completer = QCompleter(self.search_record, self)
@@ -110,6 +111,7 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.zoomOut.clicked.connect(self.image_zoom_out) # 縮小 
         self.ui.pushButton_move.clicked.connect(self.pushButtonMoveClicked) # 移動
         self.ui.patient_list.itemClicked.connect(self.patient_listItemClicked)
+        self.ui.recently_list.itemClicked.connect(self.recently_listItemClicked)
 
 #照片Pressed, Released, Mouse Track, Show Pic----------------------------------------------------------------------
     def picMouseReleased(self, event, _i, _j):
@@ -513,13 +515,11 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.pt_list.append(pt_id)
                 self.ui.patient_list.addItem(pt_id)
                 self.pt_list.sort()
+                self.ui.no_list.clear()
                 for ptid in self.pt_list:
                     self.ui.no_list.addItem(ptid)
                 for i in self.pt_list:
                     print(i)    
-                self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
-                temp_page = self.patient_mapto_page[pt_id]
-                self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[temp_page])
                 src = './tmp_database/' + pt_id
                 dst = './tmp/' + pt_id
                 if(not os.path.exists(dst)):
@@ -531,6 +531,11 @@ class initialWidget(QtWidgets.QMainWindow):
         temp = self.empty_page_stack[-1]
         self.empty_page_stack.pop()
         self.patient_mapto_page[pt_id] = temp
+        self.ui.patient_list.addItem(pt_id)
+        self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
+        temp_page = self.patient_mapto_page[pt_id]
+        self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[temp_page])
+        self.opened_list.append(pt_id)
 
     def pageFull(self):
         pageFull_msg = QMessageBox()
@@ -590,15 +595,14 @@ class initialWidget(QtWidgets.QMainWindow):
     # search
     def loadSearchRecord(self):
         self.search_record_cnt = 0
-        with open('./tmp/search_record.txt', 'r') as f:
+        with open('./record/search_record.txt', 'r') as f:
             medical_numbers = f.read().splitlines()
             for k in medical_numbers:
                 self.search_record.insertRow(self.search_record_cnt, QStandardItem(k))
                 self.search_record_cnt += 1
         
-
     def saveSearchRecord(self):
-        with open('./tmp/search_record.txt', 'w') as f:
+        with open('./record/search_record.txt', 'w') as f:
             print(self.search_record_cnt)
             for i in range(self.search_record_cnt):
                 f.write(self.search_record.item(i).text() + "\n")
@@ -635,32 +639,63 @@ class initialWidget(QtWidgets.QMainWindow):
             if(self.patient_mapto_page[pt_id] == -1): # patient list還沒有 -> 打開新page並加到patient list
                 # 檔案 from tmpDatabase -> tmp
                 self.open_pt_page(pt_id)
-                self.ui.patient_list.addItem(pt_id)
+                # self.ui.patient_list.addItem(pt_id)
                 src = './tmp_database/' + pt_id
                 dst = './tmp/' + pt_id
                 if(not os.path.exists(dst)):
                     os.makedirs(dst)
                 copytree(src, dst)
             # patient list中已存在 直接打開
-            self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
-            temp_page = self.patient_mapto_page[pt_id]
-            self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[temp_page])
-            #dir_choose = QFileDialog.getExistingDirectory(self, "選取資料夾", "/Users/user/Documents/畢專/dicom_data")  # 第三參數是起始路徑
+            # self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
+            # temp_page = self.patient_mapto_page[pt_id]
+            # self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[temp_page])
             print(pt_id + "test")
 
+# Recently viewed page--------------------------------------------------------------------------------------------
+    def loadOpened(self):
+        with open('./record/tmpOpened.txt', 'r') as f:
+            pt_id = f.read().splitlines()
+            for k in pt_id:
+                self.recent_list.append(k)
+                self.ui.recently_list.addItem(k)
+            self.opened_list = self.recent_list[::-1]
 
+    def saveOpened(self):
+        self.recent_list = self.opened_list[::-1]
+        self.recent_list = list(dict.fromkeys(self.recent_list))
+        while(len(self.recent_list) > 10):
+            self.recent_list.pop()
+        with open('./record/tmpOpened.txt', 'w') as f:
+            for k in self.recent_list:
+                f.write(k + "\n")
+        for filename in os.listdir('./tmp'):
+            shutil.rmtree('./tmp/'+ filename) 
+
+    def recently_listItemClicked(self, item):
+        pt_id = str(item.text())
+        self.open_pt_page(pt_id)
+        # self.ui.patient_list.addItem(pt_id)
+        src = './tmp_database/' + pt_id
+        dst = './tmp/' + pt_id
+        if(not os.path.exists(dst)):
+            os.makedirs(dst)
+        copytree(src, dst)
+        # self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
+        # temp_page = self.patient_mapto_page[pt_id]
+        # self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[temp_page]
 
 # 其他/初始--------------------------------------------------------------------------------------------------------
-    def loadNoList(self):
+    def loadPtList(self):
         url = 'http://127.0.0.1:8000/gmedicalnumbers'
         response = requests.get(url)
         self.ui.no_list.clear()
         medical_count = response.json()['medical_count']
         medical_numbers = response.json()['medical_numbers']
+        self.pt_list = []
         for i in medical_numbers:
             # print(i)
             # print(type(i))
-            self.ui.no_list.addItem(i)
+            self.pt_list.append(i)
 
         # print(type(response.json()['medical_numbers']))
 
@@ -703,7 +738,7 @@ class initialWidget(QtWidgets.QMainWindow):
         return np.copy(arr)
 
     def showPic(self, i, j, patient_no, patient_dics):
-        dicom_path = "./tmp/" + patient_no + "/" + patient_dics
+        dicom_path = "./tmp_database/" + patient_no + "/" + patient_dics
         ds = dcmread(dicom_path)
         self.dicoms[i][j] = ds
         arr = ds.pixel_array
