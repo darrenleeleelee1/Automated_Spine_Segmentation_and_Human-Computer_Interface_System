@@ -48,6 +48,9 @@ class initialWidget(QtWidgets.QMainWindow):
             self.empty_page_stack.append(i)
         self.patient_mapto_page = {}
 
+        self.opened_list = [] # 紀錄打開順序
+        self.recent_list = [] # 記錄倒過來
+
         self.ui.patient_list.setEditTriggers(QAbstractItemView.NoEditTriggers)
         #右键菜单
         self.ui.patient_list.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -512,17 +515,14 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.duplicateAdd()
             else:
                 self.open_pt_page(pt_id)
-                # self.pt_list.append(pt_id)
-                # self.ui.patient_list.addItem(pt_id)
+                self.pt_list.append(pt_id)
+                #self.ui.patient_list.addItem(pt_id)
                 self.ui.no_list.clear()
                 self.pt_list.sort()
                 for ptid in self.pt_list:
                     self.ui.no_list.addItem(ptid)
                 for i in self.pt_list:
                     print(i)    
-                # self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
-                # temp_page = self.patient_mapto_page[pt_id]
-                # self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[temp_page])
                 src = './tmp_database/' + pt_id
                 dst = './tmp/' + pt_id
                 if(not os.path.exists(dst)):
@@ -538,6 +538,7 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
         temp_page = self.patient_mapto_page[pt_id]
         self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[temp_page])
+        self.opened_list.append(pt_id)
 
     def pageFull(self):
         pageFull_msg = QMessageBox()
@@ -609,26 +610,6 @@ class initialWidget(QtWidgets.QMainWindow):
             for i in range(self.search_record_cnt):
                 f.write(self.search_record.item(i).text() + "\n")
 
-    def loadOpened(self):
-        with open('./record/tmpOpened.txt', 'r') as f:
-            pt_id = f.read().splitlines()
-            for k in pt_id:
-                self.ui.recently_list.addItem(k)
-
-    def saveOpened(self):
-        with open('./record/tmpOpened.txt', 'w') as f:
-            for filename in os.listdir('./tmp'):
-                print(filename)
-                f.write(filename + "\n")
-        # os.removedirs("./tmp")
-        # close_path = "./tmp/" + close_id
-        for filename in os.listdir('./tmp'):
-            shutil.rmtree('./tmp/'+ filename) 
-        #     file_path = close_path + '/' + filename
-        #     print(file_path)
-        #     os.remove(file_path)
-        # os.rmdir(close_path)
-
     def addEntry(self):
         entryItem = self.ui.input_no.text()
         if entryItem != '':
@@ -674,6 +655,25 @@ class initialWidget(QtWidgets.QMainWindow):
             print(pt_id + "test")
 
 # Recently viewed page--------------------------------------------------------------------------------------------
+    def loadOpened(self):
+        with open('./record/tmpOpened.txt', 'r') as f:
+            pt_id = f.read().splitlines()
+            for k in pt_id:
+                self.recent_list.append(k)
+                self.ui.recently_list.addItem(k)
+            self.opened_list = self.recent_list[::-1]
+
+    def saveOpened(self):
+        self.recent_list = self.opened_list[::-1]
+        self.recent_list = list(dict.fromkeys(self.recent_list))
+        while(len(self.recent_list) > 10):
+            self.recent_list.pop()
+        with open('./record/tmpOpened.txt', 'w') as f:
+            for k in self.recent_list:
+                f.write(k + "\n")
+        for filename in os.listdir('./tmp'):
+            shutil.rmtree('./tmp/'+ filename) 
+
     def recently_listItemClicked(self, item):
         pt_id = str(item.text())
         self.open_pt_page(pt_id)
