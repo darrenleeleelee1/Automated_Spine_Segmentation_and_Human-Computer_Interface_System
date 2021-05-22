@@ -85,6 +85,7 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.menu_toggle.clicked.connect(lambda: self.slideLeftMenu())  # slide menu
         self.ui.add_patient.clicked.connect(self.addPatient)
         self.ui.search.clicked.connect(lambda: self.ui.stackedWidget_right.setCurrentWidget(self.ui.search_page))
+        self.loadNoList()
         self.loadSearchRecord() # 載入搜尋紀錄
         self.ui.input_no.editingFinished.connect(self.addEntry)  # 按enter
         self.ui.search_no_button.clicked.connect(self.addEntry)  # 按 search_no
@@ -511,7 +512,6 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.open_pt_page(pt_id)
                 self.pt_list.append(pt_id)
                 self.ui.patient_list.addItem(pt_id)
-                self.ui.no_list.clear()
                 self.pt_list.sort()
                 for ptid in self.pt_list:
                     self.ui.no_list.addItem(ptid)
@@ -651,6 +651,19 @@ class initialWidget(QtWidgets.QMainWindow):
 
 
 # 其他/初始--------------------------------------------------------------------------------------------------------
+    def loadNoList(self):
+        url = 'http://127.0.0.1:8000/gmedicalnumbers'
+        response = requests.get(url)
+        self.ui.no_list.clear()
+        medical_count = response.json()['medical_count']
+        medical_numbers = response.json()['medical_numbers']
+        for i in medical_numbers:
+            # print(i)
+            # print(type(i))
+            self.ui.no_list.addItem(i)
+
+        # print(type(response.json()['medical_numbers']))
+
     def myListWidgetContext(self,position): # 設定patient list 右鍵功能 關閉
         popMenu = QMenu()
         closeAct = QAction("Close",self)

@@ -1,5 +1,6 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import FileResponse
+from pydantic import BaseModel
 from typing import List
 #import MySQLdb
 #import MySQLdb.cursors as cursors
@@ -17,9 +18,17 @@ os.system('chcp')
 # else:
 #     print("Connection Unsuccessful.")
 
-    
 
 
+@app.get("/gmedicalnumbers")
+async def get_medical_number():
+    root = './tmp_database'
+    medicalNumbers = []
+    cnt = 0
+    for filename in os.listdir(root):
+        cnt += 1
+        medicalNumbers.append(filename)
+    return {"medical_count": cnt, "medical_numbers": medicalNumbers}
 
 @app.get("/gdicom/{medical_number}") # get dicom path
 async def get_dicom(medical_number: int):
