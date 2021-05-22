@@ -636,19 +636,15 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.pageFull()
         else:
             pt_id = str(item.text())
-            if(self.patient_mapto_page[pt_id] == -1): # patient list還沒有 -> 打開新page並加到patient list
-                # 檔案 from tmpDatabase -> tmp
+            print(pt_id)
+            if((pt_id not in self.patient_mapto_page) or (self.patient_mapto_page[pt_id] == -1)):
+                print("no")
                 self.open_pt_page(pt_id)
-                # self.ui.patient_list.addItem(pt_id)
                 src = './tmp_database/' + pt_id
                 dst = './tmp/' + pt_id
                 if(not os.path.exists(dst)):
                     os.makedirs(dst)
                 copytree(src, dst)
-            # patient list中已存在 直接打開
-            # self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
-            # temp_page = self.patient_mapto_page[pt_id]
-            # self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[temp_page])
             print(pt_id + "test")
 
 # Recently viewed page--------------------------------------------------------------------------------------------
