@@ -583,7 +583,7 @@ class initialWidget(QtWidgets.QMainWindow):
         close_id = str(get_close_id.text())
         tmp = self.patient_mapto_page[close_id]
         self.empty_page_stack.append(tmp)
-        self.patient_mapto_page[close_id] = -1
+        self.patient_mapto_page.pop(close_id)
         self.ui.patient_list.takeItem(self.ui.patient_list.currentRow())
         close_path = "./tmp/" + close_id
         for filename in os.listdir(close_path):
@@ -637,7 +637,7 @@ class initialWidget(QtWidgets.QMainWindow):
         else:
             pt_id = str(item.text())
             print(pt_id)
-            if((pt_id not in self.patient_mapto_page) or (self.patient_mapto_page[pt_id] == -1)):
+            if(pt_id not in self.patient_mapto_page):
                 print("no")
                 self.open_pt_page(pt_id)
                 src = './tmp_database/' + pt_id
