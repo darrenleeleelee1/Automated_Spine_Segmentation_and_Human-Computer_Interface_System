@@ -651,7 +651,12 @@ class initialWidget(QtWidgets.QMainWindow):
                 if(not os.path.exists(dst)):
                     os.makedirs(dst)
                 copytree(src, dst)
-            print(pt_id + "test")
+            else:
+                self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
+                temp_page = self.patient_mapto_page[pt_id]
+                self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[temp_page])
+                self.opened_list.append(pt_id)
+            # print(pt_id + "test")
 
 # Recently viewed page--------------------------------------------------------------------------------------------
     def loadOpened(self):
