@@ -15,10 +15,7 @@ class Ui_MainWindow(object):
         self.photo.setText("")
         self.photo.setScaledContents(True)
         self.photo.setObjectName("photo")
-<<<<<<< HEAD
-=======
 
->>>>>>> main
         MainWindow.setCentralWidget(self.centralwidget)
 
         # self.retranslateUi(MainWindow)
