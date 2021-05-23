@@ -520,7 +520,6 @@ class initialWidget(QtWidgets.QMainWindow):
             else:
                 self.open_pt_page(pt_id)
                 self.pt_list.append(pt_id)
-                self.ui.patient_list.addItem(pt_id)
                 self.pt_list.sort()
                 self.ui.no_list.clear()
                 for ptid in self.pt_list:
