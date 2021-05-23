@@ -385,8 +385,15 @@ class initialWidget(QtWidgets.QMainWindow):
         self.tool_lock = 'angle'
 
     def pushButtonAddPicClicked(self):
-        pic_file_path, filetype = QFileDialog.getOpenFileName(self,"選取檔案","/Users/user/Documents/畢專/dicom_data","All Files (*);;Text Files (*.txt)")  #設定副檔名過濾,注意用雙分號間隔
-        print(filetype)
+        pic_file_path, filetype = QFileDialog.getOpenFileName(self,"選取檔案","/Users/user/Documents/畢專/dicom_data")  #設定副檔名過濾,注意用雙分號間隔
+        print(pic_file_path)
+        #print(self.pic_ith)
+        pt_id = list(self.patient_mapto_page.keys())[list(self.patient_mapto_page.values()).index(self.pic_ith)]
+        tmp_dst = './tmp/' + pt_id
+        database_dst = './tmp_database/' + pt_id
+        #print(tmp_dst)
+        shutil.copy(pic_file_path, tmp_dst)
+        shutil.copy(pic_file_path, database_dst)
         # fileName2, ok2 = QFileDialog.getSaveFileName(6self,"檔案儲存","./","All Files (*);;Text Files (*.txt)")
         # copyfile(pic_file_path, dst)
 
@@ -603,7 +610,7 @@ class initialWidget(QtWidgets.QMainWindow):
         
     def saveSearchRecord(self):
         with open('./record/search_record.txt', 'w') as f:
-            print(self.search_record_cnt)
+            #print(self.search_record_cnt)
             for i in range(self.search_record_cnt):
                 f.write(self.search_record.item(i).text() + "\n")
 
@@ -621,7 +628,6 @@ class initialWidget(QtWidgets.QMainWindow):
             for id in self.pt_list:
                 self.ui.no_list.addItem(id)
        
-
         completer = QCompleter(self.search_record, self)
         self.ui.input_no.setCompleter(completer)
 
@@ -676,9 +682,6 @@ class initialWidget(QtWidgets.QMainWindow):
         if(not os.path.exists(dst)):
             os.makedirs(dst)
         copytree(src, dst)
-        # self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
-        # temp_page = self.patient_mapto_page[pt_id]
-        # self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[temp_page]
 
 # 其他/初始--------------------------------------------------------------------------------------------------------
     def loadPtList(self):
