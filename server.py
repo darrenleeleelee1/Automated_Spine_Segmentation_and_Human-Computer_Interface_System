@@ -8,7 +8,7 @@ import os, aiofiles#, zipfile, StringIO
 
 app = FastAPI()
 
-os.system('chcp')
+#os.system('chcp')
 
 # connection = MySQLdb.connect(
 #     host='localhost',user='CDJY',password='C04D10J02Y09',db='sb', cursorclass = cursors.SSCursor)
