@@ -263,7 +263,7 @@ class Ui_MainWindow(object):
         spacerItem1 = QtWidgets.QSpacerItem(20, 38, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem1)
         self.recently_list = QtWidgets.QListWidget(self.recently_viewed_page)
-        self.recently_list.setMinimumSize(QtCore.QSize(1000, 800))
+        self.recently_list.setMinimumSize(QtCore.QSize(1000, 700))
         font = QtGui.QFont()
         font.setFamily("Verdana")
         font.setPointSize(18)

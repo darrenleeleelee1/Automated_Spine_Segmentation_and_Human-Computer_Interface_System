@@ -386,16 +386,16 @@ class initialWidget(QtWidgets.QMainWindow):
 
     def pushButtonAddPicClicked(self):
         pic_file_path, filetype = QFileDialog.getOpenFileName(self,"選取檔案","/Users/user/Documents/畢專/dicom_data")  #設定副檔名過濾,注意用雙分號間隔
+        if pic_file_path == "":
+                print("\n取消")
+                return
         print(pic_file_path)
         #print(self.pic_ith)
         pt_id = list(self.patient_mapto_page.keys())[list(self.patient_mapto_page.values()).index(self.pic_ith)]
         tmp_dst = './tmp/' + pt_id
         database_dst = './tmp_database/' + pt_id
-        #print(tmp_dst)
         shutil.copy(pic_file_path, tmp_dst)
         shutil.copy(pic_file_path, database_dst)
-        # fileName2, ok2 = QFileDialog.getSaveFileName(6self,"檔案儲存","./","All Files (*);;Text Files (*.txt)")
-        # copyfile(pic_file_path, dst)
 
     # 清除
     def pushButtonEraseClicked(self):
@@ -651,7 +651,12 @@ class initialWidget(QtWidgets.QMainWindow):
                 if(not os.path.exists(dst)):
                     os.makedirs(dst)
                 copytree(src, dst)
-            print(pt_id + "test")
+            else:
+                self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
+                temp_page = self.patient_mapto_page[pt_id]
+                self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[temp_page])
+                self.opened_list.append(pt_id)
+            # print(pt_id + "test")
 
 # Recently viewed page--------------------------------------------------------------------------------------------
     def loadOpened(self):
