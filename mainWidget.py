@@ -130,8 +130,15 @@ class initialWidget(QtWidgets.QMainWindow):
                     pen.setWidth(2)
                     pen.setColor(QtGui.QColor(5, 105, 25))
                     p.setPen(pen)
-                    p.drawLine(self.tmx[_i][_j], self.tmy[_i][_j], self.tsx[_i][_j], self.tsy[_i][_j])
-                    p.drawLine(self.tex[_i][_j], self.tey[_i][_j], self.tmx[_i][_j], self.tmy[_i][_j])
+                    p.drawLine((self.tmx[_i][_j] - self.x[_i][_j]) / self.size[_i][_j],
+                               (self.tmy[_i][_j] - self.y[_i][_j]) / self.size[_i][_j],
+                               (self.tsx[_i][_j] - self.x[_i][_j]) / self.size[_i][_j],
+                               (self.tsy[_i][_j] - self.y[_i][_j]) / self.size[_i][_j])
+
+                    p.drawLine((self.tex[_i][_j] - self.x[_i][_j]) / self.size[_i][_j],
+                               (self.tey[_i][_j] - self.y[_i][_j]) / self.size[_i][_j],
+                               (self.tmx[_i][_j] - self.x[_i][_j]) / self.size[_i][_j],
+                               (self.tmy[_i][_j] - self.y[_i][_j]) / self.size[_i][_j])
         elif(self.tool_lock == 'pen'):
             return
         elif(self.tool_lock == 'zoom_in'):
@@ -335,8 +342,9 @@ class initialWidget(QtWidgets.QMainWindow):
             f.setPixelSize(15)
             q.setFont(f)
             q.setPen(QtGui.QColor(210, 210, 10))
-            q.drawText(t_label, str(round(w.angle, 1)) + "°")
+            q.drawText(t_label + QtCore.QPointF(self.x[_i][_j], str(round(w.angle, 1)) + "°"))
             q.restore()
+
         for w in self.ruler_coordinate_list[_i][_j]:
             pen = QtGui.QPen()
             pen.setWidth(2)
@@ -355,14 +363,14 @@ class initialWidget(QtWidgets.QMainWindow):
             if ts_x > te_x:
                 t_label = QtCore.QPointF(ts_x + 10, ts_y)
             else:
-                t_label = QtCore.QPointF(te_x + 10, te_y) 
+                t_label = QtCore.QPointF(te_x + 10, te_y)
             q.save() # 要用來show出label，所以reset所有的transform
             q.resetTransform()
             f = q.font()
             f.setPixelSize(15)
             q.setFont(f)
-            q.setPen(QtGui.QColor(210, 210, 10))            
-            q.drawText(t_label+QtCore.QPointF(self.x[_i][_j], self.y[_i][_j]), str(round(w.length, 2)) + "pixels")
+            q.setPen(QtGui.QColor(210, 210, 10))
+            q.drawText(t_label + QtCore.QPointF(self.x[_i][_j], self.y[_i][_j]), str(round(w.length, 2)) + "pixels")
             q.restore()
         q.end()
 
@@ -896,10 +904,10 @@ class initialWidget(QtWidgets.QMainWindow):
 
 
         # 暫時試試放照片
-        self.showPic(1, 1, "01372635","5F327951")
-        self.showPic(1, 2, "01372635","5F327951")
-        self.showPic(1, 3, "01372635","5F327951")
-        self.showPic(1, 4, "01372635","5F327951")
+        self.showPic(1, 1, "01372635","5F327951.dcm")
+        self.showPic(1, 2, "01372635","5F327951.dcm")
+        self.showPic(1, 3, "01372635","5F327951.dcm")
+        self.showPic(1, 4, "01372635","5F327951.dcm")
 
     def mousePressEvent(self, event):
         self.clickPosition = event.globalPos()
