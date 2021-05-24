@@ -12,7 +12,7 @@ from generatedUiFile.Spine_BrokenUi import Ui_MainWindow
 from generatedUiFile.customUi import Ui_Dialog
 import os, requests
 from PyQt5.QtWidgets import *
-from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QInputDialog, QLineEdit, QDialog
+from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QInputDialog, QLineEdit, QDialog, QListWidgetItem
 from pydicom import dcmread, Dataset
 from pydicom.filebase import DicomBytesIO
 import numpy as np
@@ -112,6 +112,8 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.pushButton_move.clicked.connect(self.pushButtonMoveClicked) # 移動
         self.ui.patient_list.itemClicked.connect(self.patient_listItemClicked)
         self.ui.recently_list.itemClicked.connect(self.recently_listItemClicked)
+        self.ui.thumbnail_list_1.itemClicked.connect(self.thumbnaillistclicked)
+
 
 #照片Pressed, Released, Mouse Track, Show Pic----------------------------------------------------------------------
     def picMouseReleased(self, event, _i, _j):
@@ -396,7 +398,6 @@ class initialWidget(QtWidgets.QMainWindow):
         if(os.path.exists(tmp_dst)):
             self.picAlreadyExist()
             return
-
         database_dst = './tmp_database/' + pt_id
         shutil.copy(pic_file_path, tmp_dst)
         shutil.copy(pic_file_path, database_dst)
@@ -529,7 +530,6 @@ class initialWidget(QtWidgets.QMainWindow):
             if(response.json()['Result'] == 'Directory already exists.'):
                 self.duplicateAdd()
             else:
-                self.open_pt_page(pt_id)
                 self.pt_list.append(pt_id)
                 self.pt_list.sort()
                 self.ui.no_list.clear()
@@ -542,6 +542,7 @@ class initialWidget(QtWidgets.QMainWindow):
                 if(not os.path.exists(dst)):
                     os.makedirs(dst)
                 copytree(src, dst)
+                self.open_pt_page(pt_id)
 
                 
     def open_pt_page(self, pt_id): #記得要先檢查self.empty_page_stack空->Page滿->pageFull, 用在add和pt_list中打開
@@ -553,6 +554,7 @@ class initialWidget(QtWidgets.QMainWindow):
         temp_page = self.patient_mapto_page[pt_id]
         self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[temp_page])
         self.opened_list.append(pt_id)
+        self.set_thumbnail(pt_id)
 
     def pageFull(self):
         pageFull_msg = QMessageBox()
@@ -608,6 +610,68 @@ class initialWidget(QtWidgets.QMainWindow):
             print(file_path)
             os.remove(file_path)
         os.rmdir(close_path)
+
+# Thumbnail-------------------------------------------------------------------------------------------------------
+    def set_thumbnail(self, pt_id):
+        pt_path = './tmp/' + pt_id
+        i = self.patient_mapto_page
+        j = 1
+        for filename in os.listdir(pt_path):
+            dicom_path = pt_path + '/' + filename
+            ds = dcmread(dicom_path)
+            self.dicoms[i][j] = ds
+            arr = ds.pixel_array
+            arr = np.uint16(arr)
+            dicom_WL = ds[0x0028, 0x1050].value
+            dicom_WW = ds[0x0028, 0x1051].value
+            self.pic_adjust_pixels[i][j] = self.mappingWindow(arr, dicom_WL, dicom_WW)
+            self.qimage = QtGui.QImage(self.pic_adjust_pixels[i][j], self.pic_adjust_pixels[i][j].shape[1], self.pic_adjust_pixels[i][j].shape[0], QtGui.QImage.Format_Grayscale16)
+            pixmap = QtGui.QPixmap(self.qimage)
+            self.thumbnail_list[i].setViewMode(QListView.IconMode)
+            self.thumbnail_list[i].setItemAlignment(Qt.AlignCenter)
+            item = QListWidgetItem()
+            item.setText('elephant')
+            icon = QtGui.QIcon(pixmap)
+            item.setIcon(icon)
+            self.thumbnail_list[i].addItem(item) 
+            j += 1
+        size = QSize(225, 225)
+        self.thumbnail_list[i].setIconSize(size)
+            # print(file_path)
+        # dicom_path = 'C:/Users/user/Desktop/Spine_Broken/tmp_database/01372635/5F327951'
+        # ds = dcmread(dicom_path)
+        # # self.dicoms[i][j] = ds
+        # arr = ds.pixel_array
+        # arr = np.uint16(arr)
+        # # self.pic_original_pixels[i][j] = np.copy(arr)
+        # # self.pic_ith = i
+        # # self.pic_jth = j
+        # dicom_WL = ds[0x0028, 0x1050].value
+        # dicom_WW = ds[0x0028, 0x1051].value
+        # pic_adjust_pixels = self.mappingWindow(arr, dicom_WL, dicom_WW)
+        # self.qimage = QtGui.QImage(pic_adjust_pixels, pic_adjust_pixels.shape[1], pic_adjust_pixels.shape[0], QtGui.QImage.Format_Grayscale16)
+        # pixmap = QtGui.QPixmap(self.qimage)
+        # # # pt_id = list(self.patient_mapto_page.keys())[list(self.patient_mapto_page.values()).index(self.pic_ith)]
+        # self.ui.thumbnail_list_1.setViewMode(QListView.IconMode)
+        # # self.ui.thumbnail_list_1.setTextAlignment(Qt.AlignCenter)
+        # self.ui.thumbnail_list_1.setItemAlignment(Qt.AlignCenter)
+        # item = QListWidgetItem()
+        # item.setText('elephant')
+        # icon = QtGui.QIcon(pixmap)
+        # item.setIcon(icon)
+        # self.ui.thumbnail_list_1.addItem(item) 
+        # item2 = QListWidgetItem()
+        # item2.setText('panda')
+        # icon2 = QtGui.QIcon('C:/Users/user/Desktop/panda.jpg')
+        # item2.setIcon(icon2)
+        # self.ui.thumbnail_list_1.addItem(item2) 
+        # size = QSize(225, 225)
+        # self.ui.thumbnail_list_1.setIconSize(size)
+        # self.ui.thumbnail_list_1.itemClicked.connect(self.thumbnaillistclicked)
+        # print(self.ui.thumbnail_list_1.itemAlignment())
+        
+    def thumbnaillistclicked(self):
+        print("test")
 # search page-----------------------------------------------------------------------------------------------------
     # search
     def loadSearchRecord(self):
@@ -655,12 +719,12 @@ class initialWidget(QtWidgets.QMainWindow):
             print(pt_id)
             if(pt_id not in self.patient_mapto_page):
                 print("no")
-                self.open_pt_page(pt_id)
                 src = './tmp_database/' + pt_id
                 dst = './tmp/' + pt_id
                 if(not os.path.exists(dst)):
                     os.makedirs(dst)
                 copytree(src, dst)
+                self.open_pt_page(pt_id)
             else:
                 self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
                 temp_page = self.patient_mapto_page[pt_id]
@@ -690,13 +754,13 @@ class initialWidget(QtWidgets.QMainWindow):
 
     def recently_listItemClicked(self, item):
         pt_id = str(item.text())
-        self.open_pt_page(pt_id)
         # self.ui.patient_list.addItem(pt_id)
         src = './tmp_database/' + pt_id
         dst = './tmp/' + pt_id
         if(not os.path.exists(dst)):
             os.makedirs(dst)
         copytree(src, dst)
+        self.open_pt_page(pt_id)
 
 # 其他/初始--------------------------------------------------------------------------------------------------------
     def loadPtList(self):
@@ -763,7 +827,6 @@ class initialWidget(QtWidgets.QMainWindow):
         dicom_WL = ds[0x0028, 0x1050].value
         dicom_WW = ds[0x0028, 0x1051].value
         self.pic_adjust_pixels[i][j] = self.mappingWindow(arr, dicom_WL, dicom_WW)
-        
         # pixmap_resized = pixmap.scaled(self.pic_label_width * self.size, self.pic_label_height * self.size,QtCore.Qt.KeepAspectRatio)
         # self.pic[i][j].move(200, 0)
         # self.pic[i][j].setPixmap(pixmap)
