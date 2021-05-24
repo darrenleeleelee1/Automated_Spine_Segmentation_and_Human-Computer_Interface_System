@@ -130,8 +130,15 @@ class initialWidget(QtWidgets.QMainWindow):
                     pen.setWidth(2)
                     pen.setColor(QtGui.QColor(5, 105, 25))
                     p.setPen(pen)
-                    p.drawLine(self.tmx[_i][_j], self.tmy[_i][_j], self.tsx[_i][_j], self.tsy[_i][_j])
-                    p.drawLine(self.tex[_i][_j], self.tey[_i][_j], self.tmx[_i][_j], self.tmy[_i][_j])
+                    p.drawLine((self.tmx[_i][_j] - self.x[_i][_j]) / self.size[_i][_j],
+                               (self.tmy[_i][_j] - self.y[_i][_j]) / self.size[_i][_j],
+                               (self.tsx[_i][_j] - self.x[_i][_j]) / self.size[_i][_j],
+                               (self.tsy[_i][_j] - self.y[_i][_j]) / self.size[_i][_j])
+
+                    p.drawLine((self.tex[_i][_j] - self.x[_i][_j]) / self.size[_i][_j],
+                               (self.tey[_i][_j] - self.y[_i][_j]) / self.size[_i][_j],
+                               (self.tmx[_i][_j] - self.x[_i][_j]) / self.size[_i][_j],
+                               (self.tmy[_i][_j] - self.y[_i][_j]) / self.size[_i][_j])
         elif(self.tool_lock == 'pen'):
             return
         elif(self.tool_lock == 'zoom_in'):
@@ -187,6 +194,8 @@ class initialWidget(QtWidgets.QMainWindow):
             self.size[_i][_j] = self.size_last[_i][_j] * 1.25
             self.magnifier_pad_x[_i][_j] = self.magnifier_pad_x[_i][_j] - (self.size[_i][_j] - self.size_last[_i][_j]) * event.pos().x()
             self.magnifier_pad_y[_i][_j] = self.magnifier_pad_y[_i][_j] - (self.size[_i][_j] - self.size_last[_i][_j]) * event.pos().y()
+            # self.magnifier_pad_x[_i][_j] = self.magnifier_pad_x[_i][_j] - (0.25) * (event.pos().x()-self.magnifier_pad_x[_i][_j])
+            # self.magnifier_pad_y[_i][_j] = self.magnifier_pad_y[_i][_j] - (0.25) * (event.pos().y()-self.magnifier_pad_y[_i][_j])
             self.update()
 
         elif(self.tool_lock == 'zoom_out'):
@@ -292,7 +301,8 @@ class initialWidget(QtWidgets.QMainWindow):
         elif(self.tool_lock == 'pen'):
             self.pic[_i][_j].setMouseTracking(False)
             pen = QtGui.QPen()
-            pen.setWidth(6)
+            pen.setWidth(2)
+            pen.setColor(QtGui.QColor(255, 25, 0))
             p.setPen(pen)
             tpsx, tpsy = self.transitiveWithBiasMatrix(self.pen_start_x[_i][_j], self.pen_start_y[_i][_j], self.rotate_angle[_i][_j])
             tpex, tpey = self.transitiveWithBiasMatrix(self.pen_end_x[_i][_j], self.pen_end_y[_i][_j], self.rotate_angle[_i][_j])
@@ -309,7 +319,7 @@ class initialWidget(QtWidgets.QMainWindow):
                 p.setPen(pen)
                 self.tsx[_i][_j], self.tsy[_i][_j] = self.transitiveWithBiasMatrix(self.ruler_start_x[_i][_j], self.ruler_start_y[_i][_j], self.rotate_angle[_i][_j])
                 self.tex[_i][_j], self.tey[_i][_j] = self.transitiveWithBiasMatrix(self.ruler_end_x[_i][_j], self.ruler_end_y[_i][_j], self.rotate_angle[_i][_j])
-                q.drawLine(self.tex[_i][_j]/self.size[_i][_j], self.tey[_i][_j]/self.size[_i][_j], self.tsx[_i][_j]/self.size[_i][_j], self.tsy[_i][_j]//self.size[_i][_j])
+                q.drawLine(self.tex[_i][_j], self.tey[_i][_j], self.tsx[_i][_j], self.tsy[_i][_j])
 
         q.drawPixmap(self.x[_i][_j], self.y[_i][_j], img_width, img_height, self.transparent_pix[_i][_j])   #讓畫布跟著照片移動
         # show every angle
@@ -336,8 +346,9 @@ class initialWidget(QtWidgets.QMainWindow):
             f.setPixelSize(15)
             q.setFont(f)
             q.setPen(QtGui.QColor(210, 210, 10))
-            q.drawText(t_label, str(round(w.angle, 1)) + "°")
+            q.drawText(t_label + QtCore.QPointF(self.x[_i][_j], self.y[_i][_j]), str(round(w.angle, 1)) + "°")
             q.restore()
+
         for w in self.ruler_coordinate_list[_i][_j]:
             pen = QtGui.QPen()
             pen.setWidth(2)
@@ -356,15 +367,18 @@ class initialWidget(QtWidgets.QMainWindow):
             if ts_x > te_x:
                 t_label = QtCore.QPointF(ts_x + 10, ts_y)
             else:
-                t_label = QtCore.QPointF(te_x + 10, te_y) 
+                t_label = QtCore.QPointF(te_x + 10, te_y)
             q.save() # 要用來show出label，所以reset所有的transform
             q.resetTransform()
             f = q.font()
             f.setPixelSize(15)
             q.setFont(f)
             q.setPen(QtGui.QColor(210, 210, 10))
+
             q.drawText(t_label, str(round(w.length, 2)) + "pixels")
             # q.drawText(t_label+QtCore.QPointF(self.x[_i][_j], self.y[_i][_j]), str(round(w.length, 2)) + "pixels")
+
+
             q.restore()
         q.end()
 
@@ -439,8 +453,8 @@ class initialWidget(QtWidgets.QMainWindow):
         self.angle_coordinate_list[self.pic_ith][self.pic_jth].clear()
         self.update()
         # 清除後必須將畫筆設為初始位置，否則會存到上次最後的位置，而有一小黑點
-        self.pen_start_x[self.pic_ith][self.pic_jth] = self.pen_start_y[self.pic_ith][self.pic_jth] = 0
-        self.pen_end_x[self.pic_ith][self.pic_jth] = self.pen_end_y[self.pic_ith][self.pic_jth] = 0
+        self.pen_start_x[self.pic_ith][self.pic_jth] = self.pen_start_y[self.pic_ith][self.pic_jth] = -10
+        self.pen_end_x[self.pic_ith][self.pic_jth] = self.pen_end_y[self.pic_ith][self.pic_jth] = -10
 
     def pushButtonPenClicked(self):
         self.tool_lock = 'pen'
@@ -873,8 +887,8 @@ class initialWidget(QtWidgets.QMainWindow):
             for j in range(1, (self.MAXIMUM_PIC + 1)):
                 exec("%s[%d][%d] = %s_%d_%d" % (var_array_pic, i, j, var_pic, i, j))
                 self.pic[i][j].setText("%d-%d" % (i, j))
-                self.pen_start_x[i][j] = self.pen_start_y[i][j] = 0
-                self.pen_end_x[i][j] = self.pen_end_y[i][j] = 0
+                self.pen_start_x[i][j] = self.pen_start_y[i][j] = -10
+                self.pen_end_x[i][j] = self.pen_end_y[i][j] = -10
                 self.ruler_start_x[i][j] = self.ruler_start_y[i][j] = 0
                 self.ruler_end_x[i][j] = self.ruler_end_y[i][j] = 0                
                 self.angle_start_x[i][j] = self.angle_start_y[i][j] = 0
@@ -898,10 +912,10 @@ class initialWidget(QtWidgets.QMainWindow):
 
 
         # 暫時試試放照片
-        self.showPic(1, 1, "01372635","5F327951")
-        self.showPic(1, 2, "01372635","5F327951")
-        self.showPic(1, 3, "01372635","5F327951")
-        self.showPic(1, 4, "01372635","5F327951")
+        self.showPic(1, 1, "01372635","5F327951.dcm")
+        self.showPic(1, 2, "01372635","5F327951.dcm")
+        self.showPic(1, 3, "01372635","5F327951.dcm")
+        self.showPic(1, 4, "01372635","5F327951.dcm")
 
     def mousePressEvent(self, event):
         self.clickPosition = event.globalPos()
