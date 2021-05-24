@@ -449,8 +449,8 @@ class initialWidget(QtWidgets.QMainWindow):
         self.angle_coordinate_list[self.pic_ith][self.pic_jth].clear()
         self.update()
         # 清除後必須將畫筆設為初始位置，否則會存到上次最後的位置，而有一小黑點
-        self.pen_start_x[self.pic_ith][self.pic_jth] = self.pen_start_y[self.pic_ith][self.pic_jth] = 0
-        self.pen_end_x[self.pic_ith][self.pic_jth] = self.pen_end_y[self.pic_ith][self.pic_jth] = 0
+        self.pen_start_x[self.pic_ith][self.pic_jth] = self.pen_start_y[self.pic_ith][self.pic_jth] = -10
+        self.pen_end_x[self.pic_ith][self.pic_jth] = self.pen_end_y[self.pic_ith][self.pic_jth] = -10
 
     def pushButtonPenClicked(self):
         self.tool_lock = 'pen'
@@ -861,8 +861,6 @@ class initialWidget(QtWidgets.QMainWindow):
         self.rotate_angle = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)] # 旋轉角度
         self.size = [[1] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)] # 每張照片被放大縮小的倍率
         self.size_last = [[1] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)] # 每張照片上一個被放大縮小的倍率
-        self.size_click_x = [[1] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
-        self.size_click_y = [[1] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
         self.magnifier_pad_x = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)] # --magnifier--
         self.magnifier_pad_y = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
         self.tmpx = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
@@ -885,8 +883,8 @@ class initialWidget(QtWidgets.QMainWindow):
             for j in range(1, (self.MAXIMUM_PIC + 1)):
                 exec("%s[%d][%d] = %s_%d_%d" % (var_array_pic, i, j, var_pic, i, j))
                 self.pic[i][j].setText("%d-%d" % (i, j))
-                self.pen_start_x[i][j] = self.pen_start_y[i][j] = 0
-                self.pen_end_x[i][j] = self.pen_end_y[i][j] = 0
+                self.pen_start_x[i][j] = self.pen_start_y[i][j] = -10
+                self.pen_end_x[i][j] = self.pen_end_y[i][j] = -10
                 self.ruler_start_x[i][j] = self.ruler_start_y[i][j] = 0
                 self.ruler_end_x[i][j] = self.ruler_end_y[i][j] = 0                
                 self.angle_start_x[i][j] = self.angle_start_y[i][j] = 0
