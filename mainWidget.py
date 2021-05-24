@@ -157,6 +157,7 @@ class initialWidget(QtWidgets.QMainWindow):
                                (self.tsy[_i][_j] - self.y[_i][_j]) / self.size[_i][_j],
                                (self.trex[_i][_j] - self.x[_i][_j]) / self.size[_i][_j],
                                (self.trey[_i][_j] - self.y[_i][_j]) / self.size[_i][_j])
+
                     p.restore()
 
 
@@ -361,8 +362,9 @@ class initialWidget(QtWidgets.QMainWindow):
             f = q.font()
             f.setPixelSize(15)
             q.setFont(f)
-            q.setPen(QtGui.QColor(210, 210, 10))            
-            q.drawText(t_label+QtCore.QPointF(self.x[_i][_j], self.y[_i][_j]), str(round(w.length, 2)) + "pixels")
+            q.setPen(QtGui.QColor(210, 210, 10))
+            q.drawText(t_label, str(round(w.length, 2)) + "pixels")
+            # q.drawText(t_label+QtCore.QPointF(self.x[_i][_j], self.y[_i][_j]), str(round(w.length, 2)) + "pixels")
             q.restore()
         q.end()
 
