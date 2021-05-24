@@ -393,9 +393,20 @@ class initialWidget(QtWidgets.QMainWindow):
         #print(self.pic_ith)
         pt_id = list(self.patient_mapto_page.keys())[list(self.patient_mapto_page.values()).index(self.pic_ith)]
         tmp_dst = './tmp/' + pt_id
+        if(os.path.exists(tmp_dst)):
+            self.picAlreadyExist()
+            return
+
         database_dst = './tmp_database/' + pt_id
         shutil.copy(pic_file_path, tmp_dst)
         shutil.copy(pic_file_path, database_dst)
+
+    def picAlreadyExist(self):
+        picAlreadyExist_msg = QMessageBox()
+        picAlreadyExist_msg.setWindowTitle("Warning")
+        picAlreadyExist_msg.setText("Dicom already exist !")
+        picAlreadyExist_msg.setIcon(QMessageBox.Warning)
+        x = picAlreadyExist_msg.exec_() 
 
     # 清除
     def pushButtonEraseClicked(self):
