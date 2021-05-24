@@ -190,9 +190,12 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.pen_start_y[self.pic_ith][self.pic_jth] = event.pos().y()
 
         elif (self.tool_lock == 'zoom_in'):
+            print("click : ", self.size_click_x[_i][_j], self.size_click_y[_i][_j])
             self.size[_i][_j] = self.size_last[_i][_j] * 1.25
             self.magnifier_pad_x[_i][_j] = self.magnifier_pad_x[_i][_j] - (self.size[_i][_j] - self.size_last[_i][_j]) * event.pos().x()
             self.magnifier_pad_y[_i][_j] = self.magnifier_pad_y[_i][_j] - (self.size[_i][_j] - self.size_last[_i][_j]) * event.pos().y()
+            # self.magnifier_pad_x[_i][_j] = self.magnifier_pad_x[_i][_j] - (0.25) * (event.pos().x()-self.magnifier_pad_x[_i][_j])
+            # self.magnifier_pad_y[_i][_j] = self.magnifier_pad_y[_i][_j] - (0.25) * (event.pos().y()-self.magnifier_pad_y[_i][_j])
             self.update()
 
         elif(self.tool_lock == 'zoom_out'):
@@ -298,7 +301,8 @@ class initialWidget(QtWidgets.QMainWindow):
         elif(self.tool_lock == 'pen'):
             self.pic[_i][_j].setMouseTracking(False)
             pen = QtGui.QPen()
-            pen.setWidth(6)
+            pen.setWidth(2)
+            pen.setColor(QtGui.QColor(255, 25, 0))
             p.setPen(pen)
             tpsx, tpsy = self.transitiveWithBiasMatrix(self.pen_start_x[_i][_j], self.pen_start_y[_i][_j], self.rotate_angle[_i][_j])
             tpex, tpey = self.transitiveWithBiasMatrix(self.pen_end_x[_i][_j], self.pen_end_y[_i][_j], self.rotate_angle[_i][_j])
@@ -315,7 +319,7 @@ class initialWidget(QtWidgets.QMainWindow):
                 p.setPen(pen)
                 self.tsx[_i][_j], self.tsy[_i][_j] = self.transitiveWithBiasMatrix(self.ruler_start_x[_i][_j], self.ruler_start_y[_i][_j], self.rotate_angle[_i][_j])
                 self.tex[_i][_j], self.tey[_i][_j] = self.transitiveWithBiasMatrix(self.ruler_end_x[_i][_j], self.ruler_end_y[_i][_j], self.rotate_angle[_i][_j])
-                q.drawLine(self.tex[_i][_j]/self.size[_i][_j], self.tey[_i][_j]/self.size[_i][_j], self.tsx[_i][_j]/self.size[_i][_j], self.tsy[_i][_j]//self.size[_i][_j])
+                q.drawLine(self.tex[_i][_j], self.tey[_i][_j], self.tsx[_i][_j], self.tsy[_i][_j])
 
         q.drawPixmap(self.x[_i][_j], self.y[_i][_j], img_width, img_height, self.transparent_pix[_i][_j])   #讓畫布跟著照片移動
         # show every angle
@@ -342,7 +346,7 @@ class initialWidget(QtWidgets.QMainWindow):
             f.setPixelSize(15)
             q.setFont(f)
             q.setPen(QtGui.QColor(210, 210, 10))
-            q.drawText(t_label + QtCore.QPointF(self.x[_i][_j], str(round(w.angle, 1)) + "°"))
+            q.drawText(t_label + QtCore.QPointF(self.x[_i][_j], self.y[_i][_j]), str(round(w.angle, 1)) + "°")
             q.restore()
 
         for w in self.ruler_coordinate_list[_i][_j]:
@@ -857,6 +861,8 @@ class initialWidget(QtWidgets.QMainWindow):
         self.rotate_angle = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)] # 旋轉角度
         self.size = [[1] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)] # 每張照片被放大縮小的倍率
         self.size_last = [[1] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)] # 每張照片上一個被放大縮小的倍率
+        self.size_click_x = [[1] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
+        self.size_click_y = [[1] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
         self.magnifier_pad_x = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)] # --magnifier--
         self.magnifier_pad_y = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
         self.tmpx = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
