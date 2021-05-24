@@ -155,8 +155,13 @@ class initialWidget(QtWidgets.QMainWindow):
             if event.button() == Qt.LeftButton:
                 if(self.pic_clicked[_i][_j]):
                     self.pic_clicked[_i][_j] = False
-                    self.ruler_coordinate_list[_i][_j].append(rulerCoordinate(self.tsx[_i][_j], self.tsy[_i][_j], self.tex[_i][_j], self.tey[_i][_j]))
                     self.trex[_i][_j], self.trey[_i][_j] = self.transitiveWithBiasMatrix(event.x(), event.y(),self.rotate_angle[_i][_j])
+                    self.ruler_coordinate_list[_i][_j].append(rulerCoordinate(
+                        (self.tsx[_i][_j] - self.x[_i][_j]) / self.size[_i][_j],
+                        (self.tsy[_i][_j] - self.y[_i][_j]) / self.size[_i][_j],
+                        (self.trex[_i][_j] - self.x[_i][_j]) / self.size[_i][_j],
+                        (self.trey[_i][_j] - self.y[_i][_j]) / self.size[_i][_j]
+                    ))
                     pen.setWidth(2)
                     pen.setColor(QtGui.QColor(5, 105, 25))
                     p.setPen(pen)
@@ -164,9 +169,6 @@ class initialWidget(QtWidgets.QMainWindow):
                                (self.tsy[_i][_j] - self.y[_i][_j]) / self.size[_i][_j],
                                (self.trex[_i][_j] - self.x[_i][_j]) / self.size[_i][_j],
                                (self.trey[_i][_j] - self.y[_i][_j]) / self.size[_i][_j])
-
-                    p.restore()
-
 
 
     def picMousePressed(self, event, _i, _j):
@@ -336,17 +338,20 @@ class initialWidget(QtWidgets.QMainWindow):
             label_y = w.mp.y() - self.rotate_coordinate_system[t_index][1]
             t_x = w.ep.x() - self.rotate_coordinate_system[t_index][0]
             t_y = w.ep.y() - self.rotate_coordinate_system[t_index][1]
+            biasx = self.x[_i][_j] - self.rotate_coordinate_system[t_index][0]
+            biasy = self.y[_i][_j] - self.rotate_coordinate_system[t_index][1]
             label_x, label_y = self.transitiveMatrix(label_x, label_y, -self.rotate_angle[_i][_j])
             t_x, t_y = self.transitiveMatrix(t_x, t_y, -self.rotate_angle[_i][_j])
+            biasx, biasy = self.transitivaMatrix(self.x[_i][_j], self.y[_i][_j], -self.rotate_angle[_i][_j])
             label_ybias = 12 if t_y < label_y else -12
-            t_label = QtCore.QPointF(label_x + 10, label_y + label_ybias)
+            t_label = QtCore.QPointF((label_x + biasx) / self.size[_i][_j] + 10, (label_y + biasy) / self.size[_i][_j] + label_ybias)
             q.save() # 要用來show出label，所以reset所有的transform
             q.resetTransform()
             f = q.font()
             f.setPixelSize(15)
             q.setFont(f)
             q.setPen(QtGui.QColor(210, 210, 10))
-            q.drawText(t_label + QtCore.QPointF(self.x[_i][_j], self.y[_i][_j]), str(round(w.angle, 1)) + "°")
+            q.drawText(t_label, str(round(w.angle, 1)) + "°")
             q.restore()
 
         for w in self.ruler_coordinate_list[_i][_j]:
@@ -365,9 +370,9 @@ class initialWidget(QtWidgets.QMainWindow):
             ts_x, ts_y = self.transitiveMatrix(ts_x, ts_y, -self.rotate_angle[_i][_j])
             te_x, te_y = self.transitiveMatrix(te_x, te_y, -self.rotate_angle[_i][_j])
             if ts_x > te_x:
-                t_label = QtCore.QPointF(ts_x + 10, ts_y)
+                t_label = QtCore.QPointF((ts_x  + self.x[_i][_j]) / self.size[_i][_j] + 10, (ts_y + self.y[_i][_j]) / self.size[_i][_j])
             else:
-                t_label = QtCore.QPointF(te_x + 10, te_y)
+                t_label = QtCore.QPointF((te_x + self.x[_i][_j]) / self.size[_i][_j] + 10, (te_y + self.y[_i][_j]) / self.size[_i][_j])
             q.save() # 要用來show出label，所以reset所有的transform
             q.resetTransform()
             f = q.font()
@@ -912,10 +917,10 @@ class initialWidget(QtWidgets.QMainWindow):
 
 
         # 暫時試試放照片
-        self.showPic(1, 1, "01372635","5F327951.dcm")
-        self.showPic(1, 2, "01372635","5F327951.dcm")
-        self.showPic(1, 3, "01372635","5F327951.dcm")
-        self.showPic(1, 4, "01372635","5F327951.dcm")
+        self.showPic(1, 1, "01372635","5F327951")
+        self.showPic(1, 2, "01372635","5F327951")
+        self.showPic(1, 3, "01372635","5F327951")
+        self.showPic(1, 4, "01372635","5F327951")
 
     def mousePressEvent(self, event):
         self.clickPosition = event.globalPos()
