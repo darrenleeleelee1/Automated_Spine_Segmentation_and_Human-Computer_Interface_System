@@ -850,8 +850,10 @@ class initialWidget(QtWidgets.QMainWindow):
         var_thumbnail_list = 'self.ui.thumbnail_list'
         self.thumbnail_list = [None] * (self.MAXIMUM_PAGE + 1)
         var_array_thumbnail_list = 'self.thumbnail_list'
+        self.dicoms = [None] * (self.MAXIMUM_PAGE + 1) # 存Dicoms
         for i in range(1, self.MAXIMUM_PAGE + 1):
             exec("%s[%d] = %s_%d" % (var_array_thumbnail_list, i, var_thumbnail_list, i))
+            self.dicoms[i] = []
         # pics
         var_pic = 'self.ui.pic'
         self.pic = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 對應到照片的label array
@@ -894,7 +896,6 @@ class initialWidget(QtWidgets.QMainWindow):
         self.move_y = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
         self.pic_adjust_pixels = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 照片對比度須存改過的pixel array用
         self.pic_original_pixels = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 照片對比度須存原本的pixel array用
-        self.dicoms = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 存Dicoms
         var_array_pic = 'self.pic'
         for i in range(1, self.MAXIMUM_PAGE + 1):
             for j in range(1, (self.MAXIMUM_PIC + 1)):
