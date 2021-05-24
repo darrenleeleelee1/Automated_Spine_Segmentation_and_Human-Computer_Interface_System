@@ -614,19 +614,20 @@ class initialWidget(QtWidgets.QMainWindow):
 # Thumbnail-------------------------------------------------------------------------------------------------------
     def set_thumbnail(self, pt_id):
         pt_path = './tmp/' + pt_id
-        i = self.patient_mapto_page
+        i = self.patient_mapto_page[pt_id]
         j = 1
         for filename in os.listdir(pt_path):
             dicom_path = pt_path + '/' + filename
             ds = dcmread(dicom_path)
-            self.dicoms[i][j] = ds
+            self.dicoms[i].append(ds)
             arr = ds.pixel_array
             arr = np.uint16(arr)
-            dicom_WL = ds[0x0028, 0x1050].value
-            dicom_WW = ds[0x0028, 0x1051].value
-            self.pic_adjust_pixels[i][j] = self.mappingWindow(arr, dicom_WL, dicom_WW)
-            self.qimage = QtGui.QImage(self.pic_adjust_pixels[i][j], self.pic_adjust_pixels[i][j].shape[1], self.pic_adjust_pixels[i][j].shape[0], QtGui.QImage.Format_Grayscale16)
-            pixmap = QtGui.QPixmap(self.qimage)
+            # dicom_WL = ds[0x0028, 0x1050].value
+            # dicom_WW = ds[0x0028, 0x1051].value
+            # self.pic_adjust_pixels[i][j] = self.mappingWindow(arr, dicom_WL, dicom_WW)
+            # self.qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], QtGui.QImage.Format_Grayscale16)
+            # print("qimage")
+            pixmap = QtGui.QPixmap(arr)
             self.thumbnail_list[i].setViewMode(QListView.IconMode)
             self.thumbnail_list[i].setItemAlignment(Qt.AlignCenter)
             item = QListWidgetItem()
@@ -818,7 +819,7 @@ class initialWidget(QtWidgets.QMainWindow):
     def showPic(self, i, j, patient_no, patient_dics):
         dicom_path = "./tmp_database/" + patient_no + "/" + patient_dics
         ds = dcmread(dicom_path)
-        self.dicoms[i][j] = ds
+        self.dicoms[i].append(ds)
         arr = ds.pixel_array
         arr = np.uint16(arr)
         self.pic_original_pixels[i][j] = np.copy(arr)
