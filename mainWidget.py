@@ -190,7 +190,6 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.pen_start_y[self.pic_ith][self.pic_jth] = event.pos().y()
 
         elif (self.tool_lock == 'zoom_in'):
-            print("click : ", self.size_click_x[_i][_j], self.size_click_y[_i][_j])
             self.size[_i][_j] = self.size_last[_i][_j] * 1.25
             self.magnifier_pad_x[_i][_j] = self.magnifier_pad_x[_i][_j] - (self.size[_i][_j] - self.size_last[_i][_j]) * event.pos().x()
             self.magnifier_pad_y[_i][_j] = self.magnifier_pad_y[_i][_j] - (self.size[_i][_j] - self.size_last[_i][_j]) * event.pos().y()
