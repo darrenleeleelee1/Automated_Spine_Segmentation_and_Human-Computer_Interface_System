@@ -194,20 +194,17 @@ class initialWidget(QtWidgets.QMainWindow):
 
         elif (self.tool_lock == 'zoom_in'):
             self.size[_i][_j] = self.size_last[_i][_j] * 1.25
-            self.magnifier_pad_x[_i][_j] = self.magnifier_pad_x[_i][_j] - (self.size[_i][_j] - self.size_last[_i][_j]) * event.pos().x()
-            self.magnifier_pad_y[_i][_j] = self.magnifier_pad_y[_i][_j] - (self.size[_i][_j] - self.size_last[_i][_j]) * event.pos().y()
-            # self.magnifier_pad_x[_i][_j] = self.magnifier_pad_x[_i][_j] - (0.25) * (event.pos().x()-self.magnifier_pad_x[_i][_j])
-            # self.magnifier_pad_y[_i][_j] = self.magnifier_pad_y[_i][_j] - (0.25) * (event.pos().y()-self.magnifier_pad_y[_i][_j])
+            x, y = self.transitiveWithBiasMatrix(event.pos().x(), event.pos().y(), self.rotate_angle[_i][_j])
+            self.magnifier_pad_x[_i][_j] = self.magnifier_pad_x[_i][_j] - (0.25) * (x-self.x[_i][_j])
+            self.magnifier_pad_y[_i][_j] = self.magnifier_pad_y[_i][_j] - (0.25) * (y-self.y[_i][_j])
             self.update()
 
         elif(self.tool_lock == 'zoom_out'):
             if (self.size[_i][_j] > 1):
-                # self.size[_i][_j] = self.size[_i][_j] * 0.75
-                # self.move_moving_x[_i][_j] = self.move_moving_x[_i][_j] - (self.size[_i][_j] - self.size_last[_i][_j]) * event.pos().x()
-                # self.move_moving_y[_i][_j] = self.move_moving_y[_i][_j] - (self.size[_i][_j] - self.size_last[_i][_j]) * event.pos().y()
                 self.size[_i][_j] = self.size[_i][_j] * 0.8
-                self.magnifier_pad_x[_i][_j] = self.magnifier_pad_x[_i][_j] - (self.size[_i][_j] - self.size_last[_i][_j]) * event.pos().x()
-                self.magnifier_pad_y[_i][_j] = self.magnifier_pad_y[_i][_j] - (self.size[_i][_j] - self.size_last[_i][_j]) * event.pos().y()
+                x, y = self.transitiveWithBiasMatrix(event.pos().x(), event.pos().y(), self.rotate_angle[_i][_j])
+                self.magnifier_pad_x[_i][_j] = self.magnifier_pad_x[_i][_j] + (0.2) * (x - self.x[_i][_j])
+                self.magnifier_pad_y[_i][_j] = self.magnifier_pad_y[_i][_j] + (0.2) * (y - self.y[_i][_j])
                 self.update()
 
         elif(self.tool_lock == 'move'):
@@ -273,8 +270,6 @@ class initialWidget(QtWidgets.QMainWindow):
         self.x[_i][_j] = self.tmmx[_i][_j] + self.magnifier_pad_x[_i][_j] - self.rotate_coordinate_system[t_index][0]
         self.y[_i][_j] = self.tmmy[_i][_j] + self.magnifier_pad_y[_i][_j] - self.rotate_coordinate_system[t_index][1]
 
-        # self.x[_i][_j] = self.tmmx[_i][_j] + self.tmpx[_i][_j] - 2 * self.rotate_coordinate_system[t_index][0]
-        # self.y[_i][_j] = self.tmmy[_i][_j] + self.tmpy[_i][_j] - 2 * self.rotate_coordinate_system[t_index][1]
 
         self.qimage = QtGui.QImage(self.pic_adjust_pixels[_i][_j], self.pic_adjust_pixels[_i][_j].shape[1], self.pic_adjust_pixels[_i][_j].shape[0], QtGui.QImage.Format_Grayscale16)
         pixmap = QtGui.QPixmap(self.qimage)
@@ -342,9 +337,12 @@ class initialWidget(QtWidgets.QMainWindow):
             biasy = self.y[_i][_j] - self.rotate_coordinate_system[t_index][1]
             label_x, label_y = self.transitiveMatrix(label_x, label_y, -self.rotate_angle[_i][_j])
             t_x, t_y = self.transitiveMatrix(t_x, t_y, -self.rotate_angle[_i][_j])
-            biasx, biasy = self.transitivaMatrix(self.x[_i][_j], self.y[_i][_j], -self.rotate_angle[_i][_j])
+            biasx, biasy = self.transitiveMatrix(self.x[_i][_j], self.y[_i][_j], -self.rotate_angle[_i][_j])
             label_ybias = 12 if t_y < label_y else -12
-            t_label = QtCore.QPointF((label_x + biasx) / self.size[_i][_j] + 10, (label_y + biasy) / self.size[_i][_j] + label_ybias)
+            # t_label = QtCore.QPointF((label_x + biasx) / self.size[_i][_j] + 10, (label_y + biasy) / self.size[_i][_j] + label_ybias)
+            t_label = QtCore.QPointF((label_x + biasx) / self.size[_i][_j] + 10,
+                                     (label_y + biasy) / self.size[_i][_j] + label_ybias)
+
             q.save() # 要用來show出label，所以reset所有的transform
             q.resetTransform()
             f = q.font()
@@ -370,7 +368,7 @@ class initialWidget(QtWidgets.QMainWindow):
             ts_x, ts_y = self.transitiveMatrix(ts_x, ts_y, -self.rotate_angle[_i][_j])
             te_x, te_y = self.transitiveMatrix(te_x, te_y, -self.rotate_angle[_i][_j])
             if ts_x > te_x:
-                t_label = QtCore.QPointF((ts_x  + self.x[_i][_j]) / self.size[_i][_j] + 10, (ts_y + self.y[_i][_j]) / self.size[_i][_j])
+                t_label = QtCore.QPointF((ts_x + self.x[_i][_j]) / self.size[_i][_j] + 10, (ts_y + self.y[_i][_j]) / self.size[_i][_j])
             else:
                 t_label = QtCore.QPointF((te_x + self.x[_i][_j]) / self.size[_i][_j] + 10, (te_y + self.y[_i][_j]) / self.size[_i][_j])
             q.save() # 要用來show出label，所以reset所有的transform
