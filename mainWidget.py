@@ -123,9 +123,9 @@ class initialWidget(QtWidgets.QMainWindow):
                 else:
                     if(self.tsx[_i][_j] != self.tmx[_i][_j] and self.tsy[_i][_j] != self.tmy[_i][_j]):
                         self.angle_coordinate_list[_i][_j].append(angleCoordinate(
-                            self.tsx[_i][_j], self.tsy[_i][_j],
-                            self.tmx[_i][_j], self.tmy[_i][_j],
-                            self.tex[_i][_j], self.tey[_i][_j]))
+                            (self.tsx[_i][_j] - self.x[_i][_j]) / self.size[_i][_j], (self.tsy[_i][_j] - self.y[_i][_j]) / self.size[_i][_j],
+                            (self.tmx[_i][_j] - self.x[_i][_j]) / self.size[_i][_j], (self.tmy[_i][_j] - self.y[_i][_j]) / self.size[_i][_j],
+                            (self.tex[_i][_j] - self.x[_i][_j]) / self.size[_i][_j], (self.tey[_i][_j] - self.y[_i][_j]) / self.size[_i][_j]))
                     self.pic_released[_i][_j] = False
                     pen.setWidth(2)
                     pen.setColor(QtGui.QColor(5, 105, 25))
@@ -167,8 +167,8 @@ class initialWidget(QtWidgets.QMainWindow):
                     p.setPen(pen)
                     p.drawLine((self.tsx[_i][_j] - self.x[_i][_j]) / self.size[_i][_j],
                                (self.tsy[_i][_j] - self.y[_i][_j]) / self.size[_i][_j],
-                               (self.trex[_i][_j] - self.x[_i][_j]) / self.size[_i][_j],
-                               (self.trey[_i][_j] - self.y[_i][_j]) / self.size[_i][_j])
+                               (self.trex[_i][_j] - self.x[_i][_j]) / self.size[_i][_j], #trex
+                               (self.trey[_i][_j] - self.y[_i][_j]) / self.size[_i][_j]) #trey
 
 
     def picMousePressed(self, event, _i, _j):
@@ -194,9 +194,7 @@ class initialWidget(QtWidgets.QMainWindow):
 
         elif (self.tool_lock == 'zoom_in'):
             self.size[_i][_j] = self.size_last[_i][_j] * 1.25
-            print("event : ", event.pos().x(), event.pos().y())
             x, y = self.transitiveWithBiasMatrix(event.pos().x(), event.pos().y(), self.rotate_angle[_i][_j])
-            print("x, y : ", x, y)
             self.magnifier_pad_x[_i][_j] = self.magnifier_pad_x[_i][_j] - (0.25) * (x - self.x[_i][_j])
             self.magnifier_pad_y[_i][_j] = self.magnifier_pad_y[_i][_j] - (0.25) * (y - self.y[_i][_j])
             self.update()
@@ -270,7 +268,6 @@ class initialWidget(QtWidgets.QMainWindow):
         self.tmpx[_i][_j], self.tmpy[_i][_j] = self.transitiveWithBiasMatrix(self.magnifier_pad_x[_i][_j], self.magnifier_pad_y[_i][_j], self.rotate_angle[_i][_j])
 
         self.x[_i][_j] = self.tmmx[_i][_j] + self.magnifier_pad_x[_i][_j] - self.rotate_coordinate_system[t_index][0]
-        print(self.x[_i][_j])
         self.y[_i][_j] = self.tmmy[_i][_j] + self.magnifier_pad_y[_i][_j] - self.rotate_coordinate_system[t_index][1]
 
         # self.x[_i][_j] = self.tmmx[_i][_j] + self.tmpx[_i][_j] - 2 * self.rotate_coordinate_system[t_index][0]
@@ -339,13 +336,11 @@ class initialWidget(QtWidgets.QMainWindow):
             label_y = w.mp.y() - self.rotate_coordinate_system[t_index][1]
             t_x = w.ep.x() - self.rotate_coordinate_system[t_index][0]
             t_y = w.ep.y() - self.rotate_coordinate_system[t_index][1]
-            biasx = self.x[_i][_j] - self.rotate_coordinate_system[t_index][0]
-            biasy = self.y[_i][_j] - self.rotate_coordinate_system[t_index][1]
             label_x, label_y = self.transitiveMatrix(label_x, label_y, -self.rotate_angle[_i][_j])
             t_x, t_y = self.transitiveMatrix(t_x, t_y, -self.rotate_angle[_i][_j])
-            biasx, biasy = self.transitiveMatrix(self.x[_i][_j], self.y[_i][_j], -self.rotate_angle[_i][_j])
+            angle_biasx, angle_biasy = self.transitiveMatrix(self.x[_i][_j], self.y[_i][_j], -self.rotate_angle[_i][_j])
             label_ybias = 12 if t_y < label_y else -12
-            t_label = QtCore.QPointF((label_x + biasx) / self.size[_i][_j] + 10, (label_y + biasy) / self.size[_i][_j] + label_ybias)
+            t_label = QtCore.QPointF((label_x + angle_biasx) / self.size[_i][_j] + 10, (label_y + angle_biasy) / self.size[_i][_j] + label_ybias)
             q.save() # 要用來show出label，所以reset所有的transform
             q.resetTransform()
             f = q.font()
@@ -361,7 +356,7 @@ class initialWidget(QtWidgets.QMainWindow):
             pen.setColor(QtGui.QColor(5, 105, 25))
             q.setPen(pen)
             # q.drawLine(w.sp+QtCore.QPointF(self.x[_i][_j]/self.size[_i][_j] , self.y[_i][_j]/self.size[_i][_j]),
-            #            w.ep+QtCore.QPointF(self.x[_i][_j]/self.size[_i][_j] , self.y[_i][_j]/self.size[_i][_j]))
+            #             w.ep+QtCore.QPointF(self.x[_i][_j]/self.size[_i][_j] , self.y[_i][_j]/self.size[_i][_j]))
             # 把旋轉過的點再轉回來
             t_index = int((-self.rotate_angle[_i][_j] % 360) / 90)
             ts_x = w.sp.x() - self.rotate_coordinate_system[t_index][0]
@@ -370,10 +365,11 @@ class initialWidget(QtWidgets.QMainWindow):
             te_y = w.ep.y() - self.rotate_coordinate_system[t_index][1]
             ts_x, ts_y = self.transitiveMatrix(ts_x, ts_y, -self.rotate_angle[_i][_j])
             te_x, te_y = self.transitiveMatrix(te_x, te_y, -self.rotate_angle[_i][_j])
+            ruler_biasx, ruler_biasy = self.transitiveMatrix(self.x[_i][_j], self.y[_i][_j], -self.rotate_angle[_i][_j])
             if ts_x > te_x:
-                t_label = QtCore.QPointF((ts_x  + self.x[_i][_j]) / self.size[_i][_j] + 10, (ts_y + self.y[_i][_j]) / self.size[_i][_j])
+                t_label = QtCore.QPointF((ts_x + ruler_biasx) / self.size[_i][_j] + 10, (ts_y + ruler_biasy) / self.size[_i][_j])
             else:
-                t_label = QtCore.QPointF((te_x + self.x[_i][_j]) / self.size[_i][_j] + 10, (te_y + self.y[_i][_j]) / self.size[_i][_j])
+                t_label = QtCore.QPointF((te_x + ruler_biasx) / self.size[_i][_j] + 10, (te_y + ruler_biasy) / self.size[_i][_j])
             q.save() # 要用來show出label，所以reset所有的transform
             q.resetTransform()
             f = q.font()
@@ -382,8 +378,6 @@ class initialWidget(QtWidgets.QMainWindow):
             q.setPen(QtGui.QColor(210, 210, 10))
 
             q.drawText(t_label, str(round(w.length, 2)) + "pixels")
-            # q.drawText(t_label+QtCore.QPointF(self.x[_i][_j], self.y[_i][_j]), str(round(w.length, 2)) + "pixels")
-
 
             q.restore()
         q.end()
