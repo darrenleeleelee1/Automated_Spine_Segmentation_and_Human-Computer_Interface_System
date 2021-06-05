@@ -578,6 +578,7 @@ class initialWidget(QtWidgets.QMainWindow):
         if(str(item.text()) == '1'):
             self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
             self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[0])
+            self.set_thumbnail('01372635')
         else:
             self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
             temp = str(item.text())
@@ -615,37 +616,35 @@ class initialWidget(QtWidgets.QMainWindow):
 
 # Thumbnail-------------------------------------------------------------------------------------------------------
     def set_thumbnail(self, pt_id):
-        # # pt_id = '03915480'
-        # pt_path = './tmp/' + pt_id
-        # i = 1
-        # # i = self.patient_mapto_page[pt_id]
-        # # print(i)
-        # j = 1
-        # for filename in os.listdir(pt_path):
-        #     dicom_path = pt_path + '/' + filename
-        #     ds = dcmread(dicom_path)
+        # pt_id = '01372635'
+        pt_path = './tmp/' + pt_id
+        i = self.patient_mapto_page[pt_id]
+        # i = self.patient_mapto_page[pt_id]
+        # print(i)
+        for filename in os.listdir(pt_path):
+            dicom_path = pt_path + '/' + filename
+            ds = dcmread(dicom_path)
 
-        #     self.dicoms[i].append(ds)
-        #     arr = ds.pixel_array
-        #     arr = np.uint16(arr)
-        #     dicom_WL = ds[0x0028, 0x1050].value
-        #     dicom_WW = ds[0x0028, 0x1051].value
-        #     # pic_adjust_pixels = self.mappingWindow(arr, dicom_WL, dicom_WW)
-        #     qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], QtGui.QImage.Format_Grayscale16)
-        #     qimage = qimage.copy(QtCore.QRect(0, 0, min(arr.shape[1],512), min(arr.shape[0], 512)))
-        #     pixmap = QtGui.QPixmap(qimage)
-        #     self.thumbnail_list[i].setViewMode(QListView.IconMode)
-        #     self.thumbnail_list[i].setItemAlignment(Qt.AlignCenter)
-        #     item = QListWidgetItem()
-        #     item.setText('elephant')
-        #     icon = QtGui.QIcon(pixmap)
-        #     item.setIcon(icon)
-        #     self.thumbnail_list[i].addItem(item) 
-        #     j += 1
+            self.dicoms[i].append(ds)
+            arr = ds.pixel_array
+            arr = np.uint16(arr)
+            print(arr.shape)
+            dicom_WL = ds[0x0028, 0x1050].value
+            dicom_WW = ds[0x0028, 0x1051].value
+            # pic_adjust_pixels = self.mappingWindow(arr, dicom_WL, dicom_WW)
+            qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], QtGui.QImage.Format_Grayscale16)
+            qimage = qimage.copy(QtCore.QRect(0, 0, min(arr.shape[1],2048), min(arr.shape[0], 2048)))
+            pixmap = QtGui.QPixmap(qimage)
+            self.thumbnail_list[i].setViewMode(QListView.IconMode)
+            self.thumbnail_list[i].setItemAlignment(Qt.AlignCenter)
+            item = QListWidgetItem()
+            item.setText('picture')
+            icon = QtGui.QIcon(pixmap)
+            item.setIcon(icon)
+            self.thumbnail_list[i].addItem(item) 
 
-        # size = QSize(225, 225)
-        # self.thumbnail_list[i].setIconSize(size)
-        print("set")
+        size = QSize(225, 225)
+        self.thumbnail_list[i].setIconSize(size)
 
         
     def thumbnaillistclicked(self):
