@@ -18,6 +18,7 @@ from pydicom.filebase import DicomBytesIO
 import numpy as np
 from PIL import ImageQt
 import shutil
+import copy
 WINDOW_SIZE = 0
 
 class initialWidget(QtWidgets.QMainWindow):
@@ -249,9 +250,9 @@ class initialWidget(QtWidgets.QMainWindow):
         x = self.move_moving_x[_i][_j]+ self.magnifier_pad_x[_i][_j]
         y = self.move_moving_y[_i][_j]+ self.magnifier_pad_y[_i][_j]
 
-        self.qimage = QtGui.QImage(self.pic_adjust_pixels[_i][_j], self.pic_adjust_pixels[_i][_j].shape[1], self.pic_adjust_pixels[_i][_j].shape[0], QtGui.QImage.Format_Grayscale16)
-        self.qimage = self.qimage.copy(QtCore.QRect(0, 0, min(self.pic_adjust_pixels[_i][_j].shape[1],2048), min(self.pic_adjust_pixels[_i][_j].shape[0], 2048)))
-        pixmap = QtGui.QPixmap.fromImage(self.qimage)
+        qimage = QtGui.QImage(self.pic_adjust_pixels[_i][_j], self.pic_adjust_pixels[_i][_j].shape[1], self.pic_adjust_pixels[_i][_j].shape[0], self.pic_adjust_pixels[_i][_j].shape[1]*2,QtGui.QImage.Format_Grayscale16).copy()
+        # self.qimage = self.qimage.copy(QtCore.QRect(0, 0, min(self.pic_adjust_pixels[_i][_j].shape[1],2048), min(self.pic_adjust_pixels[_i][_j].shape[0], 2048)))
+        pixmap = QtGui.QPixmap.fromImage(qimage)
         q.drawPixmap(x, y, img_width, img_height, pixmap)
         p = QtGui.QPainter(self.transparent_pix[_i][_j])
 
@@ -632,8 +633,7 @@ class initialWidget(QtWidgets.QMainWindow):
             dicom_WL = ds[0x0028, 0x1050].value
             dicom_WW = ds[0x0028, 0x1051].value
             # pic_adjust_pixels = self.mappingWindow(arr, dicom_WL, dicom_WW)
-            qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], QtGui.QImage.Format_Grayscale16)
-            qimage = qimage.copy(QtCore.QRect(0, 0, min(arr.shape[1],2048), min(arr.shape[0], 2048)))
+            qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1]*2, QtGui.QImage.Format_Grayscale16).copy()
             pixmap = QtGui.QPixmap(qimage)
             self.thumbnail_list[i].setViewMode(QListView.IconMode)
             self.thumbnail_list[i].setItemAlignment(Qt.AlignCenter)
@@ -796,7 +796,7 @@ class initialWidget(QtWidgets.QMainWindow):
         dicom_path = "./tmp_database/" + patient_no + "/" + patient_dics
         ds = dcmread(dicom_path)
         self.dicoms[i].append(ds)
-        arr = ds.pixel_array
+        arr = copy.deepcopy(ds.pixel_array)
         arr = np.uint16(arr)
         self.pic_original_pixels[i][j] = np.copy(arr)
         self.pic_ith = i
@@ -901,10 +901,10 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.transparent_pix[i][j].fill(Qt.transparent)
 
         # 暫時試試放照片
-        self.showPic(1, 1, "01372635","5F327951")
-        self.showPic(1, 2, "01372635","5F327951")
-        self.showPic(1, 3, "01372635","5F327951")
-        self.showPic(1, 4, "01372635","5F327951")
+        self.showPic(1, 1, "03915480","5F329172_20170623_CR_2_1_1")
+        self.showPic(1, 2, "03915480","5F329172_20170623_CR_2_1_1")
+        self.showPic(1, 3, "03915480","5F329172_20170623_CR_2_1_1")
+        self.showPic(1, 4, "03915480","5F329172_20170623_CR_2_1_1")
 
     def mousePressEvent(self, event):
         self.clickPosition = event.globalPos()
