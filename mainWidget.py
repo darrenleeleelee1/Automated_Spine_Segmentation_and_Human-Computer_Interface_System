@@ -251,9 +251,12 @@ class initialWidget(QtWidgets.QMainWindow):
         y = self.move_moving_y[_i][_j]+ self.magnifier_pad_y[_i][_j]
 
         qimage = QtGui.QImage(self.pic_adjust_pixels[_i][_j], self.pic_adjust_pixels[_i][_j].shape[1], self.pic_adjust_pixels[_i][_j].shape[0], self.pic_adjust_pixels[_i][_j].shape[1]*2,QtGui.QImage.Format_Grayscale16).copy()
-        # self.qimage = self.qimage.copy(QtCore.QRect(0, 0, min(self.pic_adjust_pixels[_i][_j].shape[1],2048), min(self.pic_adjust_pixels[_i][_j].shape[0], 2048)))
         pixmap = QtGui.QPixmap.fromImage(qimage)
-        q.drawPixmap(x, y, img_width, img_height, pixmap)
+        print(pixmap.size())
+        pixmap = pixmap.scaled(self.pic[_i][_j].width(), self.pic[_i][_j].height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+        print(pixmap.size())
+        # q.drawPixmap(x, y, img_width, img_height, pixmap)
+        q.drawPixmap(x, y, pixmap.width(), pixmap.height(), pixmap)
         p = QtGui.QPainter(self.transparent_pix[_i][_j])
 
         if(self.tool_lock == 'mouse'):
@@ -629,10 +632,9 @@ class initialWidget(QtWidgets.QMainWindow):
             self.dicoms[i].append(ds)
             arr = ds.pixel_array
             arr = np.uint16(arr)
-            print(arr.shape)
             dicom_WL = ds[0x0028, 0x1050].value
             dicom_WW = ds[0x0028, 0x1051].value
-            # pic_adjust_pixels = self.mappingWindow(arr, dicom_WL, dicom_WW)
+            arr = self.mappingWindow(arr, dicom_WL, dicom_WW)
             qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1]*2, QtGui.QImage.Format_Grayscale16).copy()
             pixmap = QtGui.QPixmap(qimage)
             self.thumbnail_list[i].setViewMode(QListView.IconMode)
@@ -901,8 +903,8 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.transparent_pix[i][j].fill(Qt.transparent)
 
         # 暫時試試放照片
-        self.showPic(1, 1, "03915480","5F329172_20170623_CR_2_1_1")
-        self.showPic(1, 2, "03915480","5F329172_20170623_CR_2_1_1")
+        self.showPic(1, 1, "01372635","5F3279B8")
+        self.showPic(1, 2, "01372635","5F327951")
         self.showPic(1, 3, "03915480","5F329172_20170623_CR_2_1_1")
         self.showPic(1, 4, "03915480","5F329172_20170623_CR_2_1_1")
 
