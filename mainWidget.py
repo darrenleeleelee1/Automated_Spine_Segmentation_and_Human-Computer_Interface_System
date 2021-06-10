@@ -624,17 +624,16 @@ class initialWidget(QtWidgets.QMainWindow):
         for filename in os.listdir(pt_path):
             dicom_path = pt_path + '/' + filename
             ds = dcmread(dicom_path)
-
             self.dicoms[i].append(ds)
             arr = ds.pixel_array
             arr = np.uint16(arr)
-            print(arr.shape)
+            # print(arr.shape)
             dicom_WL = ds[0x0028, 0x1050].value
             dicom_WW = ds[0x0028, 0x1051].value
-            # pic_adjust_pixels = self.mappingWindow(arr, dicom_WL, dicom_WW)
+            arr = self.mappingWindow(arr, dicom_WL, dicom_WW)
             qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], QtGui.QImage.Format_Grayscale16)
             qimage = qimage.copy(QtCore.QRect(0, 0, min(arr.shape[1],2048), min(arr.shape[0], 2048)))
-            pixmap = QtGui.QPixmap(qimage)
+            pixmap = QtGui.QPixmap.fromImage(qimage)
             self.thumbnail_list[i].setViewMode(QListView.IconMode)
             self.thumbnail_list[i].setItemAlignment(Qt.AlignCenter)
             item = QListWidgetItem()
