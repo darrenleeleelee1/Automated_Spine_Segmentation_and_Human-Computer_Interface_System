@@ -252,11 +252,13 @@ class initialWidget(QtWidgets.QMainWindow):
 
         qimage = QtGui.QImage(self.pic_adjust_pixels[_i][_j], self.pic_adjust_pixels[_i][_j].shape[1], self.pic_adjust_pixels[_i][_j].shape[0], self.pic_adjust_pixels[_i][_j].shape[1]*2,QtGui.QImage.Format_Grayscale16).copy()
         pixmap = QtGui.QPixmap.fromImage(qimage)
-        print(pixmap.size())
         pixmap = pixmap.scaled(self.pic[_i][_j].width(), self.pic[_i][_j].height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
-        print(pixmap.size())
+        print(pixmap.rect())
         # q.drawPixmap(x, y, img_width, img_height, pixmap)
-        q.drawPixmap(x, y, pixmap.width(), pixmap.height(), pixmap)
+        # 置中
+        center_start_x = (self.pic_label_width - pixmap.width()) / 2
+        center_start_y = (self.pic_label_height - pixmap.height()) / 2
+        q.drawPixmap(center_start_x, center_start_y, pixmap.width(), pixmap.height(), pixmap)
         p = QtGui.QPainter(self.transparent_pix[_i][_j])
 
         if(self.tool_lock == 'mouse'):
