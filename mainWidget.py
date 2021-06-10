@@ -247,18 +247,20 @@ class initialWidget(QtWidgets.QMainWindow):
         img_width = self.pic_label_width * self.size[_i][_j]
         img_height = self.pic_label_height * self.size[_i][_j]
 
-        x = self.move_moving_x[_i][_j]+ self.magnifier_pad_x[_i][_j]
-        y = self.move_moving_y[_i][_j]+ self.magnifier_pad_y[_i][_j]
+        
 
         qimage = QtGui.QImage(self.pic_adjust_pixels[_i][_j], self.pic_adjust_pixels[_i][_j].shape[1], self.pic_adjust_pixels[_i][_j].shape[0], self.pic_adjust_pixels[_i][_j].shape[1]*2,QtGui.QImage.Format_Grayscale16).copy()
         pixmap = QtGui.QPixmap.fromImage(qimage)
         pixmap = pixmap.scaled(self.pic[_i][_j].width(), self.pic[_i][_j].height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
-        print(pixmap.rect())
-        # q.drawPixmap(x, y, img_width, img_height, pixmap)
+        img_width = pixmap.width() * self.size[_i][_j]
+        img_height = pixmap.height() * self.size[_i][_j]
+        x = self.move_moving_x[_i][_j] + self.magnifier_pad_x[_i][_j]
+        y = self.move_moving_y[_i][_j] + self.magnifier_pad_y[_i][_j]
+        center_start_x = int((self.pic_label_width - pixmap.width()) / 2)
+        center_start_y = int((self.pic_label_height - pixmap.height()) / 2)
+        q.drawPixmap(center_start_x + x, center_start_y + y, img_width, img_height, pixmap)
         # 置中
-        center_start_x = (self.pic_label_width - pixmap.width()) / 2
-        center_start_y = (self.pic_label_height - pixmap.height()) / 2
-        q.drawPixmap(center_start_x, center_start_y, pixmap.width(), pixmap.height(), pixmap)
+        
         p = QtGui.QPainter(self.transparent_pix[_i][_j])
 
         if(self.tool_lock == 'mouse'):
@@ -882,6 +884,7 @@ class initialWidget(QtWidgets.QMainWindow):
             for j in range(1, (self.MAXIMUM_PIC + 1)):
                 exec("%s[%d][%d] = %s_%d_%d" % (var_array_pic, i, j, var_pic, i, j))
                 self.pic[i][j].setText("%d-%d" % (i, j))
+                self.pic[i][j].setStyleSheet("background-color: black; border: 3px solid black;")
                 self.pen_start_x[i][j] = self.pen_start_y[i][j] = 0
                 self.pen_end_x[i][j] = self.pen_end_y[i][j] = 0
                 self.ruler_start_x[i][j] = self.ruler_start_y[i][j] = 0
