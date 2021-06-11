@@ -3,4 +3,5 @@
 tmp/
 tmp_database/
 **.idea/
-**/record/
+record/
+
