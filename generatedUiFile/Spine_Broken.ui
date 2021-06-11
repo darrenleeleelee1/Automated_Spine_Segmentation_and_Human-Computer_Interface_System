@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>802</width>
+    <width>902</width>
     <height>698</height>
    </rect>
   </property>
@@ -511,11 +511,6 @@ background-position: center left;</string>
             <property name="styleSheet">
              <string notr="true">color : #fff;</string>
             </property>
-            <item>
-             <property name="text">
-              <string>1</string>
-             </property>
-            </item>
            </widget>
           </item>
          </layout>
@@ -931,7 +926,7 @@ margin:50px;</string>
                   <number>0</number>
                  </property>
                  <item>
-                  <widget class="QFrame" name="thumbnail_frame">
+                  <widget class="QFrame" name="thumbnail_frame_1">
                    <property name="minimumSize">
                     <size>
                      <width>250</width>
@@ -983,7 +978,7 @@ margin:50px;</string>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QFrame" name="pic_frame">
+                  <widget class="QFrame" name="pic_frame_1">
                    <property name="minimumSize">
                     <size>
                      <width>600</width>
@@ -996,21 +991,9 @@ margin:50px;</string>
                    <property name="frameShadow">
                     <enum>QFrame::Raised</enum>
                    </property>
-                   <layout class="QGridLayout" name="gridLayout">
+                   <layout class="QGridLayout" name="gridLayout_1">
                     <item row="0" column="0">
                      <widget class="QLabel" name="pic_1_1">
-                      <property name="minimumSize">
-                       <size>
-                        <width>512</width>
-                        <height>512</height>
-                       </size>
-                      </property>
-                      <property name="maximumSize">
-                       <size>
-                        <width>512</width>
-                        <height>512</height>
-                       </size>
-                      </property>
                       <property name="text">
                        <string>TextLabel</string>
                       </property>
@@ -1018,18 +1001,6 @@ margin:50px;</string>
                     </item>
                     <item row="0" column="1">
                      <widget class="QLabel" name="pic_1_2">
-                      <property name="minimumSize">
-                       <size>
-                        <width>512</width>
-                        <height>512</height>
-                       </size>
-                      </property>
-                      <property name="maximumSize">
-                       <size>
-                        <width>512</width>
-                        <height>512</height>
-                       </size>
-                      </property>
                       <property name="cursor">
                        <cursorShape>ArrowCursor</cursorShape>
                       </property>
@@ -1040,18 +1011,6 @@ margin:50px;</string>
                     </item>
                     <item row="1" column="0">
                      <widget class="QLabel" name="pic_1_3">
-                      <property name="minimumSize">
-                       <size>
-                        <width>512</width>
-                        <height>512</height>
-                       </size>
-                      </property>
-                      <property name="maximumSize">
-                       <size>
-                        <width>512</width>
-                        <height>512</height>
-                       </size>
-                      </property>
                       <property name="cursor">
                        <cursorShape>ArrowCursor</cursorShape>
                       </property>
@@ -1062,18 +1021,6 @@ margin:50px;</string>
                     </item>
                     <item row="1" column="1">
                      <widget class="QLabel" name="pic_1_4">
-                      <property name="minimumSize">
-                       <size>
-                        <width>512</width>
-                        <height>512</height>
-                       </size>
-                      </property>
-                      <property name="maximumSize">
-                       <size>
-                        <width>512</width>
-                        <height>512</height>
-                       </size>
-                      </property>
                       <property name="text">
                        <string>TextLabel</string>
                       </property>
@@ -1164,7 +1111,10 @@ margin:50px;</string>
                    <property name="frameShadow">
                     <enum>QFrame::Raised</enum>
                    </property>
-                   <layout class="QGridLayout" name="gridLayout_3">
+                   <layout class="QGridLayout" name="gridLayout_2">
+                    <property name="rightMargin">
+                     <number>6</number>
+                    </property>
                     <item row="1" column="1">
                      <widget class="QLabel" name="pic_2_4">
                       <property name="text">
@@ -1278,7 +1228,7 @@ margin:50px;</string>
                    <property name="frameShadow">
                     <enum>QFrame::Raised</enum>
                    </property>
-                   <layout class="QGridLayout" name="gridLayout_4">
+                   <layout class="QGridLayout" name="gridLayout_3">
                     <item row="1" column="1">
                      <widget class="QLabel" name="pic_3_4">
                       <property name="text">
@@ -1402,7 +1352,7 @@ margin:50px;</string>
                    <property name="frameShadow">
                     <enum>QFrame::Raised</enum>
                    </property>
-                   <layout class="QGridLayout" name="gridLayout_5">
+                   <layout class="QGridLayout" name="gridLayout_4">
                     <item row="1" column="1">
                      <widget class="QLabel" name="pic_4_4">
                       <property name="text">
@@ -1519,7 +1469,7 @@ margin:50px;</string>
                    <property name="frameShadow">
                     <enum>QFrame::Raised</enum>
                    </property>
-                   <layout class="QGridLayout" name="gridLayout_6">
+                   <layout class="QGridLayout" name="gridLayout_5">
                     <item row="1" column="1">
                      <widget class="QLabel" name="pic_5_4">
                       <property name="enabled">
