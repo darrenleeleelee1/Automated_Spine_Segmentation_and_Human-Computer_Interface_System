@@ -26,7 +26,7 @@ class initialWidget(QtWidgets.QMainWindow):
         self.search_record = QStandardItemModel()
         self.pic_label_width = 512
         self.pic_label_height = 512
-
+        self.pic_windows = [0, 4, 4, 4, 4, 4]
         
         self.loadPtList()
         self.pt_list.sort()
@@ -266,6 +266,8 @@ class initialWidget(QtWidgets.QMainWindow):
         q = QtGui.QPainter(self.pic[_i][_j])
         q.resetTransform()
         q.setRenderHint(QtGui.QPainter.Antialiasing)
+        self.pic_label_width = self.pic[_i][_j].width()
+        self.pic_label_height = self.pic[_i][_j].height()
         q.translate(self.pic_label_width / 2, self.pic_label_height / 2)  # 把旋轉中心設成（pic_label_width/2, pic_label_height/2）
         q.rotate(self.rotate_angle[_i][_j])
         q.translate(-self.pic_label_width / 2, -self.pic_label_height / 2)
@@ -451,8 +453,45 @@ class initialWidget(QtWidgets.QMainWindow):
         arr = np.clip(arr, pixel_min, pixel_max)
         arr = (arr - pixel_min) / (pixel_max - pixel_min) * 65535
         return np.copy(np.uint16(arr))
-
-
+    
+    # 設定照片處理的地方有幾格
+    def setPicWindows(self, x):
+        # print("i ", self.pic_windows[self.pic_ith], " x ", x)
+        if self.pic_windows[self.pic_ith] > x:
+            for k in range(x + 1, self.pic_windows[self.pic_ith] + 1):
+                exec("self.ui.gridLayout_%d.removeWidget(self.pic[%d][%d])" % (self.pic_ith, self.pic_ith, k))
+                # self.ui.gridLayout_1.removeWidget(self.pic[self.pic_ith][k])
+                self.pic[self.pic_ith][k].deleteLater()
+            if x == 3:
+                exec("self.ui.gridLayout_%d.addWidget(self.pic[%d][%d], 0, 0, 1, 1)" % (self.pic_ith, self.pic_ith, 1))
+                exec("self.ui.gridLayout_%d.addWidget(self.pic[%d][%d], 0, 1, 1, 1)" % (self.pic_ith, self.pic_ith, 2))
+                exec("self.ui.gridLayout_%d.addWidget(self.pic[%d][%d], 0, 2, 1, 1)" % (self.pic_ith, self.pic_ith, 3))
+            self.pic_windows[self.pic_ith] = x
+        if self.pic_windows[self.pic_ith] < x:
+            for k in range(self.pic_windows[self.pic_ith] + 1, x + 1):
+                exec("label = QtWidgets.QLabel(self.ui.pic_frame_%d)\nlabel.setStyleSheet(\"background-color: black; border: 3px solid black;\")\nself.pic[self.pic_ith][k] = label" % (self.pic_ith))
+            if x == 2:
+                exec("self.ui.gridLayout_%d.addWidget(self.pic[%d][%d], 0, 0, 1, 1)" % (self.pic_ith, self.pic_ith, 1))
+                exec("self.ui.gridLayout_%d.addWidget(self.pic[%d][%d], 0, 1, 1, 1)" % (self.pic_ith, self.pic_ith, 2))
+                self.showPic(self.pic_ith, 1, "01372635","5F3279B8")
+                self.showPic(self.pic_ith, 2, "01372635","5F327951")
+            elif x == 3:
+                exec("self.ui.gridLayout_%d.addWidget(self.pic[%d][%d], 0, 0, 1, 1)" % (self.pic_ith, self.pic_ith, 1))
+                exec("self.ui.gridLayout_%d.addWidget(self.pic[%d][%d], 0, 1, 1, 1)" % (self.pic_ith, self.pic_ith, 2))
+                exec("self.ui.gridLayout_%d.addWidget(self.pic[%d][%d], 0, 2, 1, 1)" % (self.pic_ith, self.pic_ith, 3))
+                self.showPic(self.pic_ith, 1, "01372635","5F3279B8")
+                self.showPic(self.pic_ith, 2, "01372635","5F327951")
+                self.showPic(self.pic_ith, 3, "03915480","5F329172_20170623_CR_2_1_1")
+            elif x == 4:
+                exec("self.ui.gridLayout_%d.addWidget(self.pic[%d][%d], 0, 0, 1, 1)" % (self.pic_ith, self.pic_ith, 1))
+                exec("self.ui.gridLayout_%d.addWidget(self.pic[%d][%d], 0, 1, 1, 1)" % (self.pic_ith, self.pic_ith, 2))
+                exec("self.ui.gridLayout_%d.addWidget(self.pic[%d][%d], 1, 0, 1, 1)" % (self.pic_ith, self.pic_ith, 3))
+                exec("self.ui.gridLayout_%d.addWidget(self.pic[%d][%d], 1, 1, 1, 1)" % (self.pic_ith, self.pic_ith, 4))
+                self.showPic(self.pic_ith, 1, "01372635","5F3279B8")
+                self.showPic(self.pic_ith, 2, "01372635","5F327951")
+                self.showPic(self.pic_ith, 3, "03915480","5F329172_20170623_CR_2_1_1")
+                self.showPic(self.pic_ith, 4, "03915480","5F329172_20170623_CR_2_1_1")
+            self.pic_windows[self.pic_ith] = x
 #按鈕連結處--------------------------------------------------------------------------------------------------------
     def pushButtonAngleClicked(self):
         if(self.tool_lock == 'ruler'):
@@ -576,9 +615,10 @@ class initialWidget(QtWidgets.QMainWindow):
     def aboutWindows(self): # 對比度的選單設定
         self.ui.pushButton_windows.setStyleSheet("::menu-indicator{ image: none; }") #remove triangle
         self.windows_menu = QtWidgets.QMenu()
-        self.windows_menu.addAction('1', lambda: self.getWindow(0, 0))
-        self.windows_menu.addAction('2', lambda: self.getWindow(160, 320))
-        self.windows_menu.addAction('4', lambda: self.getWindow(320, 640))
+        self.windows_menu.addAction('1', lambda: self.setPicWindows(1))
+        self.windows_menu.addAction('2', lambda: self.setPicWindows(2))
+        self.windows_menu.addAction('3', lambda: self.setPicWindows(3))
+        self.windows_menu.addAction('4', lambda: self.setPicWindows(4))
         self.ui.pushButton_windows.setMenu(self.windows_menu)
 
 
@@ -634,6 +674,7 @@ class initialWidget(QtWidgets.QMainWindow):
         temp = self.empty_page_stack[-1]
         self.empty_page_stack.pop()
         self.patient_mapto_page[pt_id] = temp
+        self.pic_ith = temp
         self.ui.patient_list.addItem(pt_id)
         self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
         temp_page = self.patient_mapto_page[pt_id]
@@ -666,6 +707,7 @@ class initialWidget(QtWidgets.QMainWindow):
             self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
             temp = str(item.text())
             temp_page = self.patient_mapto_page[temp]
+            self.pic_ith = self.patient_mapto_page[temp]
             self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[temp_page])
 
     # menu 伸縮
@@ -708,7 +750,6 @@ class initialWidget(QtWidgets.QMainWindow):
             dicom_path = pt_path + '/' + filename
             ds = dcmread(dicom_path)
 
-            self.dicoms[i].append(ds)
             arr = ds.pixel_array
             arr = np.uint16(arr)
             dicom_WL = ds[0x0028, 0x1050].value
@@ -787,6 +828,7 @@ class initialWidget(QtWidgets.QMainWindow):
             else:
                 self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
                 temp_page = self.patient_mapto_page[pt_id]
+                self.pic_ith = self.patient_mapto_page[pt_id]
                 self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[temp_page])
                 self.opened_list.append(pt_id)
             # print(pt_id + "test")
@@ -878,7 +920,7 @@ class initialWidget(QtWidgets.QMainWindow):
         dicom_path = "./tmp_database/" + patient_no + "/" + patient_dics
         ds = dcmread(dicom_path)
 
-        self.dicoms[i].append(ds)
+        self.dicoms[i][j] = ds
         arr = copy.deepcopy(ds.pixel_array)
 
         arr = np.uint16(arr)
@@ -911,10 +953,8 @@ class initialWidget(QtWidgets.QMainWindow):
         var_thumbnail_list = 'self.ui.thumbnail_list'
         self.thumbnail_list = [None] * (self.MAXIMUM_PAGE + 1)
         var_array_thumbnail_list = 'self.thumbnail_list'
-        self.dicoms = [None] * (self.MAXIMUM_PAGE + 1) # 存Dicoms
         for i in range(1, self.MAXIMUM_PAGE + 1):
             exec("%s[%d] = %s_%d" % (var_array_thumbnail_list, i, var_thumbnail_list, i))
-            self.dicoms[i] = []
         # pics
         var_pic = 'self.ui.pic'
         self.pic = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 對應到照片的label array
