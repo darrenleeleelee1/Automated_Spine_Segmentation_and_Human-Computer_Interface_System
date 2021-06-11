@@ -623,8 +623,12 @@ class initialWidget(QtWidgets.QMainWindow):
         # pt_id = '01372635'
         pt_path = './tmp/' + pt_id
         i = self.patient_mapto_page[pt_id]
-        # i = self.patient_mapto_page[pt_id]
-        # print(i)
+        self.thumbnail_list[i].setViewMode(QListWidget.IconMode)
+        self.thumbnail_list[i].setItemAlignment(Qt.AlignHCenter)
+        self.thumbnail_list[i].setItemDelegate()
+        # self.thumbnail_list[i].setFlow(QListView.TopToBottom)
+        # self.thumbnail_list[i].setData(Qt.UserRole, index)
+        # print(self.thumbnail_list[i].Alignment)
         for filename in os.listdir(pt_path):
             dicom_path = pt_path + '/' + filename
             ds = dcmread(dicom_path)
@@ -636,8 +640,7 @@ class initialWidget(QtWidgets.QMainWindow):
             arr = self.mappingWindow(arr, dicom_WL, dicom_WW)
             qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1]*2, QtGui.QImage.Format_Grayscale16).copy()
             pixmap = QtGui.QPixmap(qimage)
-            self.thumbnail_list[i].setViewMode(QListView.IconMode)
-            self.thumbnail_list[i].setItemAlignment(Qt.AlignCenter)
+
             item = QListWidgetItem()
             item.setText('picture')
             icon = QtGui.QIcon(pixmap)
