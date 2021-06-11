@@ -272,11 +272,11 @@ class initialWidget(QtWidgets.QMainWindow):
         pixmap = pixmap.scaled(self.pic[_i][_j].width(), self.pic[_i][_j].height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
         img_width = pixmap.width() * self.size[_i][_j]
         img_height = pixmap.height() * self.size[_i][_j]
-        x = self.move_moving_x[_i][_j] + self.magnifier_pad_x[_i][_j]
-        y = self.move_moving_y[_i][_j] + self.magnifier_pad_y[_i][_j]
+        self.x[_i][_j] = self.move_moving_x[_i][_j] + self.magnifier_pad_x[_i][_j]
+        self.y[_i][_j] = self.move_moving_y[_i][_j] + self.magnifier_pad_y[_i][_j]
         center_start_x = int((self.pic_label_width - pixmap.width()) / 2)
         center_start_y = int((self.pic_label_height - pixmap.height()) / 2)
-        q.drawPixmap(center_start_x + x, center_start_y + y, img_width, img_height, pixmap)
+        q.drawPixmap(center_start_x + self.x[_i][_j], center_start_y + self.y[_i][_j], img_width, img_height, pixmap)
         # 置中
 
         p = QtGui.QPainter(self.transparent_pix[_i][_j])
@@ -661,6 +661,8 @@ class initialWidget(QtWidgets.QMainWindow):
         # i = self.patient_mapto_page[pt_id]
         # print(i)
         for filename in os.listdir(pt_path):
+            if filename == ".DS_Store":
+                continue
             dicom_path = pt_path + '/' + filename
             ds = dcmread(dicom_path)
 
@@ -959,10 +961,10 @@ class initialWidget(QtWidgets.QMainWindow):
 
         # 暫時試試放照片
 
-        self.showPic(1, 1, "01372635","5F3279B8")
-        self.showPic(1, 2, "01372635","5F327951")
-        self.showPic(1, 3, "03915480","5F329172_20170623_CR_2_1_1")
-        self.showPic(1, 4, "03915480","5F329172_20170623_CR_2_1_1")
+        self.showPic(1, 1, "01372635","5F3279B8.dcm")
+        self.showPic(1, 2, "01372635","5F327951.dcm")
+        self.showPic(1, 3, "03915480","5F329172_20170623_CR_2_1_1.dcm")
+        self.showPic(1, 4, "03915480","5F329172_20170623_CR_2_1_1.dcm")
 
 
 
