@@ -9,12 +9,13 @@ from generatedUiFile.Spine_BrokenUi import Ui_MainWindow
 from generatedUiFile.customUi import Ui_Dialog
 import os, requests
 from PyQt5.QtWidgets import *
-from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QInputDialog, QLineEdit, QDialog
+from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QInputDialog, QLineEdit, QDialog, QListWidgetItem
 from pydicom import dcmread, Dataset
 from pydicom.filebase import DicomBytesIO
 import numpy as np
 from PIL import ImageQt
 import shutil
+import copy
 WINDOW_SIZE = 0
 
 class initialWidget(QtWidgets.QMainWindow):
@@ -112,6 +113,9 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.pushButton_move.clicked.connect(self.pushButtonMoveClicked) # 移動
         self.ui.patient_list.itemClicked.connect(self.patient_listItemClicked)
         self.ui.recently_list.itemClicked.connect(self.recently_listItemClicked)
+        self.ui.thumbnail_list_1.itemClicked.connect(self.thumbnaillistclicked)
+        # self.set_thumbnail('03915480')
+
 
 #照片Pressed, Released, Mouse Track, Show Pic----------------------------------------------------------------------
     def picMouseReleased(self, event, _i, _j):
@@ -268,18 +272,25 @@ class initialWidget(QtWidgets.QMainWindow):
         img_width = self.pic_label_width * self.size[_i][_j]
         img_height = self.pic_label_height * self.size[_i][_j]
 
+
         self.tmmx[_i][_j], self.tmmy[_i][_j] = self.transitiveWithBiasMatrix(self.move_moving_x[_i][_j], self.move_moving_y[_i][_j], self.rotate_angle[_i][_j])
         t_index = int((-self.rotate_angle[_i][_j] % 360) / 90)
 
         self.x[_i][_j] = self.tmmx[_i][_j] + self.magnifier_pad_x[_i][_j] - self.rotate_coordinate_system[t_index][0]
         self.y[_i][_j] = self.tmmy[_i][_j] + self.magnifier_pad_y[_i][_j] - self.rotate_coordinate_system[t_index][1]
 
+        qimage = QtGui.QImage(self.pic_adjust_pixels[_i][_j], self.pic_adjust_pixels[_i][_j].shape[1], self.pic_adjust_pixels[_i][_j].shape[0], self.pic_adjust_pixels[_i][_j].shape[1]*2,QtGui.QImage.Format_Grayscale16).copy()
+        pixmap = QtGui.QPixmap.fromImage(qimage)
+        pixmap = pixmap.scaled(self.pic[_i][_j].width(), self.pic[_i][_j].height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+        img_width = pixmap.width() * self.size[_i][_j]
+        img_height = pixmap.height() * self.size[_i][_j]
+        x = self.move_moving_x[_i][_j] + self.magnifier_pad_x[_i][_j]
+        y = self.move_moving_y[_i][_j] + self.magnifier_pad_y[_i][_j]
+        center_start_x = int((self.pic_label_width - pixmap.width()) / 2)
+        center_start_y = int((self.pic_label_height - pixmap.height()) / 2)
+        q.drawPixmap(center_start_x + x, center_start_y + y, img_width, img_height, pixmap)
+        # 置中
 
-        self.qimage = QtGui.QImage(self.pic_adjust_pixels[_i][_j], self.pic_adjust_pixels[_i][_j].shape[1], self.pic_adjust_pixels[_i][_j].shape[0], QtGui.QImage.Format_Grayscale16)
-        pixmap = QtGui.QPixmap(self.qimage)
-
-
-        q.drawPixmap(self.x[_i][_j], self.y[_i][_j], img_width, img_height, pixmap)
         p = QtGui.QPainter(self.transparent_pix[_i][_j])
 
         if(self.tool_lock == 'mouse'):
@@ -461,7 +472,6 @@ class initialWidget(QtWidgets.QMainWindow):
         if(os.path.exists(tmp_dst)):
             self.picAlreadyExist()
             return
-
         database_dst = './tmp_database/' + pt_id
         shutil.copy(pic_file_path, tmp_dst)
         shutil.copy(pic_file_path, database_dst)
@@ -605,7 +615,6 @@ class initialWidget(QtWidgets.QMainWindow):
             if(response.json()['Result'] == 'Directory already exists.'):
                 self.duplicateAdd()
             else:
-                self.open_pt_page(pt_id)
                 self.pt_list.append(pt_id)
                 self.pt_list.sort()
                 self.ui.no_list.clear()
@@ -618,6 +627,7 @@ class initialWidget(QtWidgets.QMainWindow):
                 if(not os.path.exists(dst)):
                     os.makedirs(dst)
                 copytree(src, dst)
+                self.open_pt_page(pt_id)
 
                 
     def open_pt_page(self, pt_id): #記得要先檢查self.empty_page_stack空->Page滿->pageFull, 用在add和pt_list中打開
@@ -629,6 +639,7 @@ class initialWidget(QtWidgets.QMainWindow):
         temp_page = self.patient_mapto_page[pt_id]
         self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[temp_page])
         self.opened_list.append(pt_id)
+        self.set_thumbnail(pt_id)
 
     def pageFull(self):
         pageFull_msg = QMessageBox()
@@ -650,6 +661,7 @@ class initialWidget(QtWidgets.QMainWindow):
         if(str(item.text()) == '1'):
             self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
             self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[0])
+            self.set_thumbnail('01372635')
         else:
             self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
             temp = str(item.text())
@@ -684,6 +696,40 @@ class initialWidget(QtWidgets.QMainWindow):
             print(file_path)
             os.remove(file_path)
         os.rmdir(close_path)
+
+# Thumbnail-------------------------------------------------------------------------------------------------------
+    def set_thumbnail(self, pt_id):
+        # pt_id = '01372635'
+        pt_path = './tmp/' + pt_id
+        i = self.patient_mapto_page[pt_id]
+        # i = self.patient_mapto_page[pt_id]
+        # print(i)
+        for filename in os.listdir(pt_path):
+            dicom_path = pt_path + '/' + filename
+            ds = dcmread(dicom_path)
+
+            self.dicoms[i].append(ds)
+            arr = ds.pixel_array
+            arr = np.uint16(arr)
+            dicom_WL = ds[0x0028, 0x1050].value
+            dicom_WW = ds[0x0028, 0x1051].value
+            arr = self.mappingWindow(arr, dicom_WL, dicom_WW)
+            qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1]*2, QtGui.QImage.Format_Grayscale16).copy()
+            pixmap = QtGui.QPixmap(qimage)
+            self.thumbnail_list[i].setViewMode(QListView.IconMode)
+            self.thumbnail_list[i].setItemAlignment(Qt.AlignCenter)
+            item = QListWidgetItem()
+            item.setText('picture')
+            icon = QtGui.QIcon(pixmap)
+            item.setIcon(icon)
+            self.thumbnail_list[i].addItem(item) 
+
+        size = QSize(225, 225)
+        self.thumbnail_list[i].setIconSize(size)
+
+        
+    def thumbnaillistclicked(self):
+        print("test")
 # search page-----------------------------------------------------------------------------------------------------
     # search
     def loadSearchRecord(self):
@@ -732,12 +778,12 @@ class initialWidget(QtWidgets.QMainWindow):
             print(pt_id)
             if(pt_id not in self.patient_mapto_page):
                 print("no")
-                self.open_pt_page(pt_id)
                 src = './tmp_database/' + pt_id
                 dst = './tmp/' + pt_id
                 if(not os.path.exists(dst)):
                     os.makedirs(dst)
                 copytree(src, dst)
+                self.open_pt_page(pt_id)
             else:
                 self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
                 temp_page = self.patient_mapto_page[pt_id]
@@ -767,13 +813,13 @@ class initialWidget(QtWidgets.QMainWindow):
 
     def recently_listItemClicked(self, item):
         pt_id = str(item.text())
-        self.open_pt_page(pt_id)
         # self.ui.patient_list.addItem(pt_id)
         src = './tmp_database/' + pt_id
         dst = './tmp/' + pt_id
         if(not os.path.exists(dst)):
             os.makedirs(dst)
         copytree(src, dst)
+        self.open_pt_page(pt_id)
 
 # 其他/初始--------------------------------------------------------------------------------------------------------
     def loadPtList(self):
@@ -831,8 +877,9 @@ class initialWidget(QtWidgets.QMainWindow):
     def showPic(self, i, j, patient_no, patient_dics):
         dicom_path = "./tmp_database/" + patient_no + "/" + patient_dics
         ds = dcmread(dicom_path)
-        self.dicoms[i][j] = ds
-        arr = ds.pixel_array
+
+        self.dicoms[i].append(ds)
+        arr = copy.deepcopy(ds.pixel_array)
 
         arr = np.uint16(arr)
         self.pic_original_pixels[i][j] = np.copy(arr)
@@ -841,7 +888,6 @@ class initialWidget(QtWidgets.QMainWindow):
         dicom_WL = ds[0x0028, 0x1050].value
         dicom_WW = ds[0x0028, 0x1051].value
         self.pic_adjust_pixels[i][j] = self.mappingWindow(arr, dicom_WL, dicom_WW)
-        
         # pixmap_resized = pixmap.scaled(self.pic_label_width * self.size, self.pic_label_height * self.size,QtCore.Qt.KeepAspectRatio)
         # self.pic[i][j].setPixmap(pixmap)
         # self.pic[i][j].setGeometry(QtCore.QRect(100, 100, 400, 500))
@@ -865,8 +911,10 @@ class initialWidget(QtWidgets.QMainWindow):
         var_thumbnail_list = 'self.ui.thumbnail_list'
         self.thumbnail_list = [None] * (self.MAXIMUM_PAGE + 1)
         var_array_thumbnail_list = 'self.thumbnail_list'
+        self.dicoms = [None] * (self.MAXIMUM_PAGE + 1) # 存Dicoms
         for i in range(1, self.MAXIMUM_PAGE + 1):
             exec("%s[%d] = %s_%d" % (var_array_thumbnail_list, i, var_thumbnail_list, i))
+            self.dicoms[i] = []
         # pics
         var_pic = 'self.ui.pic'
         self.pic = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 對應到照片的label array
@@ -912,16 +960,24 @@ class initialWidget(QtWidgets.QMainWindow):
         self.move_y = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]  # # --move--
         self.pic_adjust_pixels = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 照片對比度須存改過的pixel array用
         self.pic_original_pixels = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 照片對比度須存原本的pixel array用
+
         self.dicoms = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 存Dicoms
         self.x = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)] # 每張照片的總位移量 x
         self.y = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)] # 每張照片的總位移量 y
+
         var_array_pic = 'self.pic'
         for i in range(1, self.MAXIMUM_PAGE + 1):
             for j in range(1, (self.MAXIMUM_PIC + 1)):
                 exec("%s[%d][%d] = %s_%d_%d" % (var_array_pic, i, j, var_pic, i, j))
                 self.pic[i][j].setText("%d-%d" % (i, j))
+
+                self.pic[i][j].setStyleSheet("background-color: black; border: 3px solid black;")
+                self.pen_start_x[i][j] = self.pen_start_y[i][j] = 0
+                self.pen_end_x[i][j] = self.pen_end_y[i][j] = 0
+
                 self.pen_start_x[i][j] = self.pen_start_y[i][j] = -10
                 self.pen_end_x[i][j] = self.pen_end_y[i][j] = -10
+
                 self.ruler_start_x[i][j] = self.ruler_start_y[i][j] = 0
                 self.ruler_end_x[i][j] = self.ruler_end_y[i][j] = 0                
                 self.angle_start_x[i][j] = self.angle_start_y[i][j] = 0
@@ -945,10 +1001,13 @@ class initialWidget(QtWidgets.QMainWindow):
 
 
         # 暫時試試放照片
-        self.showPic(1, 1, "01372635","5F327951.dcm")
-        self.showPic(1, 2, "01372635","5F327951.dcm")
-        self.showPic(1, 3, "01372635","5F327951.dcm")
-        self.showPic(1, 4, "01372635","5F327951.dcm")
+
+        self.showPic(1, 1, "01372635","5F3279B8")
+        self.showPic(1, 2, "01372635","5F327951")
+        self.showPic(1, 3, "03915480","5F329172_20170623_CR_2_1_1")
+        self.showPic(1, 4, "03915480","5F329172_20170623_CR_2_1_1")
+
+
 
     def mousePressEvent(self, event):
         self.clickPosition = event.globalPos()

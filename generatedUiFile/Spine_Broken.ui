@@ -598,7 +598,7 @@ background-position: center left;</string>
                  <property name="sizeHint" stdset="0">
                   <size>
                    <width>20</width>
-                   <height>38</height>
+                   <height>15</height>
                   </size>
                  </property>
                 </spacer>
@@ -934,7 +934,7 @@ margin:50px;</string>
                   <widget class="QFrame" name="thumbnail_frame">
                    <property name="minimumSize">
                     <size>
-                     <width>150</width>
+                     <width>250</width>
                      <height>0</height>
                     </size>
                    </property>
@@ -958,21 +958,24 @@ margin:50px;</string>
                      <number>0</number>
                     </property>
                     <property name="leftMargin">
-                     <number>0</number>
+                     <number>6</number>
                     </property>
                     <property name="topMargin">
-                     <number>0</number>
+                     <number>6</number>
                     </property>
                     <property name="rightMargin">
-                     <number>0</number>
+                     <number>6</number>
                     </property>
                     <property name="bottomMargin">
-                     <number>0</number>
+                     <number>6</number>
                     </property>
                     <item>
                      <widget class="QListWidget" name="thumbnail_list_1">
                       <property name="frameShape">
                        <enum>QFrame::NoFrame</enum>
+                      </property>
+                      <property name="viewMode">
+                       <enum>QListView::IconMode</enum>
                       </property>
                      </widget>
                     </item>
@@ -1102,7 +1105,7 @@ margin:50px;</string>
                   <widget class="QFrame" name="thumbnail_frame_2">
                    <property name="minimumSize">
                     <size>
-                     <width>150</width>
+                     <width>250</width>
                      <height>0</height>
                     </size>
                    </property>
@@ -1126,16 +1129,16 @@ margin:50px;</string>
                      <number>0</number>
                     </property>
                     <property name="leftMargin">
-                     <number>0</number>
+                     <number>6</number>
                     </property>
                     <property name="topMargin">
-                     <number>0</number>
+                     <number>6</number>
                     </property>
                     <property name="rightMargin">
-                     <number>0</number>
+                     <number>6</number>
                     </property>
                     <property name="bottomMargin">
-                     <number>0</number>
+                     <number>6</number>
                     </property>
                     <item>
                      <widget class="QListWidget" name="thumbnail_list_2">
@@ -1216,7 +1219,7 @@ margin:50px;</string>
                   <widget class="QFrame" name="thumbnail_frame_3">
                    <property name="minimumSize">
                     <size>
-                     <width>150</width>
+                     <width>250</width>
                      <height>0</height>
                     </size>
                    </property>
@@ -1240,16 +1243,16 @@ margin:50px;</string>
                      <number>0</number>
                     </property>
                     <property name="leftMargin">
-                     <number>0</number>
+                     <number>6</number>
                     </property>
                     <property name="topMargin">
-                     <number>0</number>
+                     <number>6</number>
                     </property>
                     <property name="rightMargin">
-                     <number>0</number>
+                     <number>6</number>
                     </property>
                     <property name="bottomMargin">
-                     <number>0</number>
+                     <number>6</number>
                     </property>
                     <item>
                      <widget class="QListWidget" name="thumbnail_list_3">
@@ -1330,7 +1333,7 @@ margin:50px;</string>
                   <widget class="QFrame" name="thumbnail_frame_4">
                    <property name="minimumSize">
                     <size>
-                     <width>150</width>
+                     <width>250</width>
                      <height>0</height>
                     </size>
                    </property>
@@ -1349,27 +1352,37 @@ margin:50px;</string>
                    <property name="frameShadow">
                     <enum>QFrame::Raised</enum>
                    </property>
-                   <layout class="QVBoxLayout" name="verticalLayout_11">
+                   <layout class="QVBoxLayout" name="verticalLayout_11" stretch="0">
                     <property name="spacing">
                      <number>0</number>
                     </property>
                     <property name="leftMargin">
-                     <number>0</number>
+                     <number>6</number>
                     </property>
                     <property name="topMargin">
-                     <number>0</number>
+                     <number>6</number>
                     </property>
                     <property name="rightMargin">
-                     <number>0</number>
+                     <number>6</number>
                     </property>
                     <property name="bottomMargin">
-                     <number>0</number>
+                     <number>6</number>
                     </property>
                     <item>
                      <widget class="QListWidget" name="thumbnail_list_4">
                       <property name="frameShape">
                        <enum>QFrame::NoFrame</enum>
                       </property>
+                      <item>
+                       <property name="text">
+                        <string>12345</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>67890</string>
+                       </property>
+                      </item>
                      </widget>
                     </item>
                    </layout>
@@ -1444,7 +1457,7 @@ margin:50px;</string>
                   <widget class="QFrame" name="thumbnail_frame_5">
                    <property name="minimumSize">
                     <size>
-                     <width>150</width>
+                     <width>250</width>
                      <height>0</height>
                     </size>
                    </property>
@@ -1468,13 +1481,13 @@ margin:50px;</string>
                      <number>0</number>
                     </property>
                     <property name="leftMargin">
-                     <number>0</number>
+                     <number>6</number>
                     </property>
                     <property name="topMargin">
-                     <number>0</number>
+                     <number>6</number>
                     </property>
                     <property name="rightMargin">
-                     <number>0</number>
+                     <number>6</number>
                     </property>
                     <property name="bottomMargin">
                      <number>0</number>
@@ -1483,6 +1496,9 @@ margin:50px;</string>
                      <widget class="QListWidget" name="thumbnail_list_5">
                       <property name="frameShape">
                        <enum>QFrame::NoFrame</enum>
+                      </property>
+                      <property name="viewMode">
+                       <enum>QListView::ListMode</enum>
                       </property>
                      </widget>
                     </item>
