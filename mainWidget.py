@@ -403,11 +403,6 @@ class initialWidget(QtWidgets.QMainWindow):
             # else:
             #     t_label = QtCore.QPointF((te_x + ruler_biasx + 10)*self.size[_i][_j],
             #                              ((te_y + ruler_biasy)*self.size[_i][_j]))
-
-
-
-
-
             print("self.magnifier_pad_x[_i][_j] = ", self.magnifier_pad_x[_i][_j])
             q.save() # 要用來show出label，所以reset所有的transform
             q.resetTransform()
