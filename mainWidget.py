@@ -465,16 +465,16 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.gridLayout_list[self.pic_ith].removeWidget(self.pic[self.pic_ith][k])
                 self.pic[self.pic_ith][k].deleteLater()
             if x == 3:
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][k], 0, 0, 1, 1)
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][k], 0, 1, 1, 1)
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][k], 0, 2, 1, 1)
+                self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][1], 0, 0, 1, 1)
+                self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][2], 0, 1, 1, 1)
+                self.gridLayout_list[self.pic_ith].removeWidget(self.pic[self.pic_ith][3])
+                self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][3], 0, 2, 1, 1)
             self.pic_windows[self.pic_ith] = x
         if self.pic_windows[self.pic_ith] < x:
             for k in range(self.pic_windows[self.pic_ith] + 1, x + 1):
                 label = QtWidgets.QLabel(self.pic_frame_list[self.pic_ith])
                 label.setStyleSheet("background-color: black; border: 3px solid black;")
                 self.pic[self.pic_ith][k] = label
-                print(type(self.pic[self.pic_ith][k]))
             if x == 2:
                 self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][1], 0, 0, 1, 1)
                 self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][2], 0, 1, 1, 1)
