@@ -269,29 +269,36 @@ class initialWidget(QtWidgets.QMainWindow):
         q.setRenderHint(QtGui.QPainter.Antialiasing)
         self.pic_label_width = self.pic[_i][_j].width()
         self.pic_label_height = self.pic[_i][_j].height()
+        print(self.pic_label_width, self.pic_label_height)
         q.translate(self.pic_label_width / 2, self.pic_label_height / 2)  # 把旋轉中心設成（pic_label_width/2, pic_label_height/2）
         q.rotate(self.rotate_angle[_i][_j])
         q.translate(-self.pic_label_width / 2, -self.pic_label_height / 2)
-        img_width = self.pic_label_width * self.size[_i][_j]
-        img_height = self.pic_label_height * self.size[_i][_j]
+
+        # img_width = self.pic_label_width * self.size[_i][_j]
+        # img_height = self.pic_label_height * self.size[_i][_j]
 
 
         self.tmmx[_i][_j], self.tmmy[_i][_j] = self.transitiveWithBiasMatrix(self.move_moving_x[_i][_j], self.move_moving_y[_i][_j], self.rotate_angle[_i][_j])
         t_index = int((-self.rotate_angle[_i][_j] % 360) / 90)
 
-        self.x[_i][_j] = self.tmmx[_i][_j] + self.magnifier_pad_x[_i][_j] - self.rotate_coordinate_system[t_index][0]
-        self.y[_i][_j] = self.tmmy[_i][_j] + self.magnifier_pad_y[_i][_j] - self.rotate_coordinate_system[t_index][1]
-
         qimage = QtGui.QImage(self.pic_adjust_pixels[_i][_j], self.pic_adjust_pixels[_i][_j].shape[1], self.pic_adjust_pixels[_i][_j].shape[0], self.pic_adjust_pixels[_i][_j].shape[1]*2,QtGui.QImage.Format_Grayscale16).copy()
         pixmap = QtGui.QPixmap.fromImage(qimage)
         pixmap = pixmap.scaled(self.pic[_i][_j].width(), self.pic[_i][_j].height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+
+        #self.transparent_pix[_i][_j] = QtGui.QPixmap(pixmap.width(), pixmap.height())
+
+
         img_width = pixmap.width() * self.size[_i][_j]
         img_height = pixmap.height() * self.size[_i][_j]
-        self.x[_i][_j] = self.move_moving_x[_i][_j] + self.magnifier_pad_x[_i][_j]
-        self.y[_i][_j] = self.move_moving_y[_i][_j] + self.magnifier_pad_y[_i][_j]
+
         center_start_x = int((self.pic_label_width - pixmap.width()) / 2)
         center_start_y = int((self.pic_label_height - pixmap.height()) / 2)
-        q.drawPixmap(center_start_x + self.x[_i][_j], center_start_y + self.y[_i][_j], img_width, img_height, pixmap)
+        #tcx, tcy = self.transitiveWithBiasMatrix(center_start_x, center_start_y, self.rotate_angle[_i][_j])
+
+        self.x[_i][_j] = self.tmmx[_i][_j] + self.magnifier_pad_x[_i][_j] - self.rotate_coordinate_system[t_index][0]
+        self.y[_i][_j] = self.tmmy[_i][_j] + self.magnifier_pad_y[_i][_j] - self.rotate_coordinate_system[t_index][1]
+        q.drawPixmap(self.x[_i][_j] + center_start_x, self.y[_i][_j] + center_start_y, img_width, img_height, pixmap)
+
         # 置中
 
         p = QtGui.QPainter(self.transparent_pix[_i][_j])
@@ -322,6 +329,7 @@ class initialWidget(QtWidgets.QMainWindow):
             p.setPen(pen)
             tpsx, tpsy = self.transitiveWithBiasMatrix(self.pen_start_x[_i][_j], self.pen_start_y[_i][_j], self.rotate_angle[_i][_j])
             tpex, tpey = self.transitiveWithBiasMatrix(self.pen_end_x[_i][_j], self.pen_end_y[_i][_j], self.rotate_angle[_i][_j])
+
             p.drawLine((tpex - self.x[_i][_j])/self.size[_i][_j], (tpey - self.y[_i][_j])/self.size[_i][_j],
                        (tpsx - self.x[_i][_j])/self.size[_i][_j], (tpsy - self.y[_i][_j])/self.size[_i][_j])  #移動畫布時，筆會跟著跑掉，(-x, -y)調回來
 
@@ -468,24 +476,24 @@ class initialWidget(QtWidgets.QMainWindow):
             if x == 2:
                 exec("self.ui.gridLayout_%d.addWidget(self.pic[%d][%d], 0, 0, 1, 1)" % (self.pic_ith, self.pic_ith, 1))
                 exec("self.ui.gridLayout_%d.addWidget(self.pic[%d][%d], 0, 1, 1, 1)" % (self.pic_ith, self.pic_ith, 2))
-                self.showPic(self.pic_ith, 1, "01372635","5F3279B8")
-                self.showPic(self.pic_ith, 2, "01372635","5F327951")
+                self.showPic(self.pic_ith, 1, "01372635","5F3279B8.dcm")
+                self.showPic(self.pic_ith, 2, "01372635","5F327951.dcm")
             elif x == 3:
                 exec("self.ui.gridLayout_%d.addWidget(self.pic[%d][%d], 0, 0, 1, 1)" % (self.pic_ith, self.pic_ith, 1))
                 exec("self.ui.gridLayout_%d.addWidget(self.pic[%d][%d], 0, 1, 1, 1)" % (self.pic_ith, self.pic_ith, 2))
                 exec("self.ui.gridLayout_%d.addWidget(self.pic[%d][%d], 0, 2, 1, 1)" % (self.pic_ith, self.pic_ith, 3))
-                self.showPic(self.pic_ith, 1, "01372635","5F3279B8")
-                self.showPic(self.pic_ith, 2, "01372635","5F327951")
-                self.showPic(self.pic_ith, 3, "03915480","5F329172_20170623_CR_2_1_1")
+                self.showPic(self.pic_ith, 1, "01372635","5F3279B8.dcm")
+                self.showPic(self.pic_ith, 2, "01372635","5F327951.dcm")
+                self.showPic(self.pic_ith, 3, "03915480","5F329172_20170623_CR_2_1_1.dcm")
             elif x == 4:
                 exec("self.ui.gridLayout_%d.addWidget(self.pic[%d][%d], 0, 0, 1, 1)" % (self.pic_ith, self.pic_ith, 1))
                 exec("self.ui.gridLayout_%d.addWidget(self.pic[%d][%d], 0, 1, 1, 1)" % (self.pic_ith, self.pic_ith, 2))
                 exec("self.ui.gridLayout_%d.addWidget(self.pic[%d][%d], 1, 0, 1, 1)" % (self.pic_ith, self.pic_ith, 3))
                 exec("self.ui.gridLayout_%d.addWidget(self.pic[%d][%d], 1, 1, 1, 1)" % (self.pic_ith, self.pic_ith, 4))
-                self.showPic(self.pic_ith, 1, "01372635","5F3279B8")
-                self.showPic(self.pic_ith, 2, "01372635","5F327951")
-                self.showPic(self.pic_ith, 3, "03915480","5F329172_20170623_CR_2_1_1")
-                self.showPic(self.pic_ith, 4, "03915480","5F329172_20170623_CR_2_1_1")
+                self.showPic(self.pic_ith, 1, "01372635","5F3279B8.dcm")
+                self.showPic(self.pic_ith, 2, "01372635","5F327951.dcm")
+                self.showPic(self.pic_ith, 3, "03915480","5F329172_20170623_CR_2_1_1.dcm")
+                self.showPic(self.pic_ith, 4, "03915480","5F329172_20170623_CR_2_1_1.dcm")
             self.pic_windows[self.pic_ith] = x
 #按鈕連結處--------------------------------------------------------------------------------------------------------
     def pushButtonAngleClicked(self):
@@ -1033,7 +1041,7 @@ class initialWidget(QtWidgets.QMainWindow):
         self.transparent_pix = [ [0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
         for i in range(1, self.MAXIMUM_PAGE + 1):
             for j in range(1, (self.MAXIMUM_PIC + 1)):
-                self.transparent_pix[i][j] = QtGui.QPixmap(512, 512)
+                self.transparent_pix[i][j] = QtGui.QPixmap(553, 345) # 有改
                 self.transparent_pix[i][j].fill(Qt.transparent)
 
 
