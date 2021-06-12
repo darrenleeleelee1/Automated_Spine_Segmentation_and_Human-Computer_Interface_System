@@ -269,13 +269,9 @@ class initialWidget(QtWidgets.QMainWindow):
         q.setRenderHint(QtGui.QPainter.Antialiasing)
         self.pic_label_width = self.pic[_i][_j].width()
         self.pic_label_height = self.pic[_i][_j].height()
-        print(self.pic_label_width, self.pic_label_height)
         q.translate(self.pic_label_width / 2, self.pic_label_height / 2)  # 把旋轉中心設成（pic_label_width/2, pic_label_height/2）
         q.rotate(self.rotate_angle[_i][_j])
         q.translate(-self.pic_label_width / 2, -self.pic_label_height / 2)
-
-        # img_width = self.pic_label_width * self.size[_i][_j]
-        # img_height = self.pic_label_height * self.size[_i][_j]
 
 
         self.tmmx[_i][_j], self.tmmy[_i][_j] = self.transitiveWithBiasMatrix(self.move_moving_x[_i][_j], self.move_moving_y[_i][_j], self.rotate_angle[_i][_j])
@@ -286,8 +282,7 @@ class initialWidget(QtWidgets.QMainWindow):
         pixmap = pixmap.scaled(self.pic[_i][_j].width(), self.pic[_i][_j].height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
 
         #self.transparent_pix[_i][_j] = QtGui.QPixmap(pixmap.width(), pixmap.height())
-
-
+        
         img_width = pixmap.width() * self.size[_i][_j]
         img_height = pixmap.height() * self.size[_i][_j]
 
@@ -297,6 +292,7 @@ class initialWidget(QtWidgets.QMainWindow):
 
         self.x[_i][_j] = self.tmmx[_i][_j] + self.magnifier_pad_x[_i][_j] - self.rotate_coordinate_system[t_index][0]
         self.y[_i][_j] = self.tmmy[_i][_j] + self.magnifier_pad_y[_i][_j] - self.rotate_coordinate_system[t_index][1]
+        print(self.x[_i][_j], self.y[_i][_j])
         q.drawPixmap(self.x[_i][_j] + center_start_x, self.y[_i][_j] + center_start_y, img_width, img_height, pixmap)
 
         # 置中
@@ -345,7 +341,7 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.tex[_i][_j], self.tey[_i][_j] = self.transitiveWithBiasMatrix(self.ruler_end_x[_i][_j], self.ruler_end_y[_i][_j], self.rotate_angle[_i][_j])
                 q.drawLine(self.tex[_i][_j], self.tey[_i][_j], self.tsx[_i][_j], self.tsy[_i][_j])
 
-        q.drawPixmap(self.x[_i][_j], self.y[_i][_j], img_width, img_height, self.transparent_pix[_i][_j])   #讓畫布跟著照片移動
+        q.drawPixmap(self.x[_i][_j], self.y[_i][_j], self.pic_label_width * self.size[_i][_j], self.pic_label_height * self.size[_i][_j], self.transparent_pix[_i][_j])   #讓畫布跟著照片移動
         # show every angle
 
         for w in self.angle_coordinate_list[_i][_j]:
