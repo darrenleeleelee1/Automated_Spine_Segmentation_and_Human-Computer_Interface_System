@@ -999,33 +999,6 @@ margin:50px;</string>
                       </property>
                      </widget>
                     </item>
-                    <item row="0" column="1">
-                     <widget class="QLabel" name="pic_1_2">
-                      <property name="cursor">
-                       <cursorShape>ArrowCursor</cursorShape>
-                      </property>
-                      <property name="text">
-                       <string>TextLabel</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="1" column="0">
-                     <widget class="QLabel" name="pic_1_3">
-                      <property name="cursor">
-                       <cursorShape>ArrowCursor</cursorShape>
-                      </property>
-                      <property name="text">
-                       <string>TextLabel</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="1" column="1">
-                     <widget class="QLabel" name="pic_1_4">
-                      <property name="text">
-                       <string>TextLabel</string>
-                      </property>
-                     </widget>
-                    </item>
                    </layout>
                   </widget>
                  </item>
@@ -1115,28 +1088,7 @@ margin:50px;</string>
                     <property name="rightMargin">
                      <number>6</number>
                     </property>
-                    <item row="1" column="1">
-                     <widget class="QLabel" name="pic_2_4">
-                      <property name="text">
-                       <string>TextLabel</string>
-                      </property>
-                     </widget>
-                    </item>
                     <item row="0" column="0">
-                     <widget class="QLabel" name="pic_2_2">
-                      <property name="text">
-                       <string>TextLabel</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="1" column="0">
-                     <widget class="QLabel" name="pic_2_3">
-                      <property name="text">
-                       <string>TextLabel</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="0" column="1">
                      <widget class="QLabel" name="pic_2_1">
                       <property name="text">
                        <string>TextLabel</string>
@@ -1229,27 +1181,6 @@ margin:50px;</string>
                     <enum>QFrame::Raised</enum>
                    </property>
                    <layout class="QGridLayout" name="gridLayout_3">
-                    <item row="1" column="1">
-                     <widget class="QLabel" name="pic_3_4">
-                      <property name="text">
-                       <string>TextLabel</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="0" column="1">
-                     <widget class="QLabel" name="pic_3_2">
-                      <property name="text">
-                       <string>TextLabel</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="1" column="0">
-                     <widget class="QLabel" name="pic_3_3">
-                      <property name="text">
-                       <string>TextLabel</string>
-                      </property>
-                     </widget>
-                    </item>
                     <item row="0" column="0">
                      <widget class="QLabel" name="pic_3_1">
                       <property name="text">
@@ -1353,29 +1284,8 @@ margin:50px;</string>
                     <enum>QFrame::Raised</enum>
                    </property>
                    <layout class="QGridLayout" name="gridLayout_4">
-                    <item row="1" column="1">
-                     <widget class="QLabel" name="pic_4_4">
-                      <property name="text">
-                       <string>TextLabel</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="0" column="1">
-                     <widget class="QLabel" name="pic_4_1">
-                      <property name="text">
-                       <string>TextLabel</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="1" column="0">
-                     <widget class="QLabel" name="pic_4_3">
-                      <property name="text">
-                       <string>TextLabel</string>
-                      </property>
-                     </widget>
-                    </item>
                     <item row="0" column="0">
-                     <widget class="QLabel" name="pic_4_2">
+                     <widget class="QLabel" name="pic_4_1">
                       <property name="text">
                        <string>TextLabel</string>
                       </property>
@@ -1470,30 +1380,6 @@ margin:50px;</string>
                     <enum>QFrame::Raised</enum>
                    </property>
                    <layout class="QGridLayout" name="gridLayout_5">
-                    <item row="1" column="1">
-                     <widget class="QLabel" name="pic_5_4">
-                      <property name="enabled">
-                       <bool>true</bool>
-                      </property>
-                      <property name="text">
-                       <string>TextLabel</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="0" column="1">
-                     <widget class="QLabel" name="pic_5_2">
-                      <property name="text">
-                       <string>TextLabel</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="1" column="0">
-                     <widget class="QLabel" name="pic_5_3">
-                      <property name="text">
-                       <string>TextLabel</string>
-                      </property>
-                     </widget>
-                    </item>
                     <item row="0" column="0">
                      <widget class="QLabel" name="pic_5_1">
                       <property name="text">
