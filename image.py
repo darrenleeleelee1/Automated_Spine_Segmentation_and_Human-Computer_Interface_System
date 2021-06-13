@@ -35,8 +35,6 @@ class Ui_MainWindow(object):
         scene.addPixmap(pixmap)
         QGline = QtWidgets.QGraphicsLineItem(0, 0, self.photo.width() / 2, self.photo.height() / 2)
         QGline.setPen(QtGui.QPen(QtGui.QColor(5, 105, 25)))
-        QGline.setAcceptTouchEvents(True)
-        QGline.setAcceptTouchEvents(True)
         scene.addItem(QGline)
         self.view = QtWidgets.QGraphicsView(scene, self.photo)
         self.view.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
