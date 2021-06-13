@@ -5,17 +5,8 @@ from pydicom import dcmread
 from pydicom.filebase import DicomBytesIO
 import numpy as np
 import matplotlib.pyplot as plt
-
-class GraphicView(QtWidgets.QGraphicsView):
-    def __init__(self, sence_width, sence_height, parent):
-        super().__init__(parent)
-        super().setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        super().setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.scene = QtWidgets.QGraphicsScene()
-        self.setScene(self.scene)       
-        self.setSceneRect(0, 0, sence_width, sence_height)
-        
-
+class Ruler(QtWidgets.QGraphicsItem):
+    
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -41,12 +32,15 @@ class Ui_MainWindow(object):
         pixmap = QtGui.QPixmap.fromImage(qimage)
         pixmap = pixmap.scaled(self.photo.width(), self.photo.height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
         # self.photo.setPixmap(pixmap)
+        scene = QtWidgets.QGraphicsScene()
+        scene.addPixmap(pixmap)
         QGline = QtWidgets.QGraphicsLineItem(0, 0, self.photo.width() / 2, self.photo.height() / 2)
         QGline.setPen(QtGui.QPen(QtGui.QColor(5, 105, 25)))
-        self.view = GraphicView(self.photo.width(), self.photo.height(), self.photo)
-        
-        self.view.scene.addPixmap(pixmap)
-        self.view.scene.addItem(QGline)
+        scene.addItem(QGline)
+        self.view = QtWidgets.QGraphicsView(scene, self.photo)
+        self.view.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.view.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.view.setGeometry(QtCore.QRect(0, 0, self.photo.width(), self.photo.height()))
         self.view.show()
 
         MainWindow.setCentralWidget(self.centralwidget)
