@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 class GraphicView(QtWidgets.QGraphicsView):
     def __init__(self, sence_width, sence_height, parent):
         super().__init__(parent)
+        super().setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        super().setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.scene = QtWidgets.QGraphicsScene()
         self.setScene(self.scene)       
         self.setSceneRect(0, 0, sence_width, sence_height)
@@ -42,8 +44,7 @@ class Ui_MainWindow(object):
         QGline = QtWidgets.QGraphicsLineItem(0, 0, self.photo.width() / 2, self.photo.height() / 2)
         QGline.setPen(QtGui.QPen(QtGui.QColor(5, 105, 25)))
         self.view = GraphicView(self.photo.width(), self.photo.height(), self.photo)
-        self.view.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.view.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        
         self.view.scene.addPixmap(pixmap)
         self.view.scene.addItem(QGline)
         self.view.show()
