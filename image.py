@@ -5,6 +5,15 @@ from pydicom import dcmread
 from pydicom.filebase import DicomBytesIO
 import numpy as np
 import matplotlib.pyplot as plt
+
+class GraphicView(QtWidgets.QGraphicsView):
+    def __init__(self, sence_width, sence_height, parent):
+        super().__init__(parent)
+        self.scene = QtWidgets.QGraphicsScene()
+        self.setScene(self.scene)       
+        self.setSceneRect(0, 0, sence_width, sence_height)
+        
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -30,25 +39,19 @@ class Ui_MainWindow(object):
         pixmap = QtGui.QPixmap.fromImage(qimage)
         pixmap = pixmap.scaled(self.photo.width(), self.photo.height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
         # self.photo.setPixmap(pixmap)
-        scene = QtWidgets.QGraphicsScene()
-        scene.addText("Hello, world!")
-        scene.addPixmap(pixmap)
         QGline = QtWidgets.QGraphicsLineItem(0, 0, self.photo.width() / 2, self.photo.height() / 2)
         QGline.setPen(QtGui.QPen(QtGui.QColor(5, 105, 25)))
-        scene.addItem(QGline)
-        self.view = QtWidgets.QGraphicsView(scene, self.photo)
+        self.view = GraphicView(self.photo.width(), self.photo.height(), self.photo)
         self.view.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.view.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.view.setGeometry(QtCore.QRect(0, 0, self.photo.width(), self.photo.height()))
-        self.angle = 0
-        self.view.rotate(self.angle)
+        self.view.scene.addPixmap(pixmap)
+        self.view.scene.addItem(QGline)
         self.view.show()
 
         MainWindow.setCentralWidget(self.centralwidget)
     def btn_clicked(self):
-        self.angle += 90
-        self.angle %= 360
-        self.view.shear(0, 0.1)
+        self.view.rotate(90)
+
     def mappingWindow(self, arr, WL, WW):
         pixel_max = WL + WW/2
         pixel_min = WL - WW/2
