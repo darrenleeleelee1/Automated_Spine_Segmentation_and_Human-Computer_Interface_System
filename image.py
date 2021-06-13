@@ -31,8 +31,8 @@ class Ui_MainWindow(object):
         pixmap = pixmap.scaled(self.photo.width(), self.photo.height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
         # self.photo.setPixmap(pixmap)
         scene = QtWidgets.QGraphicsScene()
-        scene.addText("Hello, world!")
         scene.addPixmap(pixmap)
+        scene.addText("Hello, world!")
         QGline = QtWidgets.QGraphicsLineItem(0, 0, self.photo.width() / 2, self.photo.height() / 2)
         QGline.setPen(QtGui.QPen(QtGui.QColor(5, 105, 25)))
         scene.addItem(QGline)
@@ -46,9 +46,10 @@ class Ui_MainWindow(object):
 
         MainWindow.setCentralWidget(self.centralwidget)
     def btn_clicked(self):
-        self.angle += 90
-        self.angle %= 360
-        self.view.shear(0, 0.1)
+        self.view.rotate(90)
+        # self.angle += 90
+        # self.angle %= 360
+        # self.view.shear(0, 0.1)
     def mappingWindow(self, arr, WL, WW):
         pixel_max = WL + WW/2
         pixel_min = WL - WW/2
