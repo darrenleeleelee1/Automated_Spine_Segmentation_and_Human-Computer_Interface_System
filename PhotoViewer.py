@@ -1,3 +1,4 @@
+from os import environ
 from PyQt5 import QtCore, QtGui, QtWidgets
 from pydicom import dcmread
 import numpy as np
@@ -5,10 +6,10 @@ class Ruler(QtWidgets.QGraphicsLineItem):
     def __init__(self, x1, y1, x2, y2):
         super().__init__(x1, y1, x2, y2)
         self.setPen(QtGui.QPen(QtGui.QColor(5, 105, 25)))
-
+        self.movable = False
     def setMovable(self, enable):
         self.setAcceptHoverEvents(enable)
-
+        self.movable = enable
     # mouse hover event
     def hoverEnterEvent(self, event):
         app.instance().setOverrideCursor(QtCore.Qt.OpenHandCursor)
@@ -21,14 +22,14 @@ class Ruler(QtWidgets.QGraphicsLineItem):
         pass
 
     def mouseMoveEvent(self, event):
-        orig_cursor_position = event.lastScenePos()
-        updated_cursor_position = event.scenePos()
-
-        orig_position = self.scenePos()
-
-        updated_cursor_x = updated_cursor_position.x() - orig_cursor_position.x() + orig_position.x()
-        updated_cursor_y = updated_cursor_position.y() - orig_cursor_position.y() + orig_position.y()
-        self.setPos(QtCore.QPointF(updated_cursor_x, updated_cursor_y))
+        print(self.movable)
+        if self.movable:
+            orig_cursor_position = event.lastScenePos()
+            updated_cursor_position = event.scenePos()
+            orig_position = self.scenePos()
+            updated_cursor_x = updated_cursor_position.x() - orig_cursor_position.x() + orig_position.x()
+            updated_cursor_y = updated_cursor_position.y() - orig_cursor_position.y() + orig_position.y()
+            self.setPos(QtCore.QPointF(updated_cursor_x, updated_cursor_y))
 
     def mouseReleaseEvent(self, event):
         print('x: {0}, y: {1}'.format(self.pos().x(), self.pos().y()))
