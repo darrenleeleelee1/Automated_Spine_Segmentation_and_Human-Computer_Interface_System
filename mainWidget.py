@@ -330,8 +330,8 @@ class initialWidget(QtWidgets.QMainWindow):
             tpsx, tpsy = self.transitiveWithBiasMatrix(self.pen_start_x[_i][_j], self.pen_start_y[_i][_j], self.rotate_angle[_i][_j])
             tpex, tpey = self.transitiveWithBiasMatrix(self.pen_end_x[_i][_j], self.pen_end_y[_i][_j], self.rotate_angle[_i][_j])
 
-            p.drawLine((tpex - self.x[_i][_j])/self.size[_i][_j], (tpey - self.y[_i][_j])/self.size[_i][_j],
-                       (tpsx - self.x[_i][_j])/self.size[_i][_j], (tpsy - self.y[_i][_j])/self.size[_i][_j])  #移動畫布時，筆會跟著跑掉，(-x, -y)調回來
+            p.drawLine((tpsx - self.x[_i][_j])/self.size[_i][_j], (tpsy - self.y[_i][_j])/self.size[_i][_j],
+                        (tpex - self.x[_i][_j])/self.size[_i][_j], (tpey - self.y[_i][_j])/self.size[_i][_j])  #移動畫布時，筆會跟著跑掉，(-x, -y)調回來
 
         elif(self.tool_lock == 'ruler'):
             if(self.pic_clicked[_i][_j]):
