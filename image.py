@@ -1,12 +1,24 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-
+from PyQt5.QtWidgets import (QApplication, QGraphicsItem, QGraphicsScene,
+        QGraphicsView, QGraphicsWidget)
+from PyQt5.QtCore import Qt, QPointF
 import requests
 from pydicom import dcmread
 from pydicom.filebase import DicomBytesIO
 import numpy as np
 import matplotlib.pyplot as plt
 class Ruler(QtWidgets.QGraphicsItem):
-    
+    pass
+
+class GraphicView(QtWidgets.QGraphicsView):
+    def __init__(self, sence_width, sence_height, parent):
+        super().__init__(parent)
+        super().setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        super().setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.scene = QtWidgets.QGraphicsScene()
+        self.setScene(self.scene)       
+        self.setSceneRect(0, 0, sence_width, sence_height)
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -16,12 +28,22 @@ class Ui_MainWindow(object):
         btn = QtWidgets.QPushButton(self.centralwidget)
         btn.setGeometry(600, 600, 60, 40)
         btn.clicked.connect(self.btn_clicked)
+
+        btn_zoom_in = QtWidgets.QPushButton(self.centralwidget)
+        btn_zoom_in.setGeometry(700, 600, 80, 40)
+        btn_zoom_in.clicked.connect(self.btn_zoom_in_clicked)
+        btn_zoom_in.setText("zoom in")
+
+        btn_zoom_out = QtWidgets.QPushButton(self.centralwidget)
+        btn_zoom_out.setGeometry(700, 700, 80, 40)
+        btn_zoom_out.clicked.connect(self.btn_zoom_out_clicked)
+        btn_zoom_out.setText("zoom out")
+
         self.photo = QtWidgets.QLabel(self.centralwidget)
         self.photo.setText("AAA")
         self.photo.setScaledContents(True)
         self.photo.setObjectName("photo")
         self.photo.setGeometry(QtCore.QRect(0, 0, 400, 500))
-
         ds = dcmread('./tmp_database/01372635/5F327951.dcm')
         arr = ds.pixel_array
         arr = np.uint16(arr)
@@ -36,16 +58,27 @@ class Ui_MainWindow(object):
         scene.addPixmap(pixmap)
         QGline = QtWidgets.QGraphicsLineItem(0, 0, self.photo.width() / 2, self.photo.height() / 2)
         QGline.setPen(QtGui.QPen(QtGui.QColor(5, 105, 25)))
-        scene.addItem(QGline)
+        # self.view = GraphicView(self.photo.width(), self.photo.height(), self.photo)
         self.view = QtWidgets.QGraphicsView(scene, self.photo)
-        self.view.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.view.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.view.setGeometry(QtCore.QRect(0, 0, self.photo.width(), self.photo.height()))
+        # self.view.scene.addPixmap(pixmap)
+        # self.view.scene.addItem(QGline)
+        scene.addPixmap(pixmap)
+        scene.addItem(QGline)
+        print(self.view.size())
+        
         self.view.show()
+
+
 
         MainWindow.setCentralWidget(self.centralwidget)
     def btn_clicked(self):
         self.view.rotate(90)
+
+    def btn_zoom_in_clicked(self):
+        self.view.scale(2, 2)
+
+    def btn_zoom_out_clicked(self):
+        self.view.scale(0.5, 0.5)
 
     def mappingWindow(self, arr, WL, WW):
         pixel_max = WL + WW/2
