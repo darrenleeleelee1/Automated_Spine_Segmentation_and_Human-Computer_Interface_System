@@ -490,10 +490,10 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][2], 0, 1, 1, 1)
                 self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][3], 1, 0, 1, 1)
                 self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][4], 1, 1, 1, 1)
-                # self.showPic(self.pic_ith, 1, "01372635","5F3279B8")
-                # self.showPic(self.pic_ith, 2, "01372635","5F327951")
-                # self.showPic(self.pic_ith, 3, "03915480","5F329172_20170623_CR_2_1_1")
-                # self.showPic(self.pic_ith, 4, "03915480","5F329172_20170623_CR_2_1_1")
+                self.showPic(self.pic_ith, 1, "01372635","5F3279B8.dcm")
+                self.showPic(self.pic_ith, 2, "01372635","5F327951.dcm")
+                self.showPic(self.pic_ith, 3, "03915480","5F329172_20170623_CR_2_1_1.dcm")
+                self.showPic(self.pic_ith, 4, "03915480","5F329172_20170623_CR_2_1_1.dcm")
             self.pic_windows[self.pic_ith] = x
 #按鈕連結處--------------------------------------------------------------------------------------------------------
     def pushButtonAngleClicked(self):
