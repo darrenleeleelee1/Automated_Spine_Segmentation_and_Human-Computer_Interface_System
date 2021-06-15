@@ -6,11 +6,43 @@ import numpy as np
 
 
 class QGraphicsLabel(QtWidgets.QGraphicsSimpleTextItem):
-    pass
+    def __init__(self, text):
+        super().__init__(text)
+        self.setPen(QtGui.QPen(QtGui.QColor(230, 230, 10)))
+        # self.setBrush(QtGui.QBrush(QtGui.QColor(60, 30, 30)))
+        self.movable = False
+        self.setVisible(False)
+    
+    def setMovable(self, enable):
+        self.setAcceptHoverEvents(enable)
+        self.movable = enable
+    # mouse hover event
+    def hoverEnterEvent(self, event):
+        app.instance().setOverrideCursor(QtCore.Qt.OpenHandCursor)
+
+    def hoverLeaveEvent(self, event):
+        app.instance().restoreOverrideCursor()
+
+    # mouse click event
+    def mousePressEvent(self, event):
+        pass
+
+    def mouseMoveEvent(self, event):
+        if self.movable:
+            orig_cursor_position = event.lastScenePos()
+            updated_cursor_position = event.scenePos()
+            orig_position = self.scenePos()
+            updated_cursor_x = updated_cursor_position.x() - orig_cursor_position.x() + orig_position.x()
+            updated_cursor_y = updated_cursor_position.y() - orig_cursor_position.y() + orig_position.y()
+            self.setPos(QtCore.QPointF(updated_cursor_x, updated_cursor_y))
+
+    def mouseReleaseEvent(self, event):
+        pass
 class Protractor(QtWidgets.QGraphicsPathItem):
     def __init__(self, qpainterpath):
         super().__init__(qpainterpath)
         self.setPen(QtGui.QPen(QtGui.QColor(5, 105, 25)))
+        self.angle_degree = 0
         self.movable = False
     def setMovable(self, enable):
         self.setAcceptHoverEvents(enable)
@@ -43,6 +75,7 @@ class Ruler(QtWidgets.QGraphicsLineItem):
         super().__init__(x1, y1, x2, y2)
         self.setPen(QtGui.QPen(QtGui.QColor(5, 105, 25)))
         self.movable = False
+        self.length = 0
     def setMovable(self, enable):
         self.setAcceptHoverEvents(enable)
         self.movable = enable
@@ -187,6 +220,8 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             print(PhotoViewer.tool_lock)
         elif PhotoViewer.tool_lock == 'ruler':
             self.ruler = Ruler(self.sp.x(), self.sp.y(), self.sp.x(), self.sp.y())
+            self.ruler_text_label = QGraphicsLabel("")
+            self._scene.addItem(self.ruler_text_label)
             self.ruler.setMovable(False)
             self._scene.addItem(self.ruler)
             self.ruler_start = True
@@ -194,10 +229,13 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             if not self.protractor_start and not self.ruler_start:
                 self.qpainterpath = QtGui.QPainterPath(self.sp)
                 self.protractor = Protractor(self.qpainterpath)
+                self.protractor_text_label = QGraphicsLabel("")
+                self._scene.addItem(self.protractor_text_label)
                 self._scene.addItem(self.protractor)
                 self.protractor_start = True
             elif not self.protractor_start and self.ruler_start:
                 self.protractor.setMovable(True)
+                self.protractor_text_label.setMovable(True)
                 self.protractor_start = False
                 self.ruler_start = False
         if PhotoViewer.tool_lock == 'pen':
@@ -215,6 +253,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         if PhotoViewer.tool_lock == 'ruler':
             self.ruler.setLine(self.sp.x(), self.sp.y(), self.ep.x(), self.ep.y())
             self.ruler.setMovable(True)
+            self.ruler_text_label.setMovable
             self.ruler_start = False
         elif PhotoViewer.tool_lock == 'angle':
             if self.protractor_start:
@@ -235,6 +274,13 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.mp = self.mapToScene(event.pos())
         if PhotoViewer.tool_lock == 'ruler' and self.ruler_start:
             self.ruler.setLine(self.sp.x(), self.sp.y(), self.mp.x(), self.mp.y())
+            self.length = np.sqrt(QtCore.QPointF.dotProduct(self.sp - self.mp, self.sp - self.mp))
+            self.ruler_text_label.setVisible(True)
+            self.ruler_text_label.setText("%.2f pixels" % self.length)
+            if self.sp.x() <= self.mp.x(): 
+                self.ruler_text_label.setPos(self.mp + QtCore.QPointF(10, 0))
+            else:
+                self.ruler_text_label.setPos(self.sp + QtCore.QPointF(10, 0))
         elif PhotoViewer.tool_lock == 'angle':
             if self.protractor_start:
                 self.qpainterpath.clear()
@@ -247,6 +293,15 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 self.qpainterpath.lineTo(self.ep)
                 self.qpainterpath.lineTo(self.mp)
                 self.protractor.setPath(self.qpainterpath)
+                self.protractor_text_label.setVisible(True)
+                spToep = np.sqrt(QtCore.QPointF.dotProduct(self.sp - self.ep, self.sp - self.ep))
+                epTomp = np.sqrt(QtCore.QPointF.dotProduct(self.mp - self.ep, self.mp - self.ep))
+                self.protractor.angle_degree = np.arccos(QtCore.QPointF.dotProduct(self.ep - self.sp, self.ep - self.mp) / spToep / epTomp) * 180 / np.pi
+                self.protractor_text_label.setText("%.1f°" % self.protractor.angle_degree)
+                if self.mp.x() > self.ep.x() and self.mp.y() < self.ep.y(): 
+                    self.protractor_text_label.setPos(self.ep + QtCore.QPointF(5, 10))
+                else:
+                    self.protractor_text_label.setPos(self.ep + QtCore.QPointF(5, -25))
         if PhotoViewer.tool_lock == 'pen' and self.pen_start:
             self.pen_path.lineTo(self.mp)
             self.pen.setPath(self.pen_path)
