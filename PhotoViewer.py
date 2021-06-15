@@ -1,6 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from pydicom import dcmread
 import numpy as np
+
 class Ruler(QtWidgets.QGraphicsLineItem):
     def __init__(self, x1, y1, x2, y2):
         super().__init__(x1, y1, x2, y2)
@@ -28,8 +29,8 @@ class Ruler(QtWidgets.QGraphicsLineItem):
         updated_cursor_y = updated_cursor_position.y() - orig_cursor_position.y() + orig_position.y()
         self.setPos(QtCore.QPointF(updated_cursor_x, updated_cursor_y))
 
-    def mouseReleaseEvent(self, event):
-        print('x: {0}, y: {1}'.format(self.pos().x(), self.pos().y()))
+    # def mouseReleaseEvent(self, event):
+    #     print('x: {0}, y: {1}'.format(self.pos().x(), self.pos().y()))
 
 class PhotoViewer(QtWidgets.QGraphicsView):
 
@@ -71,7 +72,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self._zoom = 0
         if pixmap and not pixmap.isNull():
             self._empty = False
-            self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
+            self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
             self._photo.setPixmap(pixmap)
         else:
             self._empty = True
@@ -94,18 +95,21 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             else:
                 self._zoom = 0
 
-    def toggleDragMode(self):
-        if self.dragMode() == QtWidgets.QGraphicsView.ScrollHandDrag:
-            self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
-        else:
+    def toggleDragMode(self, lock):
+        if lock == 'move':
             self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
+        else:
+            self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
+        # if self.dragMode() == QtWidgets.QGraphicsView.ScrollHandDrag:
+        #     self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
+        # else:
+        #     self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
 
     def mousePressEvent(self, event):
         if self.tool_lock == 'move':
             print(self.tool_lock)
-            
         if self.tool_lock == 'ruler':
-            print(event.pos().x(), event.pos().y())
+            #print(event.pos().x(), event.pos().y())
             self.sp = self.mapToScene(event.pos().x(), event.pos().y())
             self.ruler = Ruler(self.sp.x(), self.sp.y(), self.sp.x(), self.sp.y())
             self._scene.addItem(self.ruler)
@@ -136,6 +140,7 @@ class Window(QtWidgets.QWidget):
         self.windows_menu.addAction('ruler', lambda: self.setToolLock('ruler'))
         self.windows_menu.addAction('angle', lambda: self.setToolLock('angle'))
         self.windows_menu.addAction('move', lambda: self.setToolLock('move'))
+        self.windows_menu.addAction('pen', lambda: self.setToolLock('pen'))
         # Arrange layout
         VBlayout = QtWidgets.QVBoxLayout(self)
         VBlayout.addWidget(self.viewer)
@@ -144,10 +149,11 @@ class Window(QtWidgets.QWidget):
         HBlayout.addWidget(self.btnLoad)
         HBlayout.addWidget(self.windows_menu)
         VBlayout.addLayout(HBlayout)
+
     def setToolLock(self, lock):
         self.viewer.tool_lock = lock
-        if self.viewer.tool_lock == 'move':
-            self.viewer.toggleDragMode()
+        self.viewer.toggleDragMode(self.viewer.tool_lock)
+
     def loadImage(self):
         ds = dcmread('./tmp_database/01372635/5F327951.dcm')
         arr = ds.pixel_array
