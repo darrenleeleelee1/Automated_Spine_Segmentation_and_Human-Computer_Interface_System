@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>802</width>
+    <width>902</width>
     <height>698</height>
    </rect>
   </property>
@@ -511,11 +511,6 @@ background-position: center left;</string>
             <property name="styleSheet">
              <string notr="true">color : #fff;</string>
             </property>
-            <item>
-             <property name="text">
-              <string>1</string>
-             </property>
-            </item>
            </widget>
           </item>
          </layout>
@@ -931,7 +926,7 @@ margin:50px;</string>
                   <number>0</number>
                  </property>
                  <item>
-                  <widget class="QFrame" name="thumbnail_frame">
+                  <widget class="QFrame" name="thumbnail_frame_1">
                    <property name="minimumSize">
                     <size>
                      <width>250</width>
@@ -953,21 +948,18 @@ margin:50px;</string>
                    <property name="frameShadow">
                     <enum>QFrame::Raised</enum>
                    </property>
-                   <layout class="QVBoxLayout" name="verticalLayout_8">
-                    <property name="spacing">
+                   <layout class="QHBoxLayout" name="horizontalLayout_16">
+                    <property name="leftMargin">
                      <number>0</number>
                     </property>
-                    <property name="leftMargin">
-                     <number>6</number>
-                    </property>
                     <property name="topMargin">
-                     <number>6</number>
+                     <number>0</number>
                     </property>
                     <property name="rightMargin">
-                     <number>6</number>
+                     <number>0</number>
                     </property>
                     <property name="bottomMargin">
-                     <number>6</number>
+                     <number>0</number>
                     </property>
                     <item>
                      <widget class="QListWidget" name="thumbnail_list_1">
@@ -983,7 +975,7 @@ margin:50px;</string>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QFrame" name="pic_frame">
+                  <widget class="QFrame" name="pic_frame_1">
                    <property name="minimumSize">
                     <size>
                      <width>600</width>
@@ -996,21 +988,9 @@ margin:50px;</string>
                    <property name="frameShadow">
                     <enum>QFrame::Raised</enum>
                    </property>
-                   <layout class="QGridLayout" name="gridLayout">
+                   <layout class="QGridLayout" name="gridLayout_1">
                     <item row="0" column="0">
                      <widget class="QLabel" name="pic_1_1">
-                      <property name="minimumSize">
-                       <size>
-                        <width>512</width>
-                        <height>512</height>
-                       </size>
-                      </property>
-                      <property name="maximumSize">
-                       <size>
-                        <width>512</width>
-                        <height>512</height>
-                       </size>
-                      </property>
                       <property name="text">
                        <string>TextLabel</string>
                       </property>
@@ -1018,18 +998,6 @@ margin:50px;</string>
                     </item>
                     <item row="0" column="1">
                      <widget class="QLabel" name="pic_1_2">
-                      <property name="minimumSize">
-                       <size>
-                        <width>512</width>
-                        <height>512</height>
-                       </size>
-                      </property>
-                      <property name="maximumSize">
-                       <size>
-                        <width>512</width>
-                        <height>512</height>
-                       </size>
-                      </property>
                       <property name="cursor">
                        <cursorShape>ArrowCursor</cursorShape>
                       </property>
@@ -1040,18 +1008,6 @@ margin:50px;</string>
                     </item>
                     <item row="1" column="0">
                      <widget class="QLabel" name="pic_1_3">
-                      <property name="minimumSize">
-                       <size>
-                        <width>512</width>
-                        <height>512</height>
-                       </size>
-                      </property>
-                      <property name="maximumSize">
-                       <size>
-                        <width>512</width>
-                        <height>512</height>
-                       </size>
-                      </property>
                       <property name="cursor">
                        <cursorShape>ArrowCursor</cursorShape>
                       </property>
@@ -1062,18 +1018,6 @@ margin:50px;</string>
                     </item>
                     <item row="1" column="1">
                      <widget class="QLabel" name="pic_1_4">
-                      <property name="minimumSize">
-                       <size>
-                        <width>512</width>
-                        <height>512</height>
-                       </size>
-                      </property>
-                      <property name="maximumSize">
-                       <size>
-                        <width>512</width>
-                        <height>512</height>
-                       </size>
-                      </property>
                       <property name="text">
                        <string>TextLabel</string>
                       </property>
@@ -1164,7 +1108,10 @@ margin:50px;</string>
                    <property name="frameShadow">
                     <enum>QFrame::Raised</enum>
                    </property>
-                   <layout class="QGridLayout" name="gridLayout_3">
+                   <layout class="QGridLayout" name="gridLayout_2">
+                    <property name="rightMargin">
+                     <number>6</number>
+                    </property>
                     <item row="1" column="1">
                      <widget class="QLabel" name="pic_2_4">
                       <property name="text">
@@ -1278,7 +1225,7 @@ margin:50px;</string>
                    <property name="frameShadow">
                     <enum>QFrame::Raised</enum>
                    </property>
-                   <layout class="QGridLayout" name="gridLayout_4">
+                   <layout class="QGridLayout" name="gridLayout_3">
                     <item row="1" column="1">
                      <widget class="QLabel" name="pic_3_4">
                       <property name="text">
@@ -1402,7 +1349,7 @@ margin:50px;</string>
                    <property name="frameShadow">
                     <enum>QFrame::Raised</enum>
                    </property>
-                   <layout class="QGridLayout" name="gridLayout_5">
+                   <layout class="QGridLayout" name="gridLayout_4">
                     <item row="1" column="1">
                      <widget class="QLabel" name="pic_4_4">
                       <property name="text">
@@ -1519,7 +1466,7 @@ margin:50px;</string>
                    <property name="frameShadow">
                     <enum>QFrame::Raised</enum>
                    </property>
-                   <layout class="QGridLayout" name="gridLayout_6">
+                   <layout class="QGridLayout" name="gridLayout_5">
                     <item row="1" column="1">
                      <widget class="QLabel" name="pic_5_4">
                       <property name="enabled">
@@ -1590,7 +1537,7 @@ QPushButton{
                <property name="lineWidth">
                 <number>1</number>
                </property>
-               <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="0,0,0,0,1,0,0,0,0,0,0,0,0,0,0">
+               <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0">
                 <property name="spacing">
                  <number>0</number>
                 </property>
@@ -2083,6 +2030,32 @@ QPushButton{
                   <property name="icon">
                    <iconset resource="res/icons.qrc">
                     <normaloff>:/icons/icons/save.png</normaloff>:/icons/icons/save.png</iconset>
+                  </property>
+                  <property name="iconSize">
+                   <size>
+                    <width>30</width>
+                    <height>30</height>
+                   </size>
+                  </property>
+                  <property name="flat">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="pushButton_windows">
+                  <property name="minimumSize">
+                   <size>
+                    <width>50</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="res/icons.qrc">
+                    <normaloff>:/icons/grid.png</normaloff>:/icons/grid.png</iconset>
                   </property>
                   <property name="iconSize">
                    <size>
