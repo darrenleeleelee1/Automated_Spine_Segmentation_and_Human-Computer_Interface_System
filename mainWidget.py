@@ -16,6 +16,7 @@ import numpy as np
 from PIL import ImageQt
 import shutil
 import copy
+from PhotoViewer import QGraphicsLabel, Protractor, Ruler, Pen, PhotoViewer
 WINDOW_SIZE = 0
 
 class initialWidget(QtWidgets.QMainWindow):
@@ -490,10 +491,10 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][2], 0, 1, 1, 1)
                 self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][3], 1, 0, 1, 1)
                 self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][4], 1, 1, 1, 1)
-                self.showPic(self.pic_ith, 1, "01372635","5F3279B8.dcm")
-                self.showPic(self.pic_ith, 2, "01372635","5F327951.dcm")
-                self.showPic(self.pic_ith, 3, "03915480","5F329172_20170623_CR_2_1_1.dcm")
-                self.showPic(self.pic_ith, 4, "03915480","5F329172_20170623_CR_2_1_1.dcm")
+                # self.showPic(self.pic_ith, 1, "01372635","5F3279B8.dcm")
+                # self.showPic(self.pic_ith, 2, "01372635","5F327951.dcm")
+                # self.showPic(self.pic_ith, 3, "03915480","5F329172_20170623_CR_2_1_1.dcm")
+                # self.showPic(self.pic_ith, 4, "03915480","5F329172_20170623_CR_2_1_1.dcm")
             self.pic_windows[self.pic_ith] = x
 #按鈕連結處--------------------------------------------------------------------------------------------------------
     def pushButtonAngleClicked(self):
@@ -930,11 +931,10 @@ class initialWidget(QtWidgets.QMainWindow):
         # pixmap_resized = pixmap.scaled(self.pic_label_width * self.size, self.pic_label_height * self.size,QtCore.Qt.KeepAspectRatio)
         # self.pic[i][j].setPixmap(pixmap)
         # self.pic[i][j].setGeometry(QtCore.QRect(100, 100, 400, 500))
-
-        self.pic[i][j].mousePressEvent = lambda pressed: self.picMousePressed(pressed, i, j) # 讓每個pic的mousePressEvent可以傳出告訴自己是誰
-        self.pic[i][j].mouseReleaseEvent = lambda released: self.picMouseReleased(released, i, j)
-        self.pic[i][j].mouseMoveEvent = lambda moved: self.picMouseMove(moved, i, j)
-        self.pic[i][j].paintEvent = lambda painted: self.picPaint(painted, i, j)
+        # self.pic[i][j].mousePressEvent = lambda pressed: self.picMousePressed(pressed, i, j) # 讓每個pic的mousePressEvent可以傳出告訴自己是誰
+        # self.pic[i][j].mouseReleaseEvent = lambda released: self.picMouseReleased(released, i, j)
+        # self.pic[i][j].mouseMoveEvent = lambda moved: self.picMouseMove(moved, i, j)
+        # self.pic[i][j].paintEvent = lambda painted: self.picPaint(painted, i, j)
 
     def linkPage2Array(self, _MAXIMUM_PAGE = 5, _MAXIMUM_PIC = 4):
         # 把QtDesigner的一些重複的Widget用array對應
