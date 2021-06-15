@@ -38,6 +38,7 @@ class QGraphicsLabel(QtWidgets.QGraphicsSimpleTextItem):
 
     def mouseReleaseEvent(self, event):
         pass
+
 class Protractor(QtWidgets.QGraphicsPathItem):
     def __init__(self, qpainterpath):
         super().__init__(qpainterpath)
