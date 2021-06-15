@@ -1,3 +1,4 @@
+from os import environ
 from PyQt5 import QtCore, QtGui, QtWidgets
 from pydicom import dcmread
 import numpy as np
@@ -6,8 +7,10 @@ class Ruler(QtWidgets.QGraphicsLineItem):
     def __init__(self, x1, y1, x2, y2):
         super().__init__(x1, y1, x2, y2)
         self.setPen(QtGui.QPen(QtGui.QColor(5, 105, 25)))
-        self.setAcceptHoverEvents(True)
-
+        self.movable = False
+    def setMovable(self, enable):
+        self.setAcceptHoverEvents(enable)
+        self.movable = enable
     # mouse hover event
     def hoverEnterEvent(self, event):
         app.instance().setOverrideCursor(QtCore.Qt.OpenHandCursor)
@@ -20,27 +23,26 @@ class Ruler(QtWidgets.QGraphicsLineItem):
         pass
 
     def mouseMoveEvent(self, event):
-        orig_cursor_position = event.lastScenePos()
-        updated_cursor_position = event.scenePos()
-
-        orig_position = self.scenePos()
-
-        updated_cursor_x = updated_cursor_position.x() - orig_cursor_position.x() + orig_position.x()
-        updated_cursor_y = updated_cursor_position.y() - orig_cursor_position.y() + orig_position.y()
-        self.setPos(QtCore.QPointF(updated_cursor_x, updated_cursor_y))
+        print(self.movable)
+        if self.movable:
+            orig_cursor_position = event.lastScenePos()
+            updated_cursor_position = event.scenePos()
+            orig_position = self.scenePos()
+            updated_cursor_x = updated_cursor_position.x() - orig_cursor_position.x() + orig_position.x()
+            updated_cursor_y = updated_cursor_position.y() - orig_cursor_position.y() + orig_position.y()
+            self.setPos(QtCore.QPointF(updated_cursor_x, updated_cursor_y))
 
     # def mouseReleaseEvent(self, event):
     #     print('x: {0}, y: {1}'.format(self.pos().x(), self.pos().y()))
 
 class PhotoViewer(QtWidgets.QGraphicsView):
-
+    tool_lock = 'move'
     def __init__(self, parent):
         super(PhotoViewer, self).__init__(parent)
         self._zoom = 0
         self._empty = True
         self._scene = QtWidgets.QGraphicsScene(self)
         self._photo = QtWidgets.QGraphicsPixmapItem()
-        self.tool_lock = 'move'
         self._scene.addItem(self._photo)
         self.setScene(self._scene)
         self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
@@ -106,23 +108,25 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         #     self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
 
     def mousePressEvent(self, event):
-        if self.tool_lock == 'move':
-            print(self.tool_lock)
-        if self.tool_lock == 'ruler':
-            #print(event.pos().x(), event.pos().y())
+        if PhotoViewer.tool_lock == 'move':
+            print(PhotoViewer.tool_lock)
+        if PhotoViewer.tool_lock == 'ruler':
+            print(event.pos().x(), event.pos().y())
             self.sp = self.mapToScene(event.pos().x(), event.pos().y())
             self.ruler = Ruler(self.sp.x(), self.sp.y(), self.sp.x(), self.sp.y())
+            self.ruler.setMovable(False)
             self._scene.addItem(self.ruler)
             self.ruler_start = True
         super(PhotoViewer, self).mousePressEvent(event)
     def mouseReleaseEvent(self, event):
-        if self.tool_lock == 'ruler':
+        if PhotoViewer.tool_lock == 'ruler':
             self.ep = self.mapToScene(event.pos())
             self.ruler.setLine(self.sp.x(), self.sp.y(), self.ep.x(), self.ep.y())
+            self.ruler.setMovable(True)
             self.ruler_start = False
         super(PhotoViewer, self).mouseReleaseEvent(event)
     def mouseMoveEvent(self, event):
-        if self.tool_lock == 'ruler' and self.ruler_start:
+        if PhotoViewer.tool_lock == 'ruler' and self.ruler_start:
             self.mp = self.mapToScene(event.pos())
             self.ruler.setLine(self.sp.x(), self.sp.y(), self.mp.x(), self.mp.y())
         super(PhotoViewer, self).mouseMoveEvent(event)
@@ -151,8 +155,9 @@ class Window(QtWidgets.QWidget):
         VBlayout.addLayout(HBlayout)
 
     def setToolLock(self, lock):
-        self.viewer.tool_lock = lock
-        self.viewer.toggleDragMode(self.viewer.tool_lock)
+        PhotoViewer.tool_lock = lock
+        if PhotoViewer.tool_lock == 'move':
+            self.viewer.toggleDragMode()
 
     def loadImage(self):
         ds = dcmread('./tmp_database/01372635/5F327951.dcm')
