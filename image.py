@@ -1,6 +1,6 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import (QApplication, QGraphicsItem, QGraphicsScene,
-        QGraphicsView, QGraphicsWidget)
+                             QGraphicsView, QGraphicsWidget)
 from PyQt5.QtCore import Qt, QPointF
 import requests
 from pydicom import dcmread
@@ -8,6 +8,7 @@ from pydicom.filebase import DicomBytesIO
 import numpy as np
 import matplotlib.pyplot as plt
 
+<<<<<<< HEAD
 class Protractor(QtWidgets.QGraphicsPathItem):
     def __init__(self, qpainterpath):
         super().__init__(qpainterpath)
@@ -39,6 +40,12 @@ class Protractor(QtWidgets.QGraphicsPathItem):
 
     def mouseReleaseEvent(self, event):
         pass  
+=======
+
+class Ruler(QtWidgets.QGraphicsItem):
+    pass
+>>>>>>> cdb81cc1b08a628dd935af344bd9ed1708c76e06
+
 
 class GraphicView(QtWidgets.QGraphicsView):
     def __init__(self, sence_width, sence_height, parent):
@@ -46,8 +53,9 @@ class GraphicView(QtWidgets.QGraphicsView):
         super().setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         super().setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.scene = QtWidgets.QGraphicsScene()
-        self.setScene(self.scene)       
+        self.setScene(self.scene)
         self.setSceneRect(0, 0, sence_width, sence_height)
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -80,9 +88,10 @@ class Ui_MainWindow(object):
         WL = ds[0x0028, 0x1050].value
         WW = ds[0x0028, 0x1051].value
         arr = self.mappingWindow(arr, WL, WW)
-        qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1]*2, QtGui.QImage.Format_Grayscale16)
+        qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1] * 2, QtGui.QImage.Format_Grayscale16)
         pixmap = QtGui.QPixmap.fromImage(qimage)
-        pixmap = pixmap.scaled(self.photo.width(), self.photo.height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+        pixmap = pixmap.scaled(self.photo.width(), self.photo.height(), QtCore.Qt.KeepAspectRatio,
+                               QtCore.Qt.SmoothTransformation)
         # self.photo.setPixmap(pixmap)
         scene = QtWidgets.QGraphicsScene()
         scene.addPixmap(pixmap)
@@ -105,12 +114,11 @@ class Ui_MainWindow(object):
         scene.addPixmap(pixmap)
         scene.addItem(qpoly)
         print(self.view.size())
-        
+
         self.view.show()
 
-
-
         MainWindow.setCentralWidget(self.centralwidget)
+
     def btn_clicked(self):
         self.view.rotate(90)
 
@@ -121,11 +129,12 @@ class Ui_MainWindow(object):
         self.view.scale(0.5, 0.5)
 
     def mappingWindow(self, arr, WL, WW):
-        pixel_max = WL + WW/2
-        pixel_min = WL - WW/2
+        pixel_max = WL + WW / 2
+        pixel_min = WL - WW / 2
         arr = np.clip(arr, pixel_min, pixel_max)
         arr = (arr - pixel_min) / (pixel_max - pixel_min) * 65535
         return np.copy(np.uint16(arr))
+
 
 if __name__ == "__main__":
     import sys

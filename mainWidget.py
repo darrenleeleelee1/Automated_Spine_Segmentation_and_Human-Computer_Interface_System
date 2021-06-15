@@ -270,12 +270,10 @@ class initialWidget(QtWidgets.QMainWindow):
         self.pic_label_width = self.pic[_i][_j].width()
         self.pic_label_height = self.pic[_i][_j].height()
         print(self.pic_label_width, self.pic_label_height)
+
         q.translate(self.pic_label_width / 2, self.pic_label_height / 2)  # 把旋轉中心設成（pic_label_width/2, pic_label_height/2）
         q.rotate(self.rotate_angle[_i][_j])
         q.translate(-self.pic_label_width / 2, -self.pic_label_height / 2)
-
-        # img_width = self.pic_label_width * self.size[_i][_j]
-        # img_height = self.pic_label_height * self.size[_i][_j]
 
 
         self.tmmx[_i][_j], self.tmmy[_i][_j] = self.transitiveWithBiasMatrix(self.move_moving_x[_i][_j], self.move_moving_y[_i][_j], self.rotate_angle[_i][_j])
@@ -286,8 +284,7 @@ class initialWidget(QtWidgets.QMainWindow):
         pixmap = pixmap.scaled(self.pic[_i][_j].width(), self.pic[_i][_j].height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
 
         #self.transparent_pix[_i][_j] = QtGui.QPixmap(pixmap.width(), pixmap.height())
-
-
+        
         img_width = pixmap.width() * self.size[_i][_j]
         img_height = pixmap.height() * self.size[_i][_j]
 
@@ -302,6 +299,9 @@ class initialWidget(QtWidgets.QMainWindow):
         # 置中
 
         p = QtGui.QPainter(self.transparent_pix[_i][_j])
+
+
+
 
         if(self.tool_lock == 'mouse'):
             pass
@@ -330,8 +330,8 @@ class initialWidget(QtWidgets.QMainWindow):
             tpsx, tpsy = self.transitiveWithBiasMatrix(self.pen_start_x[_i][_j], self.pen_start_y[_i][_j], self.rotate_angle[_i][_j])
             tpex, tpey = self.transitiveWithBiasMatrix(self.pen_end_x[_i][_j], self.pen_end_y[_i][_j], self.rotate_angle[_i][_j])
 
-            p.drawLine((tpex - self.x[_i][_j])/self.size[_i][_j], (tpey - self.y[_i][_j])/self.size[_i][_j],
-                       (tpsx - self.x[_i][_j])/self.size[_i][_j], (tpsy - self.y[_i][_j])/self.size[_i][_j])  #移動畫布時，筆會跟著跑掉，(-x, -y)調回來
+            p.drawLine((tpsx - self.x[_i][_j])/self.size[_i][_j], (tpsy - self.y[_i][_j])/self.size[_i][_j],
+                        (tpex - self.x[_i][_j])/self.size[_i][_j], (tpey - self.y[_i][_j])/self.size[_i][_j])  #移動畫布時，筆會跟著跑掉，(-x, -y)調回來
 
         elif(self.tool_lock == 'ruler'):
             if(self.pic_clicked[_i][_j]):
@@ -345,7 +345,7 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.tex[_i][_j], self.tey[_i][_j] = self.transitiveWithBiasMatrix(self.ruler_end_x[_i][_j], self.ruler_end_y[_i][_j], self.rotate_angle[_i][_j])
                 q.drawLine(self.tex[_i][_j], self.tey[_i][_j], self.tsx[_i][_j], self.tsy[_i][_j])
 
-        q.drawPixmap(self.x[_i][_j], self.y[_i][_j], img_width, img_height, self.transparent_pix[_i][_j])   #讓畫布跟著照片移動
+        q.drawPixmap(self.x[_i][_j], self.y[_i][_j], self.pic_label_width * self.size[_i][_j], self.pic_label_height * self.size[_i][_j], self.transparent_pix[_i][_j])   #讓畫布跟著照片移動
         # show every angle
 
         for w in self.angle_coordinate_list[_i][_j]:
@@ -397,7 +397,6 @@ class initialWidget(QtWidgets.QMainWindow):
             if ts_x > te_x:
                 t_label = QtCore.QPointF((ts_x + ruler_biasx+ 10),
                                          (ts_y + ruler_biasy))
-                print("size", self.size[_i][_j])
             else:
                 t_label = QtCore.QPointF((te_x + ruler_biasx+ 10),
                                          ((te_y + ruler_biasy)))
@@ -413,7 +412,6 @@ class initialWidget(QtWidgets.QMainWindow):
             # else:
             #     t_label = QtCore.QPointF((te_x + ruler_biasx + 10)*self.size[_i][_j],
             #                              ((te_y + ruler_biasy)*self.size[_i][_j]))
-            print("self.magnifier_pad_x[_i][_j] = ", self.magnifier_pad_x[_i][_j])
             q.save() # 要用來show出label，所以reset所有的transform
             q.resetTransform()
             f = q.font()
@@ -1052,16 +1050,16 @@ class initialWidget(QtWidgets.QMainWindow):
         self.transparent_pix = [ [0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
         for i in range(1, self.MAXIMUM_PAGE + 1):
             for j in range(1, (self.MAXIMUM_PIC + 1)):
-                self.transparent_pix[i][j] = QtGui.QPixmap(553, 345) # 有改
+                self.transparent_pix[i][j] = QtGui.QPixmap(1114 ,701) # 有改
                 self.transparent_pix[i][j].fill(Qt.transparent)
 
 
         # 暫時試試放照片
 
         self.showPic(1, 1, "01372635","5F3279B8.dcm")
-        # self.showPic(1, 2, "01372635","5F327951")
-        # self.showPic(1, 3, "03915480","5F329172_20170623_CR_2_1_1")
-        # self.showPic(1, 4, "03915480","5F329172_20170623_CR_2_1_1")
+        # self.showPic(1, 2, "01372635","5F327951.dcm")
+        # self.showPic(1, 3, "03915480","5F329172_20170623_CR_2_1_1.dcm")
+        # self.showPic(1, 4, "03915480","5F329172_20170623_CR_2_1_1.dcm")
 
 
 

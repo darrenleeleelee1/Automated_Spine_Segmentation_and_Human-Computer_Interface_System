@@ -1,9 +1,10 @@
 from os import environ
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtGui import QPainterPath
 from pydicom import dcmread
 import numpy as np
 class QGraphicsLabel(QtWidgets.QGraphicsSimpleTextItem):
-    
+    pass
 class Protractor(QtWidgets.QGraphicsPathItem):
     def __init__(self, qpainterpath):
         super().__init__(qpainterpath)
@@ -64,7 +65,39 @@ class Ruler(QtWidgets.QGraphicsLineItem):
 
     def mouseReleaseEvent(self, event):
         pass
+    
 
+class Pen(QtWidgets.QGraphicsPathItem):
+    def __init__(self, x1):
+        super().__init__(x1)
+        self.setPen(QtGui.QPen(QtGui.QColor(250, 25, 0)))
+        self.movable = False
+    def setMovable(self, enable):
+        self.setAcceptHoverEvents(enable)
+        self.movable = enable
+    # mouse hover event
+    def hoverEnterEvent(self, event):
+        app.instance().setOverrideCursor(QtCore.Qt.OpenHandCursor)
+
+    def hoverLeaveEvent(self, event):
+        app.instance().restoreOverrideCursor()
+
+    # mouse click event
+    def mousePressEvent(self, event):
+        pass
+
+    def mouseMoveEvent(self, event):
+        if self.movable:
+            orig_cursor_position = event.lastScenePos()
+            updated_cursor_position = event.scenePos()
+            orig_position = self.scenePos()
+            updated_cursor_x = updated_cursor_position.x() - orig_cursor_position.x() + orig_position.x()
+            updated_cursor_y = updated_cursor_position.y() - orig_cursor_position.y() + orig_position.y()
+            self.setPos(QtCore.QPointF(updated_cursor_x, updated_cursor_y))
+
+    def mouseReleaseEvent(self, event):
+        pass
+    
 class PhotoViewer(QtWidgets.QGraphicsView):
     tool_lock = 'move'
     def __init__(self, parent):
@@ -83,6 +116,9 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.ruler_start = False
         self.protractor_start = False
+        self.pen_start = False
+
+
     def hasPhoto(self):
         return not self._empty
 
@@ -104,7 +140,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self._zoom = 0
         if pixmap and not pixmap.isNull():
             self._empty = False
-            self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
+            self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
             self._photo.setPixmap(pixmap)
         else:
             self._empty = True
@@ -134,7 +170,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
 
     def mousePressEvent(self, event):
-        self.sp = self.mapToScene(event.pos().x(), event.pos().y())
+        self.sp = self.mapToScene(event.pos())
         if PhotoViewer.tool_lock == 'move':
             print(PhotoViewer.tool_lock)
         elif PhotoViewer.tool_lock == 'ruler':
@@ -152,7 +188,16 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 self.protractor.setMovable(True)
                 self.protractor_start = False
                 self.ruler_start = False
+        if PhotoViewer.tool_lock == 'pen':
+            self.pen_path = QPainterPath()
+            self.pen_path.moveTo(self.sp)
+            self.pen = Pen(self.pen_path)
+            self.pen.setMovable(False)
+            self.pen.setPath(self.pen_path)
+            self._scene.addItem(self.pen)
+            self.pen_start = True
         super(PhotoViewer, self).mousePressEvent(event)
+
     def mouseReleaseEvent(self, event):
         self.ep = self.mapToScene(event.pos())
         if PhotoViewer.tool_lock == 'ruler':
@@ -167,9 +212,13 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 self.protractor.setPath(self.qpainterpath)
                 self.protractor_start = False
                 self.ruler_start = True
-            
-
+        if PhotoViewer.tool_lock == 'pen':
+            self.pen_path.lineTo(self.ep)
+            self.pen.setPath(self.pen_path)
+            self.pen.setMovable(True)
+            self.pen_start = False
         super(PhotoViewer, self).mouseReleaseEvent(event)
+
     def mouseMoveEvent(self, event):
         self.mp = self.mapToScene(event.pos())
         if PhotoViewer.tool_lock == 'ruler' and self.ruler_start:
@@ -186,6 +235,9 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 self.qpainterpath.lineTo(self.ep)
                 self.qpainterpath.lineTo(self.mp)
                 self.protractor.setPath(self.qpainterpath)
+        if PhotoViewer.tool_lock == 'pen' and self.pen_start:
+            self.pen_path.lineTo(self.mp)
+            self.pen.setPath(self.pen_path)
         super(PhotoViewer, self).mouseMoveEvent(event)
         
 class Window(QtWidgets.QWidget):
@@ -202,6 +254,7 @@ class Window(QtWidgets.QWidget):
         self.windows_menu.addAction('angle', lambda: self.setToolLock('angle'))
         self.windows_menu.addAction('pen', lambda: self.setToolLock('pen'))
         self.windows_menu.addAction('move', lambda: self.setToolLock('move'))
+        self.windows_menu.addAction('mouse', lambda: self.setToolLock('mouse'))
         # Arrange layout
         VBlayout = QtWidgets.QVBoxLayout(self)
         VBlayout.addWidget(self.viewer)
@@ -210,10 +263,12 @@ class Window(QtWidgets.QWidget):
         HBlayout.addWidget(self.btnLoad)
         HBlayout.addWidget(self.windows_menu)
         VBlayout.addLayout(HBlayout)
+
     def setToolLock(self, lock):
         PhotoViewer.tool_lock = lock
         if PhotoViewer.tool_lock == 'move':
             self.viewer.toggleDragMode()
+
     def loadImage(self):
         ds = dcmread('./tmp_database/01372635/5F327951.dcm')
         arr = ds.pixel_array
