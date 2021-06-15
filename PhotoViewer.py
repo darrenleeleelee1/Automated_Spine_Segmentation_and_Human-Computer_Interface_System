@@ -9,6 +9,7 @@ class QGraphicsLabel(QtWidgets.QGraphicsSimpleTextItem):
     def __init__(self, text):
         super().__init__(text)
         self.setPen(QtGui.QPen(QtGui.QColor(230, 230, 10)))
+        self.setFont(QtGui.QFont('Times', 8))
         # self.setBrush(QtGui.QBrush(QtGui.QColor(60, 30, 30)))
         self.movable = False
         self.setVisible(False)
@@ -78,7 +79,7 @@ class Ruler(QtWidgets.QGraphicsLineItem):
         self.movable = False
         self.length = 0
     def setMovable(self, enable):
-        self.setAcceptHoverEvents(enable)
+        #self.setAcceptHoverEvents(enable)
         self.movable = enable
     # mouse hover event
     def hoverEnterEvent(self, event):
