@@ -2,6 +2,38 @@ from os import environ
 from PyQt5 import QtCore, QtGui, QtWidgets
 from pydicom import dcmread
 import numpy as np
+class QGraphicsLabel(QtWidgets.QGraphicsSimpleTextItem):
+    
+class Protractor(QtWidgets.QGraphicsPathItem):
+    def __init__(self, qpainterpath):
+        super().__init__(qpainterpath)
+        self.setPen(QtGui.QPen(QtGui.QColor(5, 105, 25)))
+        self.movable = False
+    def setMovable(self, enable):
+        self.setAcceptHoverEvents(enable)
+        self.movable = enable
+    # mouse hover event
+    def hoverEnterEvent(self, event):
+        app.instance().setOverrideCursor(QtCore.Qt.OpenHandCursor)
+
+    def hoverLeaveEvent(self, event):
+        app.instance().restoreOverrideCursor()
+
+    # mouse click event
+    def mousePressEvent(self, event):
+        pass
+
+    def mouseMoveEvent(self, event):
+        if self.movable:
+            orig_cursor_position = event.lastScenePos()
+            updated_cursor_position = event.scenePos()
+            orig_position = self.scenePos()
+            updated_cursor_x = updated_cursor_position.x() - orig_cursor_position.x() + orig_position.x()
+            updated_cursor_y = updated_cursor_position.y() - orig_cursor_position.y() + orig_position.y()
+            self.setPos(QtCore.QPointF(updated_cursor_x, updated_cursor_y))
+
+    def mouseReleaseEvent(self, event):
+        pass  
 class Ruler(QtWidgets.QGraphicsLineItem):
     def __init__(self, x1, y1, x2, y2):
         super().__init__(x1, y1, x2, y2)
@@ -22,7 +54,6 @@ class Ruler(QtWidgets.QGraphicsLineItem):
         pass
 
     def mouseMoveEvent(self, event):
-        print(self.movable)
         if self.movable:
             orig_cursor_position = event.lastScenePos()
             updated_cursor_position = event.scenePos()
@@ -32,7 +63,7 @@ class Ruler(QtWidgets.QGraphicsLineItem):
             self.setPos(QtCore.QPointF(updated_cursor_x, updated_cursor_y))
 
     def mouseReleaseEvent(self, event):
-        print('x: {0}, y: {1}'.format(self.pos().x(), self.pos().y()))
+        pass
 
 class PhotoViewer(QtWidgets.QGraphicsView):
     tool_lock = 'move'
@@ -51,7 +82,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(30, 30, 30)))
         self.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.ruler_start = False
-
+        self.protractor_start = False
     def hasPhoto(self):
         return not self._empty
 
@@ -103,27 +134,58 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
 
     def mousePressEvent(self, event):
+        self.sp = self.mapToScene(event.pos().x(), event.pos().y())
         if PhotoViewer.tool_lock == 'move':
             print(PhotoViewer.tool_lock)
-        if PhotoViewer.tool_lock == 'ruler':
-            print(event.pos().x(), event.pos().y())
-            self.sp = self.mapToScene(event.pos().x(), event.pos().y())
+        elif PhotoViewer.tool_lock == 'ruler':
             self.ruler = Ruler(self.sp.x(), self.sp.y(), self.sp.x(), self.sp.y())
             self.ruler.setMovable(False)
             self._scene.addItem(self.ruler)
             self.ruler_start = True
+        elif PhotoViewer.tool_lock == 'angle':
+            if not self.protractor_start and not self.ruler_start:
+                self.qpainterpath = QtGui.QPainterPath(self.sp)
+                self.protractor = Protractor(self.qpainterpath)
+                self._scene.addItem(self.protractor)
+                self.protractor_start = True
+            elif not self.protractor_start and self.ruler_start:
+                self.protractor.setMovable(True)
+                self.protractor_start = False
+                self.ruler_start = False
         super(PhotoViewer, self).mousePressEvent(event)
     def mouseReleaseEvent(self, event):
+        self.ep = self.mapToScene(event.pos())
         if PhotoViewer.tool_lock == 'ruler':
-            self.ep = self.mapToScene(event.pos())
             self.ruler.setLine(self.sp.x(), self.sp.y(), self.ep.x(), self.ep.y())
             self.ruler.setMovable(True)
             self.ruler_start = False
+        elif PhotoViewer.tool_lock == 'angle':
+            if self.protractor_start:
+                self.qpainterpath.clear()
+                self.qpainterpath.moveTo(self.sp)
+                self.qpainterpath.lineTo(self.ep)
+                self.protractor.setPath(self.qpainterpath)
+                self.protractor_start = False
+                self.ruler_start = True
+            
+
         super(PhotoViewer, self).mouseReleaseEvent(event)
     def mouseMoveEvent(self, event):
+        self.mp = self.mapToScene(event.pos())
         if PhotoViewer.tool_lock == 'ruler' and self.ruler_start:
-            self.mp = self.mapToScene(event.pos())
             self.ruler.setLine(self.sp.x(), self.sp.y(), self.mp.x(), self.mp.y())
+        elif PhotoViewer.tool_lock == 'angle':
+            if self.protractor_start:
+                self.qpainterpath.clear()
+                self.qpainterpath.moveTo(self.sp)
+                self.qpainterpath.lineTo(self.mp)
+                self.protractor.setPath(self.qpainterpath)
+            elif not self.protractor_start and self.ruler_start:
+                self.qpainterpath.clear()
+                self.qpainterpath.moveTo(self.sp)
+                self.qpainterpath.lineTo(self.ep)
+                self.qpainterpath.lineTo(self.mp)
+                self.protractor.setPath(self.qpainterpath)
         super(PhotoViewer, self).mouseMoveEvent(event)
         
 class Window(QtWidgets.QWidget):
@@ -138,6 +200,7 @@ class Window(QtWidgets.QWidget):
         self.windows_menu = QtWidgets.QMenu()
         self.windows_menu.addAction('ruler', lambda: self.setToolLock('ruler'))
         self.windows_menu.addAction('angle', lambda: self.setToolLock('angle'))
+        self.windows_menu.addAction('pen', lambda: self.setToolLock('pen'))
         self.windows_menu.addAction('move', lambda: self.setToolLock('move'))
         # Arrange layout
         VBlayout = QtWidgets.QVBoxLayout(self)

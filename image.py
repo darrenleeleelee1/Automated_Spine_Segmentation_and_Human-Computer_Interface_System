@@ -7,8 +7,38 @@ from pydicom import dcmread
 from pydicom.filebase import DicomBytesIO
 import numpy as np
 import matplotlib.pyplot as plt
-class Ruler(QtWidgets.QGraphicsItem):
-    pass
+
+class Protractor(QtWidgets.QGraphicsPathItem):
+    def __init__(self, qpainterpath):
+        super().__init__(qpainterpath)
+        self.setPen(QtGui.QPen(QtGui.QColor(5, 105, 25)))
+        self.movable = False
+    def setMovable(self, enable):
+        self.setAcceptHoverEvents(enable)
+        self.movable = enable
+    # mouse hover event
+    def hoverEnterEvent(self, event):
+        app.instance().setOverrideCursor(QtCore.Qt.OpenHandCursor)
+
+    def hoverLeaveEvent(self, event):
+        app.instance().restoreOverrideCursor()
+
+    # mouse click event
+    def mousePressEvent(self, event):
+        pass
+
+    def mouseMoveEvent(self, event):
+        print(self.movable)
+        if self.movable:
+            orig_cursor_position = event.lastScenePos()
+            updated_cursor_position = event.scenePos()
+            orig_position = self.scenePos()
+            updated_cursor_x = updated_cursor_position.x() - orig_cursor_position.x() + orig_position.x()
+            updated_cursor_y = updated_cursor_position.y() - orig_cursor_position.y() + orig_position.y()
+            self.setPos(QtCore.QPointF(updated_cursor_x, updated_cursor_y))
+
+    def mouseReleaseEvent(self, event):
+        pass  
 
 class GraphicView(QtWidgets.QGraphicsView):
     def __init__(self, sence_width, sence_height, parent):
@@ -62,8 +92,18 @@ class Ui_MainWindow(object):
         self.view = QtWidgets.QGraphicsView(scene, self.photo)
         # self.view.scene.addPixmap(pixmap)
         # self.view.scene.addItem(QGline)
+        qpoint = QtGui.QPainterPath(QtCore.QPointF(50, 50))
+        qpoint.lineTo(QtCore.QPointF(100, 100))
+        qpoly = Protractor(qpoint)
+        qpoint.lineTo(QtCore.QPointF(300, 200))
+        qpoint.moveTo(QtCore.QPointF(512, 512))
+        qpoint.lineTo(QtCore.QPointF(300, 200))
+        qpoint.clear()
+        qpoint.moveTo(QtCore.QPointF(50, 50))
+        qpoint.lineTo(QtCore.QPointF(100, 100))
+        qpoly.setPath(qpoint)
         scene.addPixmap(pixmap)
-        scene.addItem(QGline)
+        scene.addItem(qpoly)
         print(self.view.size())
         
         self.view.show()
