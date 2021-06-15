@@ -8,7 +8,7 @@ from pydicom.filebase import DicomBytesIO
 import numpy as np
 import matplotlib.pyplot as plt
 
-<<<<<<< HEAD
+
 class Protractor(QtWidgets.QGraphicsPathItem):
     def __init__(self, qpainterpath):
         super().__init__(qpainterpath)
@@ -17,34 +17,9 @@ class Protractor(QtWidgets.QGraphicsPathItem):
     def setMovable(self, enable):
         self.setAcceptHoverEvents(enable)
         self.movable = enable
-    # mouse hover event
-    def hoverEnterEvent(self, event):
-        app.instance().setOverrideCursor(QtCore.Qt.OpenHandCursor)
-
-    def hoverLeaveEvent(self, event):
-        app.instance().restoreOverrideCursor()
-
-    # mouse click event
-    def mousePressEvent(self, event):
-        pass
-
-    def mouseMoveEvent(self, event):
-        print(self.movable)
-        if self.movable:
-            orig_cursor_position = event.lastScenePos()
-            updated_cursor_position = event.scenePos()
-            orig_position = self.scenePos()
-            updated_cursor_x = updated_cursor_position.x() - orig_cursor_position.x() + orig_position.x()
-            updated_cursor_y = updated_cursor_position.y() - orig_cursor_position.y() + orig_position.y()
-            self.setPos(QtCore.QPointF(updated_cursor_x, updated_cursor_y))
-
-    def mouseReleaseEvent(self, event):
-        pass  
-=======
 
 class Ruler(QtWidgets.QGraphicsItem):
     pass
->>>>>>> cdb81cc1b08a628dd935af344bd9ed1708c76e06
 
 
 class GraphicView(QtWidgets.QGraphicsView):
@@ -67,15 +42,15 @@ class Ui_MainWindow(object):
         btn.setGeometry(600, 600, 60, 40)
         btn.clicked.connect(self.btn_clicked)
 
-        btn_zoom_in = QtWidgets.QPushButton(self.centralwidget)
-        btn_zoom_in.setGeometry(700, 600, 80, 40)
-        btn_zoom_in.clicked.connect(self.btn_zoom_in_clicked)
-        btn_zoom_in.setText("zoom in")
-
-        btn_zoom_out = QtWidgets.QPushButton(self.centralwidget)
-        btn_zoom_out.setGeometry(700, 700, 80, 40)
-        btn_zoom_out.clicked.connect(self.btn_zoom_out_clicked)
-        btn_zoom_out.setText("zoom out")
+        # btn_zoom_in = QtWidgets.QPushButton(self.centralwidget)
+        # btn_zoom_in.setGeometry(700, 600, 80, 40)
+        # btn_zoom_in.clicked.connect(self.btn_zoom_in_clicked)
+        # btn_zoom_in.setText("zoom in")
+        #
+        # btn_zoom_out = QtWidgets.QPushButton(self.centralwidget)
+        # btn_zoom_out.setGeometry(700, 700, 80, 40)
+        # btn_zoom_out.clicked.connect(self.btn_zoom_out_clicked)
+        # btn_zoom_out.setText("zoom out")
 
         self.photo = QtWidgets.QLabel(self.centralwidget)
         self.photo.setText("AAA")
@@ -121,12 +96,12 @@ class Ui_MainWindow(object):
 
     def btn_clicked(self):
         self.view.rotate(90)
-
-    def btn_zoom_in_clicked(self):
-        self.view.scale(2, 2)
-
-    def btn_zoom_out_clicked(self):
-        self.view.scale(0.5, 0.5)
+    #
+    # def btn_zoom_in_clicked(self):
+    #     self.view.scale(2, 2)
+    #
+    # def btn_zoom_out_clicked(self):
+    #     self.view.scale(0.5, 0.5)
 
     def mappingWindow(self, arr, WL, WW):
         pixel_max = WL + WW / 2

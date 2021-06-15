@@ -307,7 +307,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             self.pen_path.lineTo(self.mp)
             self.pen.setPath(self.pen_path)
         super(PhotoViewer, self).mouseMoveEvent(event)
-        
+
 class Window(QtWidgets.QWidget):
     def __init__(self):
         super(Window, self).__init__()
@@ -324,6 +324,8 @@ class Window(QtWidgets.QWidget):
         self.windows_menu.addAction('move', lambda: self.setToolLock('move'))
         self.windows_menu.addAction('mouse', lambda: self.setToolLock('mouse'))
         self.windows_menu.addAction('save', lambda: self.save())
+        self.windows_menu.addAction('rotate_right', lambda: self.rotate_right())
+        self.windows_menu.addAction('rotate_left', lambda: self.rotate_left())
 
         # Arrange layout
         VBlayout = QtWidgets.QVBoxLayout(self)
@@ -360,6 +362,12 @@ class Window(QtWidgets.QWidget):
         arr = np.clip(arr, pixel_min, pixel_max)
         arr = (arr - pixel_min) / (pixel_max - pixel_min) * 65535
         return np.copy(np.uint16(arr))
+
+    def rotate_right(self):
+        self.viewer.rotate(90)
+
+    def rotate_left(self):
+        self.viewer.rotate(-90)
 
 if __name__ == '__main__':
     import sys
