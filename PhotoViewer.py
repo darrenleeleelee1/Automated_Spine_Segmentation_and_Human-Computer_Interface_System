@@ -5,14 +5,13 @@ from pydicom import dcmread
 import numpy as np
 
 
-class QGraphicsLabel(QtWidgets.QGraphicsSimpleTextItem):
+class QGraphicsLabel(QtWidgets.QGraphicsTextItem):
     def __init__(self, text):
         super().__init__(text)
-        self.setPen(QtGui.QPen(QtGui.QColor(230, 230, 10)))
+        # self.setPen(QtGui.QPen(QtGui.QColor(230, 230, 10)))
         # self.setBrush(QtGui.QBrush(QtGui.QColor(60, 30, 30)))
         self.movable = False
         self.setVisible(False)
-    
     def setMovable(self, enable):
         self.setAcceptHoverEvents(enable)
         self.movable = enable
@@ -277,7 +276,8 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             self.ruler.setLine(self.sp.x(), self.sp.y(), self.mp.x(), self.mp.y())
             self.length = np.sqrt(QtCore.QPointF.dotProduct(self.sp - self.mp, self.sp - self.mp))
             self.ruler_text_label.setVisible(True)
-            self.ruler_text_label.setText("%.2f pixels" % self.length)
+            # self.ruler_text_label.setText("%.2f pixels" % self.length)
+            self.ruler_text_label.setHtml("<div style='background-color:#3c1e1e;font-size:10px;color:#e6e60a;'>" + "%.2f pixels" % self.length + "</div>")
             if self.sp.x() <= self.mp.x(): 
                 self.ruler_text_label.setPos(self.mp + QtCore.QPointF(10, 0))
             else:
@@ -298,7 +298,8 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 spToep = np.sqrt(QtCore.QPointF.dotProduct(self.sp - self.ep, self.sp - self.ep))
                 epTomp = np.sqrt(QtCore.QPointF.dotProduct(self.mp - self.ep, self.mp - self.ep))
                 self.protractor.angle_degree = np.arccos(QtCore.QPointF.dotProduct(self.ep - self.sp, self.ep - self.mp) / spToep / epTomp) * 180 / np.pi
-                self.protractor_text_label.setText("%.1f°" % self.protractor.angle_degree)
+                # self.protractor_text_label.setText("%.1f°" % self.protractor.angle_degree)
+                self.protractor_text_label.setHtml("<div style='background-color:#3c1e1e;font-size:10px;color:#e6e60a;'>" + "%.2f pixels" % self.length + "</div>")
                 if self.mp.x() > self.ep.x() and self.mp.y() < self.ep.y(): 
                     self.protractor_text_label.setPos(self.ep + QtCore.QPointF(5, 10))
                 else:
