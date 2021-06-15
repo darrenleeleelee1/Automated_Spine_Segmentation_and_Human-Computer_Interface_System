@@ -3,6 +3,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QPainterPath
 from pydicom import dcmread
 import numpy as np
+
+
 class QGraphicsLabel(QtWidgets.QGraphicsSimpleTextItem):
     pass
 class Protractor(QtWidgets.QGraphicsPathItem):
@@ -34,7 +36,8 @@ class Protractor(QtWidgets.QGraphicsPathItem):
             self.setPos(QtCore.QPointF(updated_cursor_x, updated_cursor_y))
 
     def mouseReleaseEvent(self, event):
-        pass  
+        pass
+
 class Ruler(QtWidgets.QGraphicsLineItem):
     def __init__(self, x1, y1, x2, y2):
         super().__init__(x1, y1, x2, y2)
@@ -118,6 +121,15 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.protractor_start = False
         self.pen_start = False
 
+    #save photo
+    def save(self):
+        save_image = QtGui.QPixmap(self.viewport().size())
+        self.viewport().render(save_image)
+        filePath, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Save Image", "",
+                                                  "PNG(*.png)")  # ;;JPEG(*.jpg *.jpeg);;All Files(*.*)
+        if filePath == "":
+            return
+        save_image.save(filePath)
 
     def hasPhoto(self):
         return not self._empty
@@ -255,6 +267,8 @@ class Window(QtWidgets.QWidget):
         self.windows_menu.addAction('pen', lambda: self.setToolLock('pen'))
         self.windows_menu.addAction('move', lambda: self.setToolLock('move'))
         self.windows_menu.addAction('mouse', lambda: self.setToolLock('mouse'))
+        self.windows_menu.addAction('save', lambda: self.save())
+
         # Arrange layout
         VBlayout = QtWidgets.QVBoxLayout(self)
         VBlayout.addWidget(self.viewer)
@@ -281,7 +295,8 @@ class Window(QtWidgets.QWidget):
         # pixmap = pixmap.scaled(self.photo.width(), self.photo.height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
         self.viewer.setPhoto(pixmap)
 
-
+    def save(self):
+        self.viewer.save()
     
     def mappingWindow(self, arr, WL, WW):
         pixel_max = WL + WW/2
