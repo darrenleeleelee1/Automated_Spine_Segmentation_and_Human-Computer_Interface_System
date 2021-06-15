@@ -74,6 +74,7 @@ class Ui_MainWindow(object):
         QGline.setPen(QtGui.QPen(QtGui.QColor(5, 105, 25)))
         # self.view = GraphicView(self.photo.width(), self.photo.height(), self.photo)
         self.view = QtWidgets.QGraphicsView(scene, self.photo)
+        
         # self.view.scene.addPixmap(pixmap)
         # self.view.scene.addItem(QGline)
         qpoint = QtGui.QPainterPath(QtCore.QPointF(50, 50))

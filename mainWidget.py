@@ -461,40 +461,43 @@ class initialWidget(QtWidgets.QMainWindow):
         # print("i ", self.pic_windows[self.pic_ith], " x ", x)
         if self.pic_windows[self.pic_ith] > x:
             for k in range(x + 1, self.pic_windows[self.pic_ith] + 1):
-                self.gridLayout_list[self.pic_ith].removeWidget(self.pic[self.pic_ith][k])
-                self.pic[self.pic_ith][k].deleteLater()
+                self.gridLayout_list[self.pic_ith].removeWidget(self.pic_viewer[self.pic_ith][k])
+                self.pic_viewer[self.pic_ith][k].deleteLater()
+                # self.pic_viewer[self.pic_ith][k].setNewScence()
             if x == 3:
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][1], 0, 0, 1, 1)
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][2], 0, 1, 1, 1)
-                self.gridLayout_list[self.pic_ith].removeWidget(self.pic[self.pic_ith][3])
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][3], 0, 2, 1, 1)
+                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][1], 0, 0, 1, 1)
+                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][2], 0, 1, 1, 1)
+                self.gridLayout_list[self.pic_ith].removeWidget(self.pic_viewer[self.pic_ith][3])
+                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][3], 0, 2, 1, 1)
             self.pic_windows[self.pic_ith] = x
         if self.pic_windows[self.pic_ith] < x:
             for k in range(self.pic_windows[self.pic_ith] + 1, x + 1):
                 label = QtWidgets.QLabel(self.pic_frame_list[self.pic_ith])
                 label.setStyleSheet("background-color: black; border: 3px solid black;")
-                self.pic[self.pic_ith][k] = label
+                # self.pic_viewer[self.pic_ith][k] = label
+                pointer = PhotoViewer()
+                self.pic_viewer[self.pic_ith][k] = pointer
             if x == 2:
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][1], 0, 0, 1, 1)
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][2], 0, 1, 1, 1)
-                # self.showPic(self.pic_ith, 1, "01372635","5F3279B8")
-                # self.showPic(self.pic_ith, 2, "01372635","5F327951")
+                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][1], 0, 0, 1, 1)
+                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][2], 0, 1, 1, 1)
+                self.showPic(self.pic_ith, 1, "01372635","5F3279B8.dcm")
+                self.showPic(self.pic_ith, 2, "01372635","5F327951.dcm")
             elif x == 3:
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][1], 0, 0, 1, 1)
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][2], 0, 1, 1, 1)
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][3], 0, 2, 1, 1)
-                # self.showPic(self.pic_ith, 1, "01372635","5F3279B8")
-                # self.showPic(self.pic_ith, 2, "01372635","5F327951")
-                # self.showPic(self.pic_ith, 3, "03915480","5F329172_20170623_CR_2_1_1")
+                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][1], 0, 0, 1, 1)
+                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][2], 0, 1, 1, 1)
+                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][3], 0, 2, 1, 1)
+                self.showPic(self.pic_ith, 1, "01372635","5F3279B8.dcm")
+                self.showPic(self.pic_ith, 2, "01372635","5F327951.dcm")
+                self.showPic(self.pic_ith, 3, "03915480","5F329172_20170623_CR_2_1_1.dcm")
             elif x == 4:
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][1], 0, 0, 1, 1)
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][2], 0, 1, 1, 1)
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][3], 1, 0, 1, 1)
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][4], 1, 1, 1, 1)
-                # self.showPic(self.pic_ith, 1, "01372635","5F3279B8.dcm")
-                # self.showPic(self.pic_ith, 2, "01372635","5F327951.dcm")
-                # self.showPic(self.pic_ith, 3, "03915480","5F329172_20170623_CR_2_1_1.dcm")
-                # self.showPic(self.pic_ith, 4, "03915480","5F329172_20170623_CR_2_1_1.dcm")
+                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][1], 0, 0, 1, 1)
+                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][2], 0, 1, 1, 1)
+                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][3], 1, 0, 1, 1)
+                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][4], 1, 1, 1, 1)
+                self.showPic(self.pic_ith, 1, "01372635","5F3279B8.dcm")
+                self.showPic(self.pic_ith, 2, "01372635","5F327951.dcm")
+                self.showPic(self.pic_ith, 3, "03915480","5F329172_20170623_CR_2_1_1.dcm")
+                self.showPic(self.pic_ith, 4, "03915480","5F329172_20170623_CR_2_1_1.dcm")
             self.pic_windows[self.pic_ith] = x
 #按鈕連結處--------------------------------------------------------------------------------------------------------
     def pushButtonAngleClicked(self):
@@ -935,7 +938,9 @@ class initialWidget(QtWidgets.QMainWindow):
         # self.pic[i][j].mouseReleaseEvent = lambda released: self.picMouseReleased(released, i, j)
         # self.pic[i][j].mouseMoveEvent = lambda moved: self.picMouseMove(moved, i, j)
         # self.pic[i][j].paintEvent = lambda painted: self.picPaint(painted, i, j)
-
+        qimage = QtGui.QImage(self.pic_adjust_pixels[i][j], self.pic_adjust_pixels[i][j].shape[1], self.pic_adjust_pixels[i][j].shape[0], self.pic_adjust_pixels[i][j].shape[1]*2, QtGui.QImage.Format_Grayscale16).copy()
+        pixmap = QtGui.QPixmap(qimage)
+        self.pic_viewer[self.pic_ith][self.pic_jth].setPhoto(pixmap)
     def linkPage2Array(self, _MAXIMUM_PAGE = 5, _MAXIMUM_PIC = 4):
         # 把QtDesigner的一些重複的Widget用array對應
         # patient_page
@@ -964,13 +969,19 @@ class initialWidget(QtWidgets.QMainWindow):
         var_array_pic_frame_list = 'self.pic_frame_list'
         for i in range(1, self.MAXIMUM_PAGE + 1):
             exec("%s[%d] = %s_%d" % (var_array_pic_frame_list, i, var_pic_frame_list, i))
-        # pic
-        self.pic = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 對應到照片的label array
-        var_pic_list = 'self.ui.pic'
-        var_array_pic_list = 'self.pic'
+        # # pic
+        # self.pic = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 對應到照片的label array
+        # var_pic_list = 'self.ui.pic'
+        # var_array_pic_list = 'self.pic'
+        # for i in range(1, self.MAXIMUM_PAGE + 1):
+        #     exec("%s[%d][1] = %s_%d_1" % (var_array_pic_list, i, var_pic_list, i))
+        #     self.pic[i][1].setStyleSheet("background-color: black; border: 3px solid black;")
+        # pic Viewer
+        self.pic_viewer = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 對應到照片的viewer array
         for i in range(1, self.MAXIMUM_PAGE + 1):
-            exec("%s[%d][1] = %s_%d_1" % (var_array_pic_list, i, var_pic_list, i))
-            self.pic[i][1].setStyleSheet("background-color: black; border: 3px solid black;")
+            pointer = PhotoViewer()
+            self.pic_viewer[i][1] = pointer
+            self.gridLayout_list[i].addWidget(self.pic_viewer[i][1], 0, 0, 1, 1)
         # Image Processing Attributes
         var_pic = 'self.ui.pic'
         self.pen_start_x = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] #---筆---
@@ -1056,7 +1067,7 @@ class initialWidget(QtWidgets.QMainWindow):
 
         # 暫時試試放照片
 
-        self.showPic(1, 1, "01372635","5F3279B8.dcm")
+        # self.showPic(1, 1, "01372635","5F3279B8.dcm")
         # self.showPic(1, 2, "01372635","5F327951.dcm")
         # self.showPic(1, 3, "03915480","5F329172_20170623_CR_2_1_1.dcm")
         # self.showPic(1, 4, "03915480","5F329172_20170623_CR_2_1_1.dcm")
