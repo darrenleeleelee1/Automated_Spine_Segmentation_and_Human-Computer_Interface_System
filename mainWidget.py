@@ -1041,6 +1041,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         else:
             self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
 
+
     def mousePressEvent(self, event):
         self.sp = self.mapToScene(event.pos())
         initialWidget.pic_ith = self.in_ith
