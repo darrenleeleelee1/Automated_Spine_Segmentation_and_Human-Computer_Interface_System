@@ -952,6 +952,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.pen_start = False
     def setNewScene(self):
         self._scene = QtWidgets.QGraphicsScene(self)
+        self._empty = True
         self.setScene(self._scene)
     def resetFlags(self):
         self.ruler_start = False
