@@ -136,8 +136,8 @@ class Pen(QtWidgets.QGraphicsPathItem):
     
 class PhotoViewer(QtWidgets.QGraphicsView):
     tool_lock = 'mouse'
-    def __init__(self, parent):
-        super(PhotoViewer, self).__init__(parent)
+    def __init__(self):
+        super(PhotoViewer, self).__init__()
         self._zoom = 0
         self._empty = True
         self._scene = QtWidgets.QGraphicsScene(self)
@@ -351,7 +351,7 @@ class Window(QtWidgets.QWidget):
         VBlayout.addLayout(HBlayout)
 
     def setToolLock(self, lock):
-        self.viewer.resetFlags()
+        self.viewer.resetFlags
         PhotoViewer.tool_lock = lock
         if PhotoViewer.tool_lock == 'move':
             self.viewer.toggleDragMode()
