@@ -1051,10 +1051,10 @@ class initialWidget(QtWidgets.QMainWindow):
 
         # 暫時試試放照片
 
-        self.showPic(1, 1, "01372635","5F3279B8")
-        self.showPic(1, 2, "01372635","5F327951")
-        self.showPic(1, 3, "03915480","5F329172_20170623_CR_2_1_1")
-        self.showPic(1, 4, "03915480","5F329172_20170623_CR_2_1_1")
+        self.showPic(1, 1, "01372635","5F3279B8.dcm")
+        self.showPic(1, 2, "01372635","5F327951.dcm")
+        self.showPic(1, 3, "03915480","5F329172_20170623_CR_2_1_1.dcm")
+        self.showPic(1, 4, "03915480","5F329172_20170623_CR_2_1_1.dcm")
 
 
 
