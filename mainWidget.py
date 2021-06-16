@@ -50,6 +50,7 @@ class initialWidget(QtWidgets.QMainWindow):
         #右键菜单
         self.ui.patient_list.setContextMenuPolicy(Qt.CustomContextMenu)
         self.ui.patient_list.customContextMenuRequested.connect(self.myListWidgetContext)
+        self.ui.patient_list.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
 
         #brightness相關
@@ -113,7 +114,7 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.pushButton_move.clicked.connect(self.pushButtonMoveClicked) # 移動
         self.ui.patient_list.itemClicked.connect(self.patient_listItemClicked)
         self.ui.recently_list.itemClicked.connect(self.recently_listItemClicked)
-        self.ui.thumbnail_list_1.itemClicked.connect(self.thumbnaillistclicked)
+        self.ui.thumbnail_list_1.itemClicked.connect(self.thumbnail_listItemClicked)
         # self.set_thumbnail('03915480')
 
 
@@ -435,40 +436,55 @@ class initialWidget(QtWidgets.QMainWindow):
         close_path = "./tmp/" + close_id
         for filename in os.listdir(close_path):
             file_path = close_path + '/' + filename
-            print(file_path)
             os.remove(file_path)
         os.rmdir(close_path)
+        if(self.ui.patient_list.count() == 0 & curRow == 0): # if close the last one
+            self.ui.stackedWidget_right.setCurrentWidget(self.ui.search_page)
+        elif(curRow == 0): # close first
+            get_next_id = self.ui.patient_list.item(curRow)
+            next_pt = str(get_next_id.text())
+            temp_page = self.patient_mapto_page[next_pt]
+            self.pic_ith = temp_page
+            self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[temp_page])
+        else: # close other patient
+            get_next_id = self.ui.patient_list.item(curRow - 1)
+            next_pt = str(get_next_id.text())
+            temp_page = self.patient_mapto_page[next_pt]
+            self.pic_ith = temp_page
+            self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[temp_page])
+
 
 # Thumbnail-------------------------------------------------------------------------------------------------------
     def set_thumbnail(self, pt_id):
         pt_path = './tmp/' + pt_id
         i = self.patient_mapto_page[pt_id]
+        self.thumbnail_list[i].setViewMode(QListWidget.IconMode)
+        self.thumbnail_list[i].setItemAlignment(Qt.AlignCenter)
         for filename in os.listdir(pt_path):
             if not filename.endswith('.dcm') :
                 continue
             dicom_path = pt_path + '/' + filename
             ds = dcmread(dicom_path)
-
             arr = ds.pixel_array
             arr = np.uint16(arr)
             dicom_WL = ds[0x0028, 0x1050].value
             dicom_WW = ds[0x0028, 0x1051].value
+            SD = ds[0x0008, 0x103e].value #Series_Description
+            # SN = str(ds[0x0020, 0x0011].value) #Series Number
             arr = self.mappingWindow(arr, dicom_WL, dicom_WW)
             qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1]*2, QtGui.QImage.Format_Grayscale16).copy()
             pixmap = QtGui.QPixmap(qimage)
-            self.thumbnail_list[i].setViewMode(QListView.IconMode)
-            self.thumbnail_list[i].setItemAlignment(Qt.AlignCenter)
             item = QListWidgetItem()
-            item.setText('picture')
+            item.setSizeHint(QSize(219, 250))
+            item.setText(SD)
             icon = QtGui.QIcon(pixmap)
             item.setIcon(icon)
             self.thumbnail_list[i].addItem(item) 
 
-        size = QSize(225, 225)
+        size = QSize(215, 215)
         self.thumbnail_list[i].setIconSize(size)
 
-        
-    def thumbnaillistclicked(self):
+    def thumbnail_listItemClicked(self):
         print("test")
 # search page-----------------------------------------------------------------------------------------------------
     # search
