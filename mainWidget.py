@@ -16,7 +16,6 @@ import numpy as np
 from PIL import ImageQt
 import shutil
 import copy
-from PhotoViewer import QGraphicsLabel, Protractor, Ruler, Pen, PhotoViewer
 WINDOW_SIZE = 0
 
 class initialWidget(QtWidgets.QMainWindow):
@@ -118,310 +117,7 @@ class initialWidget(QtWidgets.QMainWindow):
         # self.set_thumbnail('03915480')
 
 
-#照片Pressed, Released, Mouse Track, Show Pic----------------------------------------------------------------------
-    def picMouseReleased(self, event, _i, _j):
-        p = QtGui.QPainter(self.transparent_pix[_i][_j])
-        pen = QtGui.QPen()
-        if(self.tool_lock == 'mouse'):
-            return
-        elif(self.tool_lock == 'angle'):
-            if event.button() == Qt.LeftButton:
-                if(self.pic_clicked[_i][_j]):
-                    self.pic_released[_i][_j] = True
-                else:
-                    if(self.tsx[_i][_j] != self.tmx[_i][_j] and self.tsy[_i][_j] != self.tmy[_i][_j]):
-                        self.angle_coordinate_list[_i][_j].append(angleCoordinate(
-                            (self.tsx[_i][_j] - self.x[_i][_j]) / self.size[_i][_j], (self.tsy[_i][_j] - self.y[_i][_j]) / self.size[_i][_j],
-                            (self.tmx[_i][_j] - self.x[_i][_j]) / self.size[_i][_j], (self.tmy[_i][_j] - self.y[_i][_j]) / self.size[_i][_j],
-                            (self.tex[_i][_j] - self.x[_i][_j]) / self.size[_i][_j], (self.tey[_i][_j] - self.y[_i][_j]) / self.size[_i][_j]))
-                    self.pic_released[_i][_j] = False
-                    pen.setWidth(2)
-                    pen.setColor(QtGui.QColor(5, 105, 25))
-                    p.setPen(pen)
-                    p.drawLine((self.tmx[_i][_j] - self.x[_i][_j]) / self.size[_i][_j],
-                               (self.tmy[_i][_j] - self.y[_i][_j]) / self.size[_i][_j],
-                               (self.tsx[_i][_j] - self.x[_i][_j]) / self.size[_i][_j],
-                               (self.tsy[_i][_j] - self.y[_i][_j]) / self.size[_i][_j])
-
-                    p.drawLine((self.tex[_i][_j] - self.x[_i][_j]) / self.size[_i][_j],
-                               (self.tey[_i][_j] - self.y[_i][_j]) / self.size[_i][_j],
-                               (self.tmx[_i][_j] - self.x[_i][_j]) / self.size[_i][_j],
-                               (self.tmy[_i][_j] - self.y[_i][_j]) / self.size[_i][_j])
-        elif(self.tool_lock == 'pen'):
-            return
-
-        elif(self.tool_lock == 'move'):
-            self.move_x[_i][_j] = self.move_x[_i][_j] + event.x() - self.move_start_x[_i][_j]
-            self.move_y[_i][_j] = self.move_y[_i][_j] + event.y() - self.move_start_y[_i][_j]
-            return
-        elif(self.tool_lock == 'ruler'):
-            if event.button() == Qt.LeftButton:
-                if(self.pic_clicked[_i][_j]):
-                    self.pic_clicked[_i][_j] = False
-                    self.trex[_i][_j], self.trey[_i][_j] = self.transitiveWithBiasMatrix(event.x(), event.y(),self.rotate_angle[_i][_j])
-                    self.ruler_coordinate_list[_i][_j].append(rulerCoordinate(
-                        (self.tsx[_i][_j] - self.x[_i][_j]) / self.size[_i][_j],
-                        (self.tsy[_i][_j] - self.y[_i][_j]) / self.size[_i][_j],
-                        (self.trex[_i][_j] - self.x[_i][_j]) / self.size[_i][_j],
-                        (self.trey[_i][_j] - self.y[_i][_j]) / self.size[_i][_j]
-                    ))
-                    # self.ruler_coordinate_list[_i][_j].append(rulerCoordinate(
-                    #     (self.tsx[_i][_j] - self.x[_i][_j]) * self.size[_i][_j],
-                    #     (self.tsy[_i][_j] - self.y[_i][_j]) * self.size[_i][_j],
-                    #     (self.trex[_i][_j] - self.x[_i][_j]) * self.size[_i][_j],
-                    #     (self.trey[_i][_j] - self.y[_i][_j]) * self.size[_i][_j]
-                    # ))
-
-                    pen.setWidth(2)
-                    pen.setColor(QtGui.QColor(5, 105, 25))
-                    p.setPen(pen)
-                    p.drawLine((self.tsx[_i][_j] - self.x[_i][_j]) / self.size[_i][_j],
-                               (self.tsy[_i][_j] - self.y[_i][_j]) / self.size[_i][_j],
-                               (self.trex[_i][_j] - self.x[_i][_j]) / self.size[_i][_j],
-                               (self.trey[_i][_j] - self.y[_i][_j]) / self.size[_i][_j])
-
-
-
-    def picMousePressed(self, event, _i, _j):
-        self.pic_ith = _i
-        self.pic_jth = _j
-        if(self.tool_lock == 'mouse'):
-            return
-        elif(self.tool_lock == 'angle'):
-            if event.button() == QtCore.Qt.LeftButton:
-                if(not self.pic_clicked[_i][_j]):
-                    self.pic_clicked[_i][_j] = True
-                    self.angle_start_x[self.pic_ith][self.pic_jth] = event.pos().x()
-                    self.angle_start_y[self.pic_ith][self.pic_jth] = event.pos().y()
-
-                else:
-                    self.pic_clicked[_i][_j] = False
-        elif(self.tool_lock == 'pen'):
-            if event.button() == QtCore.Qt.LeftButton:
-                self.pen_end_x[_i][_j] = event.x()
-                self.pen_end_y[_i][_j] = event.y()
-                self.pen_start_x[self.pic_ith][self.pic_jth] = event.pos().x()
-                self.pen_start_y[self.pic_ith][self.pic_jth] = event.pos().y()
-
-        elif (self.tool_lock == 'zoom_in'):
-            self.size[_i][_j] = self.size[_i][_j] * 1.25
-            x, y = self.transitiveWithBiasMatrix(event.pos().x(), event.pos().y(), self.rotate_angle[_i][_j])
-            self.magnifier_pad_x[_i][_j] = self.magnifier_pad_x[_i][_j] - (0.25) * (x - self.x[_i][_j])
-            self.magnifier_pad_y[_i][_j] = self.magnifier_pad_y[_i][_j] - (0.25) * (y - self.y[_i][_j])
-            self.update()
-
-        elif(self.tool_lock == 'zoom_out'):
-            if (self.size[_i][_j] > 1):
-                self.size[_i][_j] = self.size[_i][_j] * 0.8
-                x, y = self.transitiveWithBiasMatrix(event.pos().x(), event.pos().y(), self.rotate_angle[_i][_j])
-                self.magnifier_pad_x[_i][_j] = self.magnifier_pad_x[_i][_j] + (0.2) * (x - self.x[_i][_j])
-                self.magnifier_pad_y[_i][_j] = self.magnifier_pad_y[_i][_j] + (0.2) * (y - self.y[_i][_j])
-                self.update()
-
-        elif(self.tool_lock == 'move'):
-            if event.button() == QtCore.Qt.LeftButton:
-                self.move_start_x[_i][_j] = event.x()
-                self.move_start_y[_i][_j] = event.y()
-
-        elif(self.tool_lock == 'ruler'):
-            if event.button() == QtCore.Qt.LeftButton:
-                if(not self.pic_clicked[_i][_j]):
-                    self.pic_clicked[_i][_j] = True
-                    self.ruler_start_x[self.pic_ith][self.pic_jth] = event.pos().x()
-                    self.ruler_start_y[self.pic_ith][self.pic_jth] = event.pos().y()
-
-
-    def picMouseMove(self, event, _i, _j):
-        if(self.tool_lock == 'mouse'):
-            return
-        elif(self.tool_lock == 'angle'):
-            if event.buttons() == QtCore.Qt.NoButton:
-                if(self.pic_clicked[self.pic_ith][self.pic_jth] and self.pic_released[self.pic_ith][self.pic_jth]):
-                    self.angle_end_x[self.pic_ith][self.pic_jth] = event.x()
-                    self.angle_end_y[self.pic_ith][self.pic_jth] = event.y()
-            elif event.buttons() == QtCore.Qt.LeftButton:
-                if(self.pic_clicked[self.pic_ith][self.pic_jth] and not self.pic_released[self.pic_ith][self.pic_jth]):
-                    self.angle_middle_x[self.pic_ith][self.pic_jth] = self.angle_end_x[self.pic_ith][self.pic_jth] = event.x()
-                    self.angle_middle_y[self.pic_ith][self.pic_jth] = self.angle_end_y[self.pic_ith][self.pic_jth] = event.y()
-        elif(self.tool_lock == 'pen'):
-            if event.buttons() == QtCore.Qt.LeftButton:
-                self.pen_start_x[self.pic_ith][self.pic_jth] = self.pen_end_x[_i][_j]
-                self.pen_start_y[self.pic_ith][self.pic_jth] = self.pen_end_y[_i][_j]
-                self.pen_end_x[_i][_j] = event.x()
-                self.pen_end_y[_i][_j] = event.y()
-
-        elif(self.tool_lock == 'move'):
-            if event.buttons() == QtCore.Qt.LeftButton:
-                self.move_moving_x[_i][_j] = event.x() - self.move_start_x[_i][_j] + self.move_x[_i][_j]
-                self.move_moving_y[_i][_j] = event.y() - self.move_start_y[_i][_j] + self.move_y[_i][_j]
-
-
-        elif(self.tool_lock == 'ruler'):
-            if event.buttons() == QtCore.Qt.LeftButton:
-                self.ruler_end_x[_i][_j] = event.x()
-                self.ruler_end_y[_i][_j] = event.y()
-
-        self.update()
-
-
-    def picPaint(self, event, _i, _j):
-        q = QtGui.QPainter(self.pic[_i][_j])
-        q.resetTransform()
-        q.setRenderHint(QtGui.QPainter.Antialiasing)
-        self.pic_label_width = self.pic[_i][_j].width()
-        self.pic_label_height = self.pic[_i][_j].height()
-        print(self.pic_label_width, self.pic_label_height)
-
-        q.translate(self.pic_label_width / 2, self.pic_label_height / 2)  # 把旋轉中心設成（pic_label_width/2, pic_label_height/2）
-        q.rotate(self.rotate_angle[_i][_j])
-        q.translate(-self.pic_label_width / 2, -self.pic_label_height / 2)
-
-
-        self.tmmx[_i][_j], self.tmmy[_i][_j] = self.transitiveWithBiasMatrix(self.move_moving_x[_i][_j], self.move_moving_y[_i][_j], self.rotate_angle[_i][_j])
-        t_index = int((-self.rotate_angle[_i][_j] % 360) / 90)
-
-        qimage = QtGui.QImage(self.pic_adjust_pixels[_i][_j], self.pic_adjust_pixels[_i][_j].shape[1], self.pic_adjust_pixels[_i][_j].shape[0], self.pic_adjust_pixels[_i][_j].shape[1]*2,QtGui.QImage.Format_Grayscale16).copy()
-        pixmap = QtGui.QPixmap.fromImage(qimage)
-        pixmap = pixmap.scaled(self.pic[_i][_j].width(), self.pic[_i][_j].height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
-
-        #self.transparent_pix[_i][_j] = QtGui.QPixmap(pixmap.width(), pixmap.height())
-        
-        img_width = pixmap.width() * self.size[_i][_j]
-        img_height = pixmap.height() * self.size[_i][_j]
-
-        center_start_x = int((self.pic_label_width - pixmap.width()) / 2)
-        center_start_y = int((self.pic_label_height - pixmap.height()) / 2)
-        #tcx, tcy = self.transitiveWithBiasMatrix(center_start_x, center_start_y, self.rotate_angle[_i][_j])
-
-        self.x[_i][_j] = self.tmmx[_i][_j] + self.magnifier_pad_x[_i][_j] - self.rotate_coordinate_system[t_index][0]
-        self.y[_i][_j] = self.tmmy[_i][_j] + self.magnifier_pad_y[_i][_j] - self.rotate_coordinate_system[t_index][1]
-        q.drawPixmap(self.x[_i][_j] + center_start_x, self.y[_i][_j] + center_start_y, img_width, img_height, pixmap)
-
-        # 置中
-
-        p = QtGui.QPainter(self.transparent_pix[_i][_j])
-
-
-
-
-        if(self.tool_lock == 'mouse'):
-            pass
-        elif(self.tool_lock == 'angle'):
-            if(not self.pic_clicked[_i][_j] and not self.pic_released[_i][_j]):
-                pass
-            else:
-                self.pic[_i][_j].setMouseTracking(True)
-                pen = QtGui.QPen()
-                pen.setWidth(2)
-                pen.setColor(QtGui.QColor(5, 105, 25))
-                q.setPen(pen)
-                # tsx = transitved start x
-                self.tsx[_i][_j], self.tsy[_i][_j] = self.transitiveWithBiasMatrix(self.angle_start_x[_i][_j], self.angle_start_y[_i][_j], self.rotate_angle[_i][_j])
-                self.tmx[_i][_j], self.tmy[_i][_j] = self.transitiveWithBiasMatrix(self.angle_middle_x[_i][_j], self.angle_middle_y[_i][_j], self.rotate_angle[_i][_j])
-                self.tex[_i][_j], self.tey[_i][_j] = self.transitiveWithBiasMatrix(self.angle_end_x[_i][_j], self.angle_end_y[_i][_j], self.rotate_angle[_i][_j])
-                q.drawLine(self.tmx[_i][_j], self.tmy[_i][_j], self.tsx[_i][_j], self.tsy[_i][_j])
-                q.drawLine(self.tex[_i][_j], self.tey[_i][_j], self.tmx[_i][_j], self.tmy[_i][_j])
-
-        elif(self.tool_lock == 'pen'):
-            self.pic[_i][_j].setMouseTracking(False)
-            pen = QtGui.QPen()
-            pen.setWidth(2)
-            pen.setColor(QtGui.QColor(255, 25, 0))
-            p.setPen(pen)
-            tpsx, tpsy = self.transitiveWithBiasMatrix(self.pen_start_x[_i][_j], self.pen_start_y[_i][_j], self.rotate_angle[_i][_j])
-            tpex, tpey = self.transitiveWithBiasMatrix(self.pen_end_x[_i][_j], self.pen_end_y[_i][_j], self.rotate_angle[_i][_j])
-
-            p.drawLine((tpsx - self.x[_i][_j])/self.size[_i][_j], (tpsy - self.y[_i][_j])/self.size[_i][_j],
-                        (tpex - self.x[_i][_j])/self.size[_i][_j], (tpey - self.y[_i][_j])/self.size[_i][_j])  #移動畫布時，筆會跟著跑掉，(-x, -y)調回來
-
-        elif(self.tool_lock == 'ruler'):
-            if(self.pic_clicked[_i][_j]):
-                self.pic[_i][_j].setMouseTracking(True)
-                pen = QtGui.QPen()
-                pen.setWidth(2)
-                pen.setColor(QtGui.QColor(5, 105, 25))
-                q.setPen(pen)
-                p.setPen(pen)
-                self.tsx[_i][_j], self.tsy[_i][_j] = self.transitiveWithBiasMatrix(self.ruler_start_x[_i][_j], self.ruler_start_y[_i][_j], self.rotate_angle[_i][_j])
-                self.tex[_i][_j], self.tey[_i][_j] = self.transitiveWithBiasMatrix(self.ruler_end_x[_i][_j], self.ruler_end_y[_i][_j], self.rotate_angle[_i][_j])
-                q.drawLine(self.tex[_i][_j], self.tey[_i][_j], self.tsx[_i][_j], self.tsy[_i][_j])
-
-        q.drawPixmap(self.x[_i][_j], self.y[_i][_j], self.pic_label_width * self.size[_i][_j], self.pic_label_height * self.size[_i][_j], self.transparent_pix[_i][_j])   #讓畫布跟著照片移動
-        # show every angle
-
-        for w in self.angle_coordinate_list[_i][_j]:
-            pen = QtGui.QPen()
-            pen.setWidth(2)
-            pen.setColor(QtGui.QColor(5, 105, 25))
-            q.setPen(pen)
-            # q.drawPolyline(w.points)
-            # 把旋轉過的點再轉回來
-            t_index = int((-self.rotate_angle[_i][_j] % 360) / 90)
-            label_x = w.mp.x() - self.rotate_coordinate_system[t_index][0]
-            label_y = w.mp.y() - self.rotate_coordinate_system[t_index][1]
-            t_x = w.ep.x() - self.rotate_coordinate_system[t_index][0]
-            t_y = w.ep.y() - self.rotate_coordinate_system[t_index][1]
-            label_x, label_y = self.transitiveMatrix(label_x, label_y, -self.rotate_angle[_i][_j])
-            t_x, t_y = self.transitiveMatrix(t_x, t_y, -self.rotate_angle[_i][_j])
-            angle_biasx, angle_biasy = self.transitiveMatrix(self.x[_i][_j], self.y[_i][_j], -self.rotate_angle[_i][_j])
-            label_ybias = 12 if t_y < label_y else -12
-            t_label = QtCore.QPointF((label_x + angle_biasx) / self.size[_i][_j] + 10, (label_y + angle_biasy) / self.size[_i][_j] + label_ybias)
-            q.save() # 要用來show出label，所以reset所有的transform
-            q.resetTransform()
-            f = q.font()
-            f.setPixelSize(15)
-            q.setFont(f)
-            q.setPen(QtGui.QColor(210, 210, 10))
-            q.drawText(t_label, str(round(w.angle, 1)) + "°")
-            q.restore()
-
-        for w in self.ruler_coordinate_list[_i][_j]:
-            pen = QtGui.QPen()
-            pen.setWidth(2)
-            pen.setColor(QtGui.QColor(5, 105, 25))
-            q.setPen(pen)
-            # q.drawLine(w.sp+QtCore.QPointF(self.x[_i][_j]/self.size[_i][_j] , self.y[_i][_j]/self.size[_i][_j]),
-            #             w.ep+QtCore.QPointF(self.x[_i][_j]/self.size[_i][_j] , self.y[_i][_j]/self.size[_i][_j]))
-            # 把旋轉過的點再轉回來
-            t_index = int((-self.rotate_angle[_i][_j] % 360) / 90)
-            ts_x = w.sp.x() - self.rotate_coordinate_system[t_index][0]
-            ts_y = w.sp.y() - self.rotate_coordinate_system[t_index][1]
-            te_x = w.ep.x() - self.rotate_coordinate_system[t_index][0]
-            te_y = w.ep.y() - self.rotate_coordinate_system[t_index][1]
-            ts_x, ts_y = self.transitiveMatrix(ts_x, ts_y, -self.rotate_angle[_i][_j])
-            te_x, te_y = self.transitiveMatrix(te_x, te_y, -self.rotate_angle[_i][_j])
-            ruler_biasx, ruler_biasy = self.transitiveMatrix(self.x[_i][_j], self.y[_i][_j], -self.rotate_angle[_i][_j])
-            # if ts_x > te_x:
-            #     t_label = QtCore.QPointF((ts_x + ruler_biasx) / self.size[_i][_j] + 10, ((ts_y + ruler_biasy) / self.size[_i][_j]))
-            # else:
-            #     t_label = QtCore.QPointF((te_x + ruler_biasx) / self.size[_i][_j] + 10, ((te_y + ruler_biasy) / self.size[_i][_j]))
-            if ts_x > te_x:
-                t_label = QtCore.QPointF((ts_x + ruler_biasx+ 10),
-                                         (ts_y + ruler_biasy))
-            else:
-                t_label = QtCore.QPointF((te_x + ruler_biasx+ 10),
-                                         ((te_y + ruler_biasy)))
-            # if ts_x > te_x:
-            #     t_label = QtCore.QPointF((ts_x + ruler_biasx + 10),
-            #                              ((ts_y + ruler_biasy)))
-            # else:
-            #     t_label = QtCore.QPointF((te_x + ruler_biasx + 10),
-            #                              ((te_y + ruler_biasy)))
-            # if ts_x > te_x:
-            #     t_label = QtCore.QPointF((ts_x + ruler_biasx + 10)*self.size[_i][_j],
-            #                              ((ts_y + ruler_biasy)*self.size[_i][_j]))
-            # else:
-            #     t_label = QtCore.QPointF((te_x + ruler_biasx + 10)*self.size[_i][_j],
-            #                              ((te_y + ruler_biasy)*self.size[_i][_j]))
-            q.save() # 要用來show出label，所以reset所有的transform
-            q.resetTransform()
-            f = q.font()
-            f.setPixelSize(15)
-            q.setFont(f)
-            q.setPen(QtGui.QColor(210, 210, 10))
-            q.drawText(t_label + QtCore.QPointF(self.x[_i][_j], self.y[_i][_j]), str(round(w.length, 2)) + "pixels")
-            q.restore()
-        q.end()
+#照片Show Pic----------------------------------------------------------------------
 
     #brightness 
     def getWindow(self, WL, WW):
@@ -461,48 +157,84 @@ class initialWidget(QtWidgets.QMainWindow):
         # print("i ", self.pic_windows[self.pic_ith], " x ", x)
         if self.pic_windows[self.pic_ith] > x:
             for k in range(x + 1, self.pic_windows[self.pic_ith] + 1):
-                self.gridLayout_list[self.pic_ith].removeWidget(self.pic[self.pic_ith][k])
-                self.pic[self.pic_ith][k].deleteLater()
+                self.gridLayout_list[self.pic_ith].removeWidget(self.pic_viewer[self.pic_ith][k])
+                self.pic_viewer[self.pic_ith][k].deleteLater()
+                # self.pic_viewer[self.pic_ith][k].setNewScence()
             if x == 3:
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][1], 0, 0, 1, 1)
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][2], 0, 1, 1, 1)
-                self.gridLayout_list[self.pic_ith].removeWidget(self.pic[self.pic_ith][3])
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][3], 0, 2, 1, 1)
+                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][1], 0, 0, 1, 1)
+                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][2], 0, 1, 1, 1)
+                self.gridLayout_list[self.pic_ith].removeWidget(self.pic_viewer[self.pic_ith][3])
+                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][3], 0, 2, 1, 1)
             self.pic_windows[self.pic_ith] = x
         if self.pic_windows[self.pic_ith] < x:
             for k in range(self.pic_windows[self.pic_ith] + 1, x + 1):
                 label = QtWidgets.QLabel(self.pic_frame_list[self.pic_ith])
                 label.setStyleSheet("background-color: black; border: 3px solid black;")
-                self.pic[self.pic_ith][k] = label
+                # self.pic_viewer[self.pic_ith][k] = label
+                pointer = PhotoViewer(self)
+                self.pic_viewer[self.pic_ith][k] = pointer
             if x == 2:
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][1], 0, 0, 1, 1)
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][2], 0, 1, 1, 1)
-                # self.showPic(self.pic_ith, 1, "01372635","5F3279B8")
-                # self.showPic(self.pic_ith, 2, "01372635","5F327951")
+                print(self.pic_viewer[self.pic_ith][1].width(), self.pic_viewer[self.pic_ith][1].height())
+                print(self.pic_viewer[self.pic_ith][2].width(), self.pic_viewer[self.pic_ith][2].height())
+                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][1], 0, 0, 1, 1)
+                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][2], 0, 1, 1, 1)
+                self.showPic(self.pic_ith, 1, "01372635","5F3279B8.dcm")
+                self.showPic(self.pic_ith, 2, "01372635","5F327951.dcm")
             elif x == 3:
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][1], 0, 0, 1, 1)
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][2], 0, 1, 1, 1)
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][3], 0, 2, 1, 1)
-                # self.showPic(self.pic_ith, 1, "01372635","5F3279B8")
-                # self.showPic(self.pic_ith, 2, "01372635","5F327951")
-                # self.showPic(self.pic_ith, 3, "03915480","5F329172_20170623_CR_2_1_1")
+                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][1], 0, 0, 1, 1)
+                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][2], 0, 1, 1, 1)
+                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][3], 0, 2, 1, 1)
+                self.showPic(self.pic_ith, 1, "01372635","5F3279B8.dcm")
+                self.showPic(self.pic_ith, 2, "01372635","5F327951.dcm")
+                self.showPic(self.pic_ith, 3, "03915480","5F329172_20170623_CR_2_1_1.dcm")
             elif x == 4:
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][1], 0, 0, 1, 1)
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][2], 0, 1, 1, 1)
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][3], 1, 0, 1, 1)
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic[self.pic_ith][4], 1, 1, 1, 1)
+                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][1], 0, 0, 1, 1)
+                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][2], 0, 1, 1, 1)
+                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][3], 1, 0, 1, 1)
+                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][4], 1, 1, 1, 1)
                 # self.showPic(self.pic_ith, 1, "01372635","5F3279B8.dcm")
                 # self.showPic(self.pic_ith, 2, "01372635","5F327951.dcm")
                 # self.showPic(self.pic_ith, 3, "03915480","5F329172_20170623_CR_2_1_1.dcm")
-                # self.showPic(self.pic_ith, 4, "03915480","5F329172_20170623_CR_2_1_1.dcm")
+                # self.showPic( self.pic_ith, 4, "03915480","5F329172_20170623_CR_2_1_1.dcm")
             self.pic_windows[self.pic_ith] = x
 #按鈕連結處--------------------------------------------------------------------------------------------------------
+    # 鼠標
+    def pushButtonMouseClicked(self):
+        self.setToolLock('mouse')
+    # 移動
+    def pushButtonMoveClicked(self):
+        self.setToolLock('move')
+    # 放大
+    def image_zoom_in(self):
+        self.setToolLock('zoom_in')
+    # 縮小
+    def image_zoom_out(self):
+        self.setToolLock('zoom_out')
+    # 順時鐘轉
+    def rotate_image_right(self):
+        self.setToolLock('rotate_right')
+    # 逆時鐘轉
+    def rotate_image_left(self):
+        self.setToolLock('rotate_left')
+    # 角度
     def pushButtonAngleClicked(self):
-        if(self.tool_lock == 'ruler'):
-            self.pic_clicked[self.pic_ith][self.pic_jth] = False
-            self.pic_released[self.pic_ith][self.pic_jth] = False
-        self.tool_lock = 'angle'
-
+        self.setToolLock('angle')
+    # 尺        
+    def pushButtonRulerClicked(self):
+        self.setToolLock('ruler')
+    # 筆
+    def pushButtonPenClicked(self):
+        self.setToolLock('pen')
+    # 清除
+    def pushButtonEraseClicked(self):
+        self.transparent_pix[self.pic_ith][self.pic_jth].fill(Qt.transparent)
+        self.angle_coordinate_list[self.pic_ith][self.pic_jth].clear()
+        self.update()
+        # 清除後必須將畫筆設為初始位置，否則會存到上次最後的位置，而有一小黑點
+        self.pen_start_x[self.pic_ith][self.pic_jth] = self.pen_start_y[self.pic_ith][self.pic_jth] = -10
+        self.pen_end_x[self.pic_ith][self.pic_jth] = self.pen_end_y[self.pic_ith][self.pic_jth] = -10
+    
+    # 加照片
     def pushButtonAddPicClicked(self):
         pic_file_path, filetype = QFileDialog.getOpenFileName(self,"選取檔案","/Users/user/Documents/畢專/dicom_data")  #設定副檔名過濾,注意用雙分號間隔
         if pic_file_path == "":
@@ -518,59 +250,33 @@ class initialWidget(QtWidgets.QMainWindow):
         database_dst = './tmp_database/' + pt_id
         shutil.copy(pic_file_path, tmp_dst)
         shutil.copy(pic_file_path, database_dst)
-
     def picAlreadyExist(self):
         picAlreadyExist_msg = QMessageBox()
         picAlreadyExist_msg.setWindowTitle("Warning")
         picAlreadyExist_msg.setText("Dicom already exist !")
         picAlreadyExist_msg.setIcon(QMessageBox.Warning)
         x = picAlreadyExist_msg.exec_() 
-
-    # 清除
-    def pushButtonEraseClicked(self):
-        self.transparent_pix[self.pic_ith][self.pic_jth].fill(Qt.transparent)
-        self.angle_coordinate_list[self.pic_ith][self.pic_jth].clear()
-        self.update()
-        # 清除後必須將畫筆設為初始位置，否則會存到上次最後的位置，而有一小黑點
-        self.pen_start_x[self.pic_ith][self.pic_jth] = self.pen_start_y[self.pic_ith][self.pic_jth] = -10
-        self.pen_end_x[self.pic_ith][self.pic_jth] = self.pen_end_y[self.pic_ith][self.pic_jth] = -10
-
-    def pushButtonPenClicked(self):
-        self.tool_lock = 'pen'
-
-    def pushButtonMouseClicked(self):
-        self.tool_lock = 'mouse'
-
     # save photo .png
     def pushButtonSaveClicked(self):
-        image = ImageQt.fromqpixmap(self.pic[self.pic_ith][self.pic_jth].grab())
-        filePath, _ = QFileDialog.getSaveFileName(self, "Save Image", "", "PNG(*.png)") # ;;JPEG(*.jpg *.jpeg);;All Files(*.*) 
-        if filePath == "":
-            return
-        image.save(filePath)
-
-    def rotate_image_right(self):
-        self.tool_lock = 'rotate'
-        self.rotate_angle[self.pic_ith][self.pic_jth] = self.rotate_angle[self.pic_ith][self.pic_jth] + 90
-        self.update()
-
-    def rotate_image_left(self):
-        self.tool_lock = 'rotate'
-        self.rotate_angle[self.pic_ith][self.pic_jth] = self.rotate_angle[self.pic_ith][self.pic_jth] - 90
-        self.update()
-
-    def image_zoom_in(self):
-        self.tool_lock = 'zoom_in'
-
-    def image_zoom_out(self):
-        self.tool_lock = 'zoom_out'
-
-    def pushButtonMoveClicked(self):
-        self.tool_lock = 'move'
+        self.setToolLock('save')
+    
+    def setToolLock(self, lock):
+        self.pic_viewer[self.pic_ith][self.pic_jth].resetFlags()
+        PhotoViewer.tool_lock = lock
+        if PhotoViewer.tool_lock == 'move':
+            self.pic_viewer[self.pic_ith][self.pic_jth].toggleDragMode()
+        elif PhotoViewer.tool_lock == 'clear':
+            self.pic_viewer[self.pic_ith][self.pic_jth].setNewScene()
+        elif PhotoViewer.tool_lock == 'save':
+            self.pic_viewer[self.pic_ith][self.pic_jth].save()
+        elif PhotoViewer.tool_lock == 'rotate_right':
+            self.pic_viewer[self.pic_ith][self.pic_jth].rotate(90)
+        elif PhotoViewer.tool_lock == 'rotate_left':
+            self.pic_viewer[self.pic_ith][self.pic_jth].rotate(-90)
 
 
-
-    def aboutBrightness(self): # 對比度的選單設定
+    # 對比度的選單設定
+    def aboutBrightness(self): 
         self.ui.pushButton_brightness.setStyleSheet("::menu-indicator{ image: none; }") #remove triangle
         self.window_menu = QtWidgets.QMenu()
         self.window_menu.addAction('Default window', lambda: self.getWindow(0, 0))
@@ -581,13 +287,8 @@ class initialWidget(QtWidgets.QMainWindow):
         self.window_menu.addAction('[2560/5120]', lambda: self.getWindow(2560, 5120))
         self.window_menu.addAction('Custom window', lambda: self.getWindow(1, 1))
         self.ui.pushButton_brightness.setMenu(self.window_menu)
-
     
-    def pushButtonRulerClicked(self):
-        if(self.tool_lock == 'angle'):
-            self.pic_clicked[self.pic_ith][self.pic_jth] = False
-            self.pic_released[self.pic_ith][self.pic_jth] = False
-        self.tool_lock = 'ruler'
+    
 
 
     def slideMagnifierZoomInOrOut(self):
@@ -920,7 +621,6 @@ class initialWidget(QtWidgets.QMainWindow):
 
         self.dicoms[i][j] = ds
         arr = copy.deepcopy(ds.pixel_array)
-
         arr = np.uint16(arr)
         self.pic_original_pixels[i][j] = np.copy(arr)
         self.pic_ith = i
@@ -928,14 +628,11 @@ class initialWidget(QtWidgets.QMainWindow):
         dicom_WL = ds[0x0028, 0x1050].value
         dicom_WW = ds[0x0028, 0x1051].value
         self.pic_adjust_pixels[i][j] = self.mappingWindow(arr, dicom_WL, dicom_WW)
-        # pixmap_resized = pixmap.scaled(self.pic_label_width * self.size, self.pic_label_height * self.size,QtCore.Qt.KeepAspectRatio)
-        # self.pic[i][j].setPixmap(pixmap)
-        # self.pic[i][j].setGeometry(QtCore.QRect(100, 100, 400, 500))
-        # self.pic[i][j].mousePressEvent = lambda pressed: self.picMousePressed(pressed, i, j) # 讓每個pic的mousePressEvent可以傳出告訴自己是誰
-        # self.pic[i][j].mouseReleaseEvent = lambda released: self.picMouseReleased(released, i, j)
-        # self.pic[i][j].mouseMoveEvent = lambda moved: self.picMouseMove(moved, i, j)
-        # self.pic[i][j].paintEvent = lambda painted: self.picPaint(painted, i, j)
-
+        qimage = QtGui.QImage(self.pic_adjust_pixels[i][j], self.pic_adjust_pixels[i][j].shape[1], self.pic_adjust_pixels[i][j].shape[0], self.pic_adjust_pixels[i][j].shape[1]*2, QtGui.QImage.Format_Grayscale16).copy()
+        pixmap = QtGui.QPixmap(qimage)
+        pixmap = pixmap.scaled(self.pic_viewer[i][j].width(), self.pic_viewer[i][j].height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+        # print(self.pic_viewer[i][j].width(), self.pic_viewer[i][j].height())
+        self.pic_viewer[self.pic_ith][self.pic_jth].setPhoto(pixmap)
     def linkPage2Array(self, _MAXIMUM_PAGE = 5, _MAXIMUM_PIC = 4):
         # 把QtDesigner的一些重複的Widget用array對應
         # patient_page
@@ -964,13 +661,19 @@ class initialWidget(QtWidgets.QMainWindow):
         var_array_pic_frame_list = 'self.pic_frame_list'
         for i in range(1, self.MAXIMUM_PAGE + 1):
             exec("%s[%d] = %s_%d" % (var_array_pic_frame_list, i, var_pic_frame_list, i))
-        # pic
-        self.pic = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 對應到照片的label array
-        var_pic_list = 'self.ui.pic'
-        var_array_pic_list = 'self.pic'
+        # # pic
+        # self.pic = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 對應到照片的label array
+        # var_pic_list = 'self.ui.pic'
+        # var_array_pic_list = 'self.pic'
+        # for i in range(1, self.MAXIMUM_PAGE + 1):
+        #     exec("%s[%d][1] = %s_%d_1" % (var_array_pic_list, i, var_pic_list, i))
+        #     self.pic[i][1].setStyleSheet("background-color: black; border: 3px solid black;")
+        # pic Viewer
+        self.pic_viewer = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 對應到照片的viewer array
         for i in range(1, self.MAXIMUM_PAGE + 1):
-            exec("%s[%d][1] = %s_%d_1" % (var_array_pic_list, i, var_pic_list, i))
-            self.pic[i][1].setStyleSheet("background-color: black; border: 3px solid black;")
+            pointer = PhotoViewer(self)
+            self.pic_viewer[i][1] = pointer
+            self.gridLayout_list[i].addWidget(self.pic_viewer[i][1], 0, 0, 1, 1)
         # Image Processing Attributes
         var_pic = 'self.ui.pic'
         self.pen_start_x = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] #---筆---
@@ -1056,7 +759,7 @@ class initialWidget(QtWidgets.QMainWindow):
 
         # 暫時試試放照片
 
-        self.showPic(1, 1, "01372635","5F3279B8.dcm")
+        # self.showPic(1, 1, "01372635","5F3279B8.dcm")
         # self.showPic(1, 2, "01372635","5F327951.dcm")
         # self.showPic(1, 3, "03915480","5F329172_20170623_CR_2_1_1.dcm")
         # self.showPic(1, 4, "03915480","5F329172_20170623_CR_2_1_1.dcm")
@@ -1101,32 +804,315 @@ class custom(QDialog):
     self.customui = Ui_Dialog()
     self.customui.setupUi(self)
     
-class Patient():
-    def __init__(self, _pt_id, _pt_path):
-        self.pt_id = _pt_id
-        self.pt_path = _pt_path
+class QGraphicsLabel(QtWidgets.QGraphicsTextItem):
+    def __init__(self, text):
+        super().__init__(text)
+        # self.setPen(QtGui.QPen(QtGui.QColor(230, 230, 10)))
+        # self.setBrush(QtGui.QBrush(QtGui.QColor(60, 30, 30)))
+        self.movable = False
+        self.setVisible(False)
+    def setMovable(self, enable):
+        self.setAcceptHoverEvents(enable)
+        self.movable = enable
+    # mouse hover event
+    def hoverEnterEvent(self, event):
+        app.instance().setOverrideCursor(QtCore.Qt.OpenHandCursor)
 
-class rulerCoordinate():
-    def __init__(self, _sx, _sy, _ex, _ey):
-        self.sp = QtCore.QPointF(_sx, _sy)
-        self.ep = QtCore.QPointF(_ex, _ey)
-        self.length = ((_sx - _ex) ** 2 + (_sy - _ey) ** 2) ** 0.5
+    def hoverLeaveEvent(self, event):
+        app.instance().restoreOverrideCursor()
 
-class angleCoordinate():
-    def __init__(self, _sx, _sy, _mx, _my, _ex, _ey):
-        self.points = QtGui.QPolygonF()
-        self.sp = QtCore.QPointF(_sx, _sy)
-        self.mp = QtCore.QPointF(_mx, _my)
-        self.ep = QtCore.QPointF(_ex, _ey)
-        self.points.append(self.sp)
-        self.points.append(self.mp)
-        self.points.append(self.ep)
-        self.length_sp2mp = ((self.sp.x() - self.mp.x()) ** 2 + (self.sp.y() - self.mp.y()) ** 2) ** 0.5
-        self.length_mp2ep = ((self.mp.x() - self.ep.x()) ** 2 + (self.mp.y() - self.ep.y()) ** 2) ** 0.5
-        self.inner_product = (self.sp.x() - self.mp.x()) * (self.ep.x() - self.mp.x()) + (self.sp.y() - self.mp.y()) * (self.ep.y() - self.mp.y())
-        self.angle = 0
-        if(self.length_sp2mp != 0 and self.length_mp2ep != 0):
-            self.angle = np.arccos(self.inner_product / self.length_sp2mp / self.length_mp2ep) * 180 / np.pi
+    # mouse click event
+    def mousePressEvent(self, event):
+        pass
+
+    def mouseMoveEvent(self, event):
+        if self.movable:
+            orig_cursor_position = event.lastScenePos()
+            updated_cursor_position = event.scenePos()
+            orig_position = self.scenePos()
+            updated_cursor_x = updated_cursor_position.x() - orig_cursor_position.x() + orig_position.x()
+            updated_cursor_y = updated_cursor_position.y() - orig_cursor_position.y() + orig_position.y()
+            self.setPos(QtCore.QPointF(updated_cursor_x, updated_cursor_y))
+
+    def mouseReleaseEvent(self, event):
+        pass
+
+class Protractor(QtWidgets.QGraphicsPathItem):
+    def __init__(self, qpainterpath):
+        super().__init__(qpainterpath)
+        self.setPen(QtGui.QPen(QtGui.QColor(5, 105, 25)))
+        self.angle_degree = 0
+        self.movable = False
+    def setMovable(self, enable):
+        self.setAcceptHoverEvents(enable)
+        self.movable = enable
+    # mouse hover event
+    def hoverEnterEvent(self, event):
+        app.instance().setOverrideCursor(QtCore.Qt.OpenHandCursor)
+
+    def hoverLeaveEvent(self, event):
+        app.instance().restoreOverrideCursor()
+
+    # mouse click event
+    def mousePressEvent(self, event):
+        pass
+
+    def mouseMoveEvent(self, event):
+        if self.movable:
+            orig_cursor_position = event.lastScenePos()
+            updated_cursor_position = event.scenePos()
+            orig_position = self.scenePos()
+            updated_cursor_x = updated_cursor_position.x() - orig_cursor_position.x() + orig_position.x()
+            updated_cursor_y = updated_cursor_position.y() - orig_cursor_position.y() + orig_position.y()
+            self.setPos(QtCore.QPointF(updated_cursor_x, updated_cursor_y))
+
+    def mouseReleaseEvent(self, event):
+        pass
+
+class Ruler(QtWidgets.QGraphicsLineItem):
+    def __init__(self, x1, y1, x2, y2):
+        super().__init__(x1, y1, x2, y2)
+        self.setPen(QtGui.QPen(QtGui.QColor(5, 105, 25)))
+        self.movable = False
+        self.length = 0
+    def setMovable(self, enable):
+        self.setAcceptHoverEvents(enable)
+        self.movable = enable
+    # mouse hover event
+    def hoverEnterEvent(self, event):
+        app.instance().setOverrideCursor(QtCore.Qt.OpenHandCursor)
+
+    def hoverLeaveEvent(self, event):
+        app.instance().restoreOverrideCursor()
+
+    # mouse click event
+    def mousePressEvent(self, event):
+        pass
+
+    def mouseMoveEvent(self, event):
+        if self.movable:
+            orig_cursor_position = event.lastScenePos()
+            updated_cursor_position = event.scenePos()
+            orig_position = self.scenePos()
+            updated_cursor_x = updated_cursor_position.x() - orig_cursor_position.x() + orig_position.x()
+            updated_cursor_y = updated_cursor_position.y() - orig_cursor_position.y() + orig_position.y()
+            self.setPos(QtCore.QPointF(updated_cursor_x, updated_cursor_y))
+
+    def mouseReleaseEvent(self, event):
+        pass
+    
+
+class Pen(QtWidgets.QGraphicsPathItem):
+    def __init__(self, x1):
+        super().__init__(x1)
+        self.setPen(QtGui.QPen(QtGui.QColor(250, 25, 0)))
+        self.movable = False
+    def setMovable(self, enable):
+        self.setAcceptHoverEvents(enable)
+        self.movable = enable
+    # mouse hover event
+    def hoverEnterEvent(self, event):
+        app.instance().setOverrideCursor(QtCore.Qt.OpenHandCursor)
+
+    def hoverLeaveEvent(self, event):
+        app.instance().restoreOverrideCursor()
+
+    # mouse click event
+    def mousePressEvent(self, event):
+        pass
+
+    def mouseMoveEvent(self, event):
+        if self.movable:
+            orig_cursor_position = event.lastScenePos()
+            updated_cursor_position = event.scenePos()
+            orig_position = self.scenePos()
+            updated_cursor_x = updated_cursor_position.x() - orig_cursor_position.x() + orig_position.x()
+            updated_cursor_y = updated_cursor_position.y() - orig_cursor_position.y() + orig_position.y()
+            self.setPos(QtCore.QPointF(updated_cursor_x, updated_cursor_y))
+
+    def mouseReleaseEvent(self, event):
+        pass
+    
+class PhotoViewer(QtWidgets.QGraphicsView):
+    tool_lock = 'mouse'
+    def __init__(self, parent):
+        super(PhotoViewer, self).__init__(parent)
+        self._zoom = 0
+        self._empty = True
+        self._scene = QtWidgets.QGraphicsScene(self)
+        self.setScene(self._scene)
+        self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
+        self.setResizeAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
+        self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(0, 0, 0)))
+        self.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.ruler_start = False
+        self.protractor_start = False
+        self.pen_start = False
+    def setNewScene(self):
+        self._scene = QtWidgets.QGraphicsScene(self)
+        self.setScene(self._scene)
+    def resetFlags(self):
+        self.ruler_start = False
+        self.protractor_start = False
+        self.pen_start = False
+    #save photo
+    def save(self):
+        save_image = QtGui.QPixmap(self.viewport().size())
+        self.viewport().render(save_image)
+        filePath, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Save Image", "",
+                                                  "PNG(*.png)")  # ;;JPEG(*.jpg *.jpeg);;All Files(*.*)
+        if filePath == "":
+            return
+        save_image.save(filePath)
+
+    def hasPhoto(self):
+        return not self._empty
+
+    def fitInView(self, scale=True):
+        rect = QtCore.QRectF(self._photo.pixmap().rect())
+        if not rect.isNull():
+            self.setSceneRect(rect)
+            if self.hasPhoto():
+                unity = self.transform().mapRect(QtCore.QRectF(0, 0, 1, 1))
+                self.scale(1 / unity.width(), 1 / unity.height())
+                viewrect = self.viewport().rect()
+                scenerect = self.transform().mapRect(rect)
+                factor = min(viewrect.width() / scenerect.width(),
+                             viewrect.height() / scenerect.height())
+                self.scale(factor, factor)
+            self._zoom = 0
+
+    def setPhoto(self, pixmap=None):
+        self._zoom = 0
+        self._photo = QtWidgets.QGraphicsPixmapItem()
+        self._scene.addItem(self._photo)
+        if pixmap and not pixmap.isNull():
+            self._empty = False
+            self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
+            self._photo.setPixmap(pixmap)
+        else:
+            self._empty = True
+            self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
+            self._photo.setPixmap(QtGui.QPixmap())
+        self.fitInView()
+
+    def wheelEvent(self, event):
+        if self.hasPhoto():
+            if event.angleDelta().y() > 0:
+                factor = 1.25
+                self._zoom += 1
+            else:
+                factor = 0.8
+                self._zoom -= 1
+            if self._zoom > 0:
+                self.scale(factor, factor)
+            elif self._zoom == 0:
+                self.fitInView()
+            else:
+                self._zoom = 0
+
+    def toggleDragMode(self):
+        if self.dragMode() == QtWidgets.QGraphicsView.ScrollHandDrag:
+            self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
+        else:
+            self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
+
+    def mousePressEvent(self, event):
+        self.sp = self.mapToScene(event.pos())
+        if PhotoViewer.tool_lock == 'move':
+            print(PhotoViewer.tool_lock)
+        elif PhotoViewer.tool_lock == 'ruler':
+            self.ruler = Ruler(self.sp.x(), self.sp.y(), self.sp.x(), self.sp.y())
+            self.ruler_text_label = QGraphicsLabel("")
+            self._scene.addItem(self.ruler_text_label)
+            self.ruler.setMovable(False)
+            self._scene.addItem(self.ruler)
+            self.ruler_start = True
+        elif PhotoViewer.tool_lock == 'angle':
+            if not self.protractor_start and not self.ruler_start:
+                self.qpainterpath = QtGui.QPainterPath(self.sp)
+                self.protractor = Protractor(self.qpainterpath)
+                self.protractor_text_label = QGraphicsLabel("")
+                self._scene.addItem(self.protractor_text_label)
+                self._scene.addItem(self.protractor)
+                self.protractor_start = True
+            elif not self.protractor_start and self.ruler_start:
+                self.protractor.setMovable(True)
+                self.protractor_text_label.setMovable(True)
+                self.protractor_start = False
+                self.ruler_start = False
+        if PhotoViewer.tool_lock == 'pen':
+            self.pen_path = QtGui.QPainterPath()
+            self.pen_path.moveTo(self.sp)
+            self.pen = Pen(self.pen_path)
+            self.pen.setMovable(False)
+            self.pen.setPath(self.pen_path)
+            self._scene.addItem(self.pen)
+            self.pen_start = True
+        super(PhotoViewer, self).mousePressEvent(event)
+
+    def mouseReleaseEvent(self, event):
+        self.ep = self.mapToScene(event.pos())
+        if PhotoViewer.tool_lock == 'ruler':
+            self.ruler.setLine(self.sp.x(), self.sp.y(), self.ep.x(), self.ep.y())
+            self.ruler.setMovable(True)
+            self.ruler_text_label.setMovable(True)
+            self.ruler_start = False
+        elif PhotoViewer.tool_lock == 'angle':
+            if self.protractor_start:
+                self.qpainterpath.clear()
+                self.qpainterpath.moveTo(self.sp)
+                self.qpainterpath.lineTo(self.ep)
+                self.protractor.setPath(self.qpainterpath)
+                self.protractor_start = False
+                self.ruler_start = True
+        if PhotoViewer.tool_lock == 'pen':
+            self.pen_path.lineTo(self.ep)
+            self.pen.setPath(self.pen_path)
+            self.pen.setMovable(True)
+            self.pen_start = False
+        super(PhotoViewer, self).mouseReleaseEvent(event)
+
+    def mouseMoveEvent(self, event):
+        self.mp = self.mapToScene(event.pos())
+        if PhotoViewer.tool_lock == 'ruler' and self.ruler_start:
+            self.ruler.setLine(self.sp.x(), self.sp.y(), self.mp.x(), self.mp.y())
+            self.length = np.sqrt(QtCore.QPointF.dotProduct(self.sp - self.mp, self.sp - self.mp))
+            self.ruler_text_label.setVisible(True)
+            # self.ruler_text_label.setText("%.2f pixels" % self.length)
+            self.ruler_text_label.setHtml("<div style='background-color:#3c1e1e;font-size:10px;color:#e6e60a;'>" + "%.2f pixels" % self.length + "</div>")
+            if self.sp.x() <= self.mp.x(): 
+                self.ruler_text_label.setPos(self.mp + QtCore.QPointF(10, 0))
+            else:
+                self.ruler_text_label.setPos(self.sp + QtCore.QPointF(10, 0))
+        elif PhotoViewer.tool_lock == 'angle':
+            if self.protractor_start:
+                self.qpainterpath.clear()
+                self.qpainterpath.moveTo(self.sp)
+                self.qpainterpath.lineTo(self.mp)
+                self.protractor.setPath(self.qpainterpath)
+            elif not self.protractor_start and self.ruler_start:
+                self.qpainterpath.clear()
+                self.qpainterpath.moveTo(self.sp)
+                self.qpainterpath.lineTo(self.ep)
+                self.qpainterpath.lineTo(self.mp)
+                self.protractor.setPath(self.qpainterpath)
+                self.protractor_text_label.setVisible(True)
+                spToep = np.sqrt(QtCore.QPointF.dotProduct(self.sp - self.ep, self.sp - self.ep))
+                epTomp = np.sqrt(QtCore.QPointF.dotProduct(self.mp - self.ep, self.mp - self.ep))
+                self.protractor.angle_degree = np.arccos(QtCore.QPointF.dotProduct(self.ep - self.sp, self.ep - self.mp) / spToep / epTomp) * 180 / np.pi
+                # self.protractor_text_label.setText("%.1f°" % self.protractor.angle_degree)
+                self.protractor_text_label.setHtml("<div style='background-color:#3c1e1e;font-size:10px;color:#e6e60a;'>" + "%.1f°" % self.protractor.angle_degree + "</div>")
+                if self.mp.x() > self.ep.x() and self.mp.y() < self.ep.y(): 
+                    self.protractor_text_label.setPos(self.ep + QtCore.QPointF(5, 10))
+                else:
+                    self.protractor_text_label.setPos(self.ep + QtCore.QPointF(5, -25))
+        if PhotoViewer.tool_lock == 'pen' and self.pen_start:
+            self.pen_path.lineTo(self.mp)
+            self.pen.setPath(self.pen_path)
+        super(PhotoViewer, self).mouseMoveEvent(event)
 
 if __name__ == '__main__':
     import sys

@@ -194,7 +194,6 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self._zoom = 0
         self._photo = QtWidgets.QGraphicsPixmapItem()
         self._scene.addItem(self._photo)
-        print("Test")
         if pixmap and not pixmap.isNull():
             self._empty = False
             self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
@@ -344,9 +343,9 @@ class Window(QtWidgets.QWidget):
         self.windows_menu.addAction('move', lambda: self.setToolLock('move'))
         self.windows_menu.addAction('mouse', lambda: self.setToolLock('mouse'))
         self.windows_menu.addAction('clear', lambda: self.setToolLock('clear'))
-        self.windows_menu.addAction('save', lambda: self.save())
-        self.windows_menu.addAction('rotate_right', lambda: self.rotate_right())
-        self.windows_menu.addAction('rotate_left', lambda: self.rotate_left())
+        self.windows_menu.addAction('save', lambda: self.setToolLock('save'))
+        self.windows_menu.addAction('rotate_right', lambda: self.setToolLock('rotate_right'))
+        self.windows_menu.addAction('rotate_left', lambda: self.setToolLock('rotate_left'))
 
         # Arrange layout
         VBlayout = QtWidgets.QVBoxLayout(self)
@@ -365,7 +364,12 @@ class Window(QtWidgets.QWidget):
             self.viewer.toggleDragMode()
         elif PhotoViewer.tool_lock == 'clear':
             self.viewer.setNewScene()
-
+        elif PhotoViewer.tool_lock == 'save':
+            self.save()
+        elif PhotoViewer.tool_lock == 'rotate_right':
+            self.rotate_right()
+        elif PhotoViewer.tool_lock == 'rotate_left':
+            self.rotate_left()
     def loadImage(self):
         ds = dcmread('./tmp_database/01372635/5F327951.dcm')
         arr = ds.pixel_array
