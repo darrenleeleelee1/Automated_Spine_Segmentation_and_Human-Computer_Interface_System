@@ -133,6 +133,11 @@ class initialWidget(QtWidgets.QMainWindow):
         self.pic_adjust_pixels[self.pic_ith][self.pic_jth] = np.copy(self.pic_original_pixels[self.pic_ith][self.pic_jth])
         arr = self.pic_adjust_pixels[self.pic_ith][self.pic_jth]
         self.pic_adjust_pixels[self.pic_ith][self.pic_jth] = np.copy(np.uint16(self.mappingWindow(arr, WL, WW)))
+        qimage = QtGui.QImage(self.pic_adjust_pixels[self.pic_ith][self.pic_jth], self.pic_adjust_pixels[self.pic_ith][self.pic_jth].shape[1], self.pic_adjust_pixels[self.pic_ith][self.pic_jth].shape[0], self.pic_adjust_pixels[self.pic_ith][self.pic_jth].shape[1]*2, QtGui.QImage.Format_Grayscale16).copy()
+        pixmap = QtGui.QPixmap(qimage)
+        pixmap = pixmap.scaled(self.pic_viewer[self.pic_ith][self.pic_jth].width(), self.pic_viewer[self.pic_ith][self.pic_jth].height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+        # print(self.pic_viewer[i][j].width(), self.pic_viewer[i][j].height())
+        self.pic_viewer[self.pic_ith][self.pic_jth].setPhoto(pixmap)
         self.update()
 
     def showCustom(self):
