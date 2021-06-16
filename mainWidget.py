@@ -259,7 +259,6 @@ class initialWidget(QtWidgets.QMainWindow):
     # save photo .png
     def pushButtonSaveClicked(self):
         self.setToolLock('save')
-            
     
     def setToolLock(self, lock):
         self.pic_viewer[self.pic_ith][self.pic_jth].resetFlags()
