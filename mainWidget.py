@@ -19,6 +19,8 @@ import copy
 WINDOW_SIZE = 0
 
 class initialWidget(QtWidgets.QMainWindow):
+    pic_ith = 1 
+    pic_jth = 1
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.ui = Ui_MainWindow()
@@ -50,6 +52,7 @@ class initialWidget(QtWidgets.QMainWindow):
         #右键菜单
         self.ui.patient_list.setContextMenuPolicy(Qt.CustomContextMenu)
         self.ui.patient_list.customContextMenuRequested.connect(self.myListWidgetContext)
+        self.ui.patient_list.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
 
         #brightness相關
@@ -113,7 +116,7 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.pushButton_move.clicked.connect(self.pushButtonMoveClicked) # 移動
         self.ui.patient_list.itemClicked.connect(self.patient_listItemClicked)
         self.ui.recently_list.itemClicked.connect(self.recently_listItemClicked)
-        self.ui.thumbnail_list_1.itemClicked.connect(self.thumbnaillistclicked)
+        self.ui.thumbnail_list_1.itemClicked.connect(self.thumbnail_listItemClicked)
         # self.set_thumbnail('03915480')
 
 
@@ -123,16 +126,16 @@ class initialWidget(QtWidgets.QMainWindow):
     def getWindow(self, WL, WW):
         print(WL, WW)
         if(WL == 0 & WW == 0): # default
-            ds = self.dicoms[self.pic_ith][self.pic_jth]
+            ds = self.dicoms[initialWidget.pic_ith][initialWidget.pic_jth]
             WL = ds[0x0028, 0x1050].value
             WW = ds[0x0028, 0x1051].value
         elif(WL == 1 & WW == 1): # custom
             WL, WW = self.showCustom()
             if(WL == 0 & WW == 0):
                 return
-        self.pic_adjust_pixels[self.pic_ith][self.pic_jth] = np.copy(self.pic_original_pixels[self.pic_ith][self.pic_jth])
-        arr = self.pic_adjust_pixels[self.pic_ith][self.pic_jth]
-        self.pic_adjust_pixels[self.pic_ith][self.pic_jth] = np.copy(np.uint16(self.mappingWindow(arr, WL, WW)))
+        self.pic_adjust_pixels[initialWidget.pic_ith][initialWidget.pic_jth] = np.copy(self.pic_original_pixels[initialWidget.pic_ith][initialWidget.pic_jth])
+        arr = self.pic_adjust_pixels[initialWidget.pic_ith][initialWidget.pic_jth]
+        self.pic_adjust_pixels[initialWidget.pic_ith][initialWidget.pic_jth] = np.copy(np.uint16(self.mappingWindow(arr, WL, WW)))
         self.update()
 
     def showCustom(self):
@@ -154,49 +157,49 @@ class initialWidget(QtWidgets.QMainWindow):
     
     # 設定照片處理的地方有幾格
     def setPicWindows(self, x):
-        # print("i ", self.pic_windows[self.pic_ith], " x ", x)
-        if self.pic_windows[self.pic_ith] > x:
-            for k in range(x + 1, self.pic_windows[self.pic_ith] + 1):
-                self.gridLayout_list[self.pic_ith].removeWidget(self.pic_viewer[self.pic_ith][k])
-                self.pic_viewer[self.pic_ith][k].deleteLater()
-                # self.pic_viewer[self.pic_ith][k].setNewScence()
+        # print("i ", self.pic_windows[initialWidget.pic_ith], " x ", x)
+        if self.pic_windows[initialWidget.pic_ith] > x:
+            for k in range(x + 1, self.pic_windows[initialWidget.pic_ith] + 1):
+                self.gridLayout_list[initialWidget.pic_ith].removeWidget(self.pic_viewer[initialWidget.pic_ith][k])
+                self.pic_viewer[initialWidget.pic_ith][k].deleteLater()
+                # self.pic_viewer[initialWidget.pic_ith][k].setNewScence()
             if x == 3:
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][1], 0, 0, 1, 1)
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][2], 0, 1, 1, 1)
-                self.gridLayout_list[self.pic_ith].removeWidget(self.pic_viewer[self.pic_ith][3])
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][3], 0, 2, 1, 1)
-            self.pic_windows[self.pic_ith] = x
-        if self.pic_windows[self.pic_ith] < x:
-            for k in range(self.pic_windows[self.pic_ith] + 1, x + 1):
-                label = QtWidgets.QLabel(self.pic_frame_list[self.pic_ith])
+                self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][1], 0, 0, 1, 1)
+                self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][2], 0, 1, 1, 1)
+                self.gridLayout_list[initialWidget.pic_ith].removeWidget(self.pic_viewer[initialWidget.pic_ith][3])
+                self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][3], 0, 2, 1, 1)
+            self.pic_windows[initialWidget.pic_ith] = x
+        if self.pic_windows[initialWidget.pic_ith] < x:
+            for k in range(self.pic_windows[initialWidget.pic_ith] + 1, x + 1):
+                label = QtWidgets.QLabel(self.pic_frame_list[initialWidget.pic_ith])
                 label.setStyleSheet("background-color: black; border: 3px solid black;")
-                # self.pic_viewer[self.pic_ith][k] = label
-                pointer = PhotoViewer(self)
-                self.pic_viewer[self.pic_ith][k] = pointer
+                # self.pic_viewer[initialWidget.pic_ith][k] = label
+                pointer = PhotoViewer(self, initialWidget.pic_ith, k)
+                self.pic_viewer[initialWidget.pic_ith][k] = pointer
             if x == 2:
-                print(self.pic_viewer[self.pic_ith][1].width(), self.pic_viewer[self.pic_ith][1].height())
-                print(self.pic_viewer[self.pic_ith][2].width(), self.pic_viewer[self.pic_ith][2].height())
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][1], 0, 0, 1, 1)
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][2], 0, 1, 1, 1)
-                self.showPic(self.pic_ith, 1, "01372635","5F3279B8.dcm")
-                self.showPic(self.pic_ith, 2, "01372635","5F327951.dcm")
+                print(self.pic_viewer[initialWidget.pic_ith][1].width(), self.pic_viewer[initialWidget.pic_ith][1].height())
+                print(self.pic_viewer[initialWidget.pic_ith][2].width(), self.pic_viewer[initialWidget.pic_ith][2].height())
+                self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][1], 0, 0, 1, 1)
+                self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][2], 0, 1, 1, 1)
+                self.showPic(initialWidget.pic_ith, 1, "01372635","5F3279B8.dcm")
+                self.showPic(initialWidget.pic_ith, 2, "01372635","5F327951.dcm")
             elif x == 3:
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][1], 0, 0, 1, 1)
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][2], 0, 1, 1, 1)
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][3], 0, 2, 1, 1)
-                self.showPic(self.pic_ith, 1, "01372635","5F3279B8.dcm")
-                self.showPic(self.pic_ith, 2, "01372635","5F327951.dcm")
-                self.showPic(self.pic_ith, 3, "03915480","5F329172_20170623_CR_2_1_1.dcm")
+                self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][1], 0, 0, 1, 1)
+                self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][2], 0, 1, 1, 1)
+                self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][3], 0, 2, 1, 1)
+                self.showPic(initialWidget.pic_ith, 1, "01372635","5F3279B8.dcm")
+                self.showPic(initialWidget.pic_ith, 2, "01372635","5F327951.dcm")
+                self.showPic(initialWidget.pic_ith, 3, "03915480","5F329172_20170623_CR_2_1_1.dcm")
             elif x == 4:
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][1], 0, 0, 1, 1)
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][2], 0, 1, 1, 1)
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][3], 1, 0, 1, 1)
-                self.gridLayout_list[self.pic_ith].addWidget(self.pic_viewer[self.pic_ith][4], 1, 1, 1, 1)
-                # self.showPic(self.pic_ith, 1, "01372635","5F3279B8.dcm")
-                # self.showPic(self.pic_ith, 2, "01372635","5F327951.dcm")
-                # self.showPic(self.pic_ith, 3, "03915480","5F329172_20170623_CR_2_1_1.dcm")
-                # self.showPic( self.pic_ith, 4, "03915480","5F329172_20170623_CR_2_1_1.dcm")
-            self.pic_windows[self.pic_ith] = x
+                self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][1], 0, 0, 1, 1)
+                self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][2], 0, 1, 1, 1)
+                self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][3], 1, 0, 1, 1)
+                self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][4], 1, 1, 1, 1)
+                # self.showPic(initialWidget.pic_ith, 1, "01372635","5F3279B8.dcm")
+                # self.showPic(initialWidget.pic_ith, 2, "01372635","5F327951.dcm")
+                # self.showPic(initialWidget.pic_ith, 3, "03915480","5F329172_20170623_CR_2_1_1.dcm")
+                # self.showPic( initialWidget.pic_ith, 4, "03915480","5F329172_20170623_CR_2_1_1.dcm")
+            self.pic_windows[initialWidget.pic_ith] = x
 #按鈕連結處--------------------------------------------------------------------------------------------------------
     # 鼠標
     def pushButtonMouseClicked(self):
@@ -227,12 +230,12 @@ class initialWidget(QtWidgets.QMainWindow):
         self.setToolLock('pen')
     # 清除
     def pushButtonEraseClicked(self):
-        self.transparent_pix[self.pic_ith][self.pic_jth].fill(Qt.transparent)
-        self.angle_coordinate_list[self.pic_ith][self.pic_jth].clear()
+        self.transparent_pix[initialWidget.pic_ith][initialWidget.pic_jth].fill(Qt.transparent)
+        self.angle_coordinate_list[initialWidget.pic_ith][initialWidget.pic_jth].clear()
         self.update()
         # 清除後必須將畫筆設為初始位置，否則會存到上次最後的位置，而有一小黑點
-        self.pen_start_x[self.pic_ith][self.pic_jth] = self.pen_start_y[self.pic_ith][self.pic_jth] = -10
-        self.pen_end_x[self.pic_ith][self.pic_jth] = self.pen_end_y[self.pic_ith][self.pic_jth] = -10
+        self.pen_start_x[initialWidget.pic_ith][initialWidget.pic_jth] = self.pen_start_y[initialWidget.pic_ith][initialWidget.pic_jth] = -10
+        self.pen_end_x[initialWidget.pic_ith][initialWidget.pic_jth] = self.pen_end_y[initialWidget.pic_ith][initialWidget.pic_jth] = -10
     
     # 加照片
     def pushButtonAddPicClicked(self):
@@ -241,8 +244,8 @@ class initialWidget(QtWidgets.QMainWindow):
                 print("\n取消")
                 return
         print(pic_file_path)
-        #print(self.pic_ith)
-        pt_id = list(self.patient_mapto_page.keys())[list(self.patient_mapto_page.values()).index(self.pic_ith)]
+        #print(initialWidget.pic_ith)
+        pt_id = list(self.patient_mapto_page.keys())[list(self.patient_mapto_page.values()).index(initialWidget.pic_ith)]
         tmp_dst = './tmp/' + pt_id
         if(os.path.exists(tmp_dst)):
             self.picAlreadyExist()
@@ -261,18 +264,18 @@ class initialWidget(QtWidgets.QMainWindow):
         self.setToolLock('save')
     
     def setToolLock(self, lock):
-        self.pic_viewer[self.pic_ith][self.pic_jth].resetFlags()
+        self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].resetFlags()
         PhotoViewer.tool_lock = lock
         if PhotoViewer.tool_lock == 'move':
-            self.pic_viewer[self.pic_ith][self.pic_jth].toggleDragMode()
+            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].toggleDragMode()
         elif PhotoViewer.tool_lock == 'clear':
-            self.pic_viewer[self.pic_ith][self.pic_jth].setNewScene()
+            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].setNewScene()
         elif PhotoViewer.tool_lock == 'save':
-            self.pic_viewer[self.pic_ith][self.pic_jth].save()
+            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].save()
         elif PhotoViewer.tool_lock == 'rotate_right':
-            self.pic_viewer[self.pic_ith][self.pic_jth].rotate(90)
+            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].rotate(90)
         elif PhotoViewer.tool_lock == 'rotate_left':
-            self.pic_viewer[self.pic_ith][self.pic_jth].rotate(-90)
+            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].rotate(-90)
 
 
     # 對比度的選單設定
@@ -379,7 +382,7 @@ class initialWidget(QtWidgets.QMainWindow):
         temp = self.empty_page_stack[-1]
         self.empty_page_stack.pop()
         self.patient_mapto_page[pt_id] = temp
-        self.pic_ith = temp
+        initialWidget.pic_ith = temp
         self.ui.patient_list.addItem(pt_id)
         self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
         temp_page = self.patient_mapto_page[pt_id]
@@ -407,7 +410,7 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
         temp = str(item.text())
         temp_page = self.patient_mapto_page[temp]
-        self.pic_ith = self.patient_mapto_page[temp]
+        initialWidget.pic_ith = self.patient_mapto_page[temp]
         self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[temp_page])
 
     # menu 伸縮
@@ -435,40 +438,55 @@ class initialWidget(QtWidgets.QMainWindow):
         close_path = "./tmp/" + close_id
         for filename in os.listdir(close_path):
             file_path = close_path + '/' + filename
-            print(file_path)
             os.remove(file_path)
         os.rmdir(close_path)
+        if(self.ui.patient_list.count() == 0 & curRow == 0): # if close the last one
+            self.ui.stackedWidget_right.setCurrentWidget(self.ui.search_page)
+        elif(curRow == 0): # close first
+            get_next_id = self.ui.patient_list.item(curRow)
+            next_pt = str(get_next_id.text())
+            temp_page = self.patient_mapto_page[next_pt]
+            initialWidget.pic_ith = temp_page
+            self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[temp_page])
+        else: # close other patient
+            get_next_id = self.ui.patient_list.item(curRow - 1)
+            next_pt = str(get_next_id.text())
+            temp_page = self.patient_mapto_page[next_pt]
+            initialWidget.pic_ith = temp_page
+            self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[temp_page])
+
 
 # Thumbnail-------------------------------------------------------------------------------------------------------
     def set_thumbnail(self, pt_id):
         pt_path = './tmp/' + pt_id
         i = self.patient_mapto_page[pt_id]
+        self.thumbnail_list[i].setViewMode(QListWidget.IconMode)
+        self.thumbnail_list[i].setItemAlignment(Qt.AlignCenter)
         for filename in os.listdir(pt_path):
             if not filename.endswith('.dcm') :
                 continue
             dicom_path = pt_path + '/' + filename
             ds = dcmread(dicom_path)
-
             arr = ds.pixel_array
             arr = np.uint16(arr)
             dicom_WL = ds[0x0028, 0x1050].value
             dicom_WW = ds[0x0028, 0x1051].value
+            SD = ds[0x0008, 0x103e].value #Series_Description
+            # SN = str(ds[0x0020, 0x0011].value) #Series Number
             arr = self.mappingWindow(arr, dicom_WL, dicom_WW)
             qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1]*2, QtGui.QImage.Format_Grayscale16).copy()
             pixmap = QtGui.QPixmap(qimage)
-            self.thumbnail_list[i].setViewMode(QListView.IconMode)
-            self.thumbnail_list[i].setItemAlignment(Qt.AlignCenter)
             item = QListWidgetItem()
-            item.setText('picture')
+            item.setSizeHint(QSize(219, 250))
+            item.setText(SD)
             icon = QtGui.QIcon(pixmap)
             item.setIcon(icon)
             self.thumbnail_list[i].addItem(item) 
 
-        size = QSize(225, 225)
+        size = QSize(215, 215)
         self.thumbnail_list[i].setIconSize(size)
 
-        
-    def thumbnaillistclicked(self):
+    def thumbnail_listItemClicked(self):
         print("test")
 # search page-----------------------------------------------------------------------------------------------------
     # search
@@ -527,7 +545,7 @@ class initialWidget(QtWidgets.QMainWindow):
             else:
                 self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
                 temp_page = self.patient_mapto_page[pt_id]
-                self.pic_ith = self.patient_mapto_page[pt_id]
+                initialWidget.pic_ith = self.patient_mapto_page[pt_id]
                 self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[temp_page])
                 self.opened_list.append(pt_id)
             # print(pt_id + "test")
@@ -623,8 +641,8 @@ class initialWidget(QtWidgets.QMainWindow):
         arr = copy.deepcopy(ds.pixel_array)
         arr = np.uint16(arr)
         self.pic_original_pixels[i][j] = np.copy(arr)
-        self.pic_ith = i
-        self.pic_jth = j
+        initialWidget.pic_ith = i
+        initialWidget.pic_jth = j
         dicom_WL = ds[0x0028, 0x1050].value
         dicom_WW = ds[0x0028, 0x1051].value
         self.pic_adjust_pixels[i][j] = self.mappingWindow(arr, dicom_WL, dicom_WW)
@@ -632,7 +650,7 @@ class initialWidget(QtWidgets.QMainWindow):
         pixmap = QtGui.QPixmap(qimage)
         pixmap = pixmap.scaled(self.pic_viewer[i][j].width(), self.pic_viewer[i][j].height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
         # print(self.pic_viewer[i][j].width(), self.pic_viewer[i][j].height())
-        self.pic_viewer[self.pic_ith][self.pic_jth].setPhoto(pixmap)
+        self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].setPhoto(pixmap)
     def linkPage2Array(self, _MAXIMUM_PAGE = 5, _MAXIMUM_PIC = 4):
         # 把QtDesigner的一些重複的Widget用array對應
         # patient_page
@@ -671,7 +689,7 @@ class initialWidget(QtWidgets.QMainWindow):
         # pic Viewer
         self.pic_viewer = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 對應到照片的viewer array
         for i in range(1, self.MAXIMUM_PAGE + 1):
-            pointer = PhotoViewer(self)
+            pointer = PhotoViewer(self, i, 1)
             self.pic_viewer[i][1] = pointer
             self.gridLayout_list[i].addWidget(self.pic_viewer[i][1], 0, 0, 1, 1)
         # Image Processing Attributes
@@ -747,7 +765,7 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.ruler_coordinate_list[i][j] = []
 
         self.pic_cnt = [0] * (self.MAXIMUM_PAGE + 1)
-        self.pic_ith = self.pic_jth = 1
+        initialWidget.pic_ith = initialWidget.pic_jth = 1
         self.rotate_coordinate_system = [[0, 0], [512, 0], [512, 512], [0, 512]]
         # 畫圖透明canvas
         self.transparent_pix = [ [0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
@@ -935,8 +953,10 @@ class Pen(QtWidgets.QGraphicsPathItem):
     
 class PhotoViewer(QtWidgets.QGraphicsView):
     tool_lock = 'mouse'
-    def __init__(self, parent):
+    def __init__(self, parent, _i, _j):
         super(PhotoViewer, self).__init__(parent)
+        self.in_ith = _i
+        self.in_jth = _j
         self._zoom = 0
         self._empty = True
         self._scene = QtWidgets.QGraphicsScene(self)
@@ -950,8 +970,10 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.ruler_start = False
         self.protractor_start = False
         self.pen_start = False
+    
     def setNewScene(self):
         self._scene = QtWidgets.QGraphicsScene(self)
+        self._empty = True
         self.setScene(self._scene)
     def resetFlags(self):
         self.ruler_start = False
@@ -1019,8 +1041,11 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         else:
             self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
 
+
     def mousePressEvent(self, event):
         self.sp = self.mapToScene(event.pos())
+        initialWidget.pic_ith = self.in_ith
+        initialWidget.pic_jth = self.in_jth
         if PhotoViewer.tool_lock == 'move':
             print(PhotoViewer.tool_lock)
         elif PhotoViewer.tool_lock == 'ruler':
