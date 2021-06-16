@@ -5,15 +5,13 @@ from pydicom import dcmread
 import numpy as np
 
 
-class QGraphicsLabel(QtWidgets.QGraphicsSimpleTextItem):
+class QGraphicsLabel(QtWidgets.QGraphicsTextItem):
     def __init__(self, text):
         super().__init__(text)
-        self.setPen(QtGui.QPen(QtGui.QColor(230, 230, 10)))
-        self.setFont(QtGui.QFont('Times', 8))
+        # self.setPen(QtGui.QPen(QtGui.QColor(230, 230, 10)))
         # self.setBrush(QtGui.QBrush(QtGui.QColor(60, 30, 30)))
         self.movable = False
         self.setVisible(False)
-    
     def setMovable(self, enable):
         self.setAcceptHoverEvents(enable)
         self.movable = enable
@@ -79,7 +77,7 @@ class Ruler(QtWidgets.QGraphicsLineItem):
         self.movable = False
         self.length = 0
     def setMovable(self, enable):
-        #self.setAcceptHoverEvents(enable)
+        self.setAcceptHoverEvents(enable)
         self.movable = enable
     # mouse hover event
     def hoverEnterEvent(self, event):
@@ -137,25 +135,31 @@ class Pen(QtWidgets.QGraphicsPathItem):
         pass
     
 class PhotoViewer(QtWidgets.QGraphicsView):
-    tool_lock = 'move'
+    tool_lock = 'mouse'
     def __init__(self, parent):
         super(PhotoViewer, self).__init__(parent)
         self._zoom = 0
         self._empty = True
         self._scene = QtWidgets.QGraphicsScene(self)
-        self._photo = QtWidgets.QGraphicsPixmapItem()
-        self._scene.addItem(self._photo)
         self.setScene(self._scene)
         self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
         self.setResizeAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
         self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(30, 30, 30)))
+        self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(0, 0, 0)))
         self.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.ruler_start = False
         self.protractor_start = False
         self.pen_start = False
 
+
+    def setNewScene(self):
+        self._scene = QtWidgets.QGraphicsScene(self)
+        self.setScene(self._scene)
+    def resetFlags(self):
+        self.ruler_start = False
+        self.protractor_start = False
+        self.pen_start = False
     #save photo
     def save(self):
         save_image = QtGui.QPixmap(self.viewport().size())
@@ -185,6 +189,9 @@ class PhotoViewer(QtWidgets.QGraphicsView):
 
     def setPhoto(self, pixmap=None):
         self._zoom = 0
+        self._photo = QtWidgets.QGraphicsPixmapItem()
+        self._scene.addItem(self._photo)
+        print("Test")
         if pixmap and not pixmap.isNull():
             self._empty = False
             self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
@@ -240,6 +247,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 self.protractor_text_label.setMovable(True)
                 self.protractor_start = False
                 self.ruler_start = False
+
         if PhotoViewer.tool_lock == 'pen':
             self.pen_path = QPainterPath()
             self.pen_path.moveTo(self.sp)
@@ -255,7 +263,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         if PhotoViewer.tool_lock == 'ruler':
             self.ruler.setLine(self.sp.x(), self.sp.y(), self.ep.x(), self.ep.y())
             self.ruler.setMovable(True)
-            self.ruler_text_label.setMovable
+            self.ruler_text_label.setMovable(True)
             self.ruler_start = False
         elif PhotoViewer.tool_lock == 'angle':
             if self.protractor_start:
@@ -278,7 +286,8 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             self.ruler.setLine(self.sp.x(), self.sp.y(), self.mp.x(), self.mp.y())
             self.length = np.sqrt(QtCore.QPointF.dotProduct(self.sp - self.mp, self.sp - self.mp))
             self.ruler_text_label.setVisible(True)
-            self.ruler_text_label.setText("%.2f pixels" % self.length)
+            # self.ruler_text_label.setText("%.2f pixels" % self.length)
+            self.ruler_text_label.setHtml("<div style='background-color:#3c1e1e;font-size:10px;color:#e6e60a;'>" + "%.2f pixels" % self.length + "</div>")
             if self.sp.x() <= self.mp.x(): 
                 self.ruler_text_label.setPos(self.mp + QtCore.QPointF(10, 0))
             else:
@@ -299,7 +308,8 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 spToep = np.sqrt(QtCore.QPointF.dotProduct(self.sp - self.ep, self.sp - self.ep))
                 epTomp = np.sqrt(QtCore.QPointF.dotProduct(self.mp - self.ep, self.mp - self.ep))
                 self.protractor.angle_degree = np.arccos(QtCore.QPointF.dotProduct(self.ep - self.sp, self.ep - self.mp) / spToep / epTomp) * 180 / np.pi
-                self.protractor_text_label.setText("%.1f°" % self.protractor.angle_degree)
+                # self.protractor_text_label.setText("%.1f°" % self.protractor.angle_degree)
+                self.protractor_text_label.setHtml("<div style='background-color:#3c1e1e;font-size:10px;color:#e6e60a;'>" + "%.1f°" % self.protractor.angle_degree + "</div>")
                 if self.mp.x() > self.ep.x() and self.mp.y() < self.ep.y(): 
                     self.protractor_text_label.setPos(self.ep + QtCore.QPointF(5, 10))
                 else:
@@ -308,11 +318,12 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             self.pen_path.lineTo(self.mp)
             self.pen.setPath(self.pen_path)
         super(PhotoViewer, self).mouseMoveEvent(event)
-        
+
 class Window(QtWidgets.QWidget):
     def __init__(self):
         super(Window, self).__init__()
         self.viewer = PhotoViewer(self)
+        self.viewer2 = PhotoViewer(self)
         # 'Load image' button
         self.btnLoad = QtWidgets.QToolButton(self)
         self.btnLoad.setText('Load image')
@@ -324,11 +335,15 @@ class Window(QtWidgets.QWidget):
         self.windows_menu.addAction('pen', lambda: self.setToolLock('pen'))
         self.windows_menu.addAction('move', lambda: self.setToolLock('move'))
         self.windows_menu.addAction('mouse', lambda: self.setToolLock('mouse'))
+        self.windows_menu.addAction('clear', lambda: self.setToolLock('clear'))
         self.windows_menu.addAction('save', lambda: self.save())
+        self.windows_menu.addAction('rotate_right', lambda: self.rotate_right())
+        self.windows_menu.addAction('rotate_left', lambda: self.rotate_left())
 
         # Arrange layout
         VBlayout = QtWidgets.QVBoxLayout(self)
         VBlayout.addWidget(self.viewer)
+        VBlayout.addWidget(self.viewer2)
         HBlayout = QtWidgets.QHBoxLayout()
         HBlayout.setAlignment(QtCore.Qt.AlignLeft)
         HBlayout.addWidget(self.btnLoad)
@@ -336,9 +351,12 @@ class Window(QtWidgets.QWidget):
         VBlayout.addLayout(HBlayout)
 
     def setToolLock(self, lock):
+        self.viewer.resetFlags()
         PhotoViewer.tool_lock = lock
         if PhotoViewer.tool_lock == 'move':
             self.viewer.toggleDragMode()
+        elif PhotoViewer.tool_lock == 'clear':
+            self.viewer.setNewScene()
 
     def loadImage(self):
         ds = dcmread('./tmp_database/01372635/5F327951.dcm')
@@ -351,6 +369,7 @@ class Window(QtWidgets.QWidget):
         pixmap = QtGui.QPixmap.fromImage(qimage)
         # pixmap = pixmap.scaled(self.photo.width(), self.photo.height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
         self.viewer.setPhoto(pixmap)
+        self.viewer2.setPhoto(pixmap)
 
     def save(self):
         self.viewer.save()
@@ -361,6 +380,12 @@ class Window(QtWidgets.QWidget):
         arr = np.clip(arr, pixel_min, pixel_max)
         arr = (arr - pixel_min) / (pixel_max - pixel_min) * 65535
         return np.copy(np.uint16(arr))
+
+    def rotate_right(self):
+        self.viewer.rotate(90)
+
+    def rotate_left(self):
+        self.viewer.rotate(-90)
 
 if __name__ == '__main__':
     import sys
