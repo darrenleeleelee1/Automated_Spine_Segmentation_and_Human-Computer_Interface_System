@@ -941,6 +941,7 @@ class initialWidget(QtWidgets.QMainWindow):
         qimage = QtGui.QImage(self.pic_adjust_pixels[i][j], self.pic_adjust_pixels[i][j].shape[1], self.pic_adjust_pixels[i][j].shape[0], self.pic_adjust_pixels[i][j].shape[1]*2, QtGui.QImage.Format_Grayscale16).copy()
         pixmap = QtGui.QPixmap(qimage)
         self.pic_viewer[self.pic_ith][self.pic_jth].setPhoto(pixmap)
+
     def linkPage2Array(self, _MAXIMUM_PAGE = 5, _MAXIMUM_PIC = 4):
         # 把QtDesigner的一些重複的Widget用array對應
         # patient_page
