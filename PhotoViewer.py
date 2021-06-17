@@ -13,6 +13,7 @@ class QGraphicsLabel(QtWidgets.QGraphicsTextItem):
         self.movable = False
         self.setVisible(False)
         self.setRotation(window.rotate_angle)
+
         
     def setMovable(self, enable):
         self.setAcceptHoverEvents(enable)
@@ -260,9 +261,9 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         super(PhotoViewer, self).mousePressEvent(event)
 
     def labelRotate(self):
-        if(self.ruler_text_label):
-            self.ruler_text_label.setRotate(-window.rotate_angle)
-
+        for item in self._scene.items():
+            if isinstance(item, QGraphicsLabel):
+                item.setRotate(-window.rotate_angle)
 
     def mouseReleaseEvent(self, event):
         self.ep = self.mapToScene(event.pos())

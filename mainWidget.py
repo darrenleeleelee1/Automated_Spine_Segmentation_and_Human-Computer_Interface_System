@@ -37,7 +37,7 @@ class initialWidget(QtWidgets.QMainWindow):
 
         self.tmp_cnt = 0
 
-        # 控制工具列現在選擇的工具為: mouse(defalut), pen, angle, ruler, move, zoom_in, zoom_out
+        # 控制工具列現在選擇的工具為: mouse(defalut), pen, angle, ruler, move, magnifier
         self.tool_lock = "mouse"
          # patient num map to page
         self.empty_page_stack = []
@@ -79,8 +79,6 @@ class initialWidget(QtWidgets.QMainWindow):
         self.saveOpened()
         event.accept()
 
-        
-        
 
     def backend(self):
         self.ui.stackedWidget_right.setCurrentWidget(self.ui.recently_viewed_page)
@@ -107,12 +105,10 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.pushButton_save.clicked.connect(self.pushButtonSaveClicked) # 儲存照片按鈕連結
         self.ui.pushButton_mouse.clicked.connect(self.pushButtonMouseClicked) # 鼠標
         self.ui.pushButton_erase.clicked.connect(self.pushButtonEraseClicked) # 清除畫筆、角度
-        self.ui.pushButton_magnifier.clicked.connect(lambda: self.slideMagnifierZoomInOrOut())  # 打開放大縮小的frame
+        self.ui.pushButton_magnifier.clicked.connect(self.pushButtonMagnifier)  # 放大 縮小
         self.ui.pushButton_rotate.clicked.connect(lambda: self.slideRotateLeftOrRight())    # 打開旋轉的frame
         self.ui.pushButton_rotate_right.clicked.connect(self.rotate_image_right)    #向右旋轉
         self.ui.pushButton_rotate_left.clicked.connect(self.rotate_image_left)  #向左旋轉
-        self.ui.zoomIn.clicked.connect(self.image_zoom_in) # 放大
-        self.ui.zoomOut.clicked.connect(self.image_zoom_out) # 縮小 
         self.ui.pushButton_move.clicked.connect(self.pushButtonMoveClicked) # 移動
         self.ui.patient_list.itemClicked.connect(self.patient_listItemClicked)
         self.ui.recently_list.itemClicked.connect(self.recently_listItemClicked)
@@ -207,12 +203,9 @@ class initialWidget(QtWidgets.QMainWindow):
     # 移動
     def pushButtonMoveClicked(self):
         self.setToolLock('move')
-    # 放大
-    def image_zoom_in(self):
-        self.setToolLock('zoom_in')
-    # 縮小
-    def image_zoom_out(self):
-        self.setToolLock('zoom_out')
+    # 放大 縮小
+    def pushButtonMagnifier(self):
+        self.setToolLock('magnifier')
     # 順時鐘轉
     def rotate_image_right(self):
         self.setToolLock('rotate_right')
@@ -290,22 +283,7 @@ class initialWidget(QtWidgets.QMainWindow):
         self.window_menu.addAction('[2560/5120]', lambda: self.getWindow(2560, 5120))
         self.window_menu.addAction('Custom window', lambda: self.getWindow(1, 1))
         self.ui.pushButton_brightness.setMenu(self.window_menu)
-    
-    
 
-
-    def slideMagnifierZoomInOrOut(self):
-            zoom_frame_width = self.ui.zoom_frame.width()
-            if zoom_frame_width == 0:
-                new_zoom_frame_width = 100
-            else:
-                new_zoom_frame_width = 0
-            self.animation = QPropertyAnimation(self.ui.zoom_frame, b"minimumWidth")
-            self.animation.setDuration(250)
-            self.animation.setStartValue(zoom_frame_width)
-            self.animation.setEndValue(new_zoom_frame_width)
-            self.animation.setEasingCurve(QtCore.QEasingCurve.InOutQuart)
-            self.animation.start()
 
     def slideRotateLeftOrRight(self):
         rotate_frame_width = self.ui.rotate_frame.width()
@@ -1021,19 +999,20 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.fitInView()
 
     def wheelEvent(self, event):
-        if self.hasPhoto():
-            if event.angleDelta().y() > 0:
-                factor = 1.25
-                self._zoom += 1
-            else:
-                factor = 0.8
-                self._zoom -= 1
-            if self._zoom > 0:
-                self.scale(factor, factor)
-            elif self._zoom == 0:
-                self.fitInView()
-            else:
-                self._zoom = 0
+        if PhotoViewer.tool_lock == 'magnifier':
+            if self.hasPhoto():
+                if event.angleDelta().y() > 0:
+                    factor = 1.25
+                    self._zoom += 1
+                else:
+                    factor = 0.8
+                    self._zoom -= 1
+                if self._zoom > 0:
+                    self.scale(factor, factor)
+                elif self._zoom == 0:
+                    self.fitInView()
+                else:
+                    self._zoom = 0
 
     def toggleDragMode(self):
         if self.dragMode() == QtWidgets.QGraphicsView.ScrollHandDrag:
