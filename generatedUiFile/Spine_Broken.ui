@@ -948,21 +948,18 @@ margin:50px;</string>
                    <property name="frameShadow">
                     <enum>QFrame::Raised</enum>
                    </property>
-                   <layout class="QVBoxLayout" name="verticalLayout_8">
-                    <property name="spacing">
+                   <layout class="QHBoxLayout" name="horizontalLayout_16">
+                    <property name="leftMargin">
                      <number>0</number>
                     </property>
-                    <property name="leftMargin">
-                     <number>6</number>
-                    </property>
                     <property name="topMargin">
-                     <number>6</number>
+                     <number>0</number>
                     </property>
                     <property name="rightMargin">
-                     <number>6</number>
+                     <number>0</number>
                     </property>
                     <property name="bottomMargin">
-                     <number>6</number>
+                     <number>0</number>
                     </property>
                     <item>
                      <widget class="QListWidget" name="thumbnail_list_1">
@@ -1901,13 +1898,20 @@ QPushButton{
                    </size>
                   </property>
                   <property name="text">
-                   <string>windows</string>
+                   <string/>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="res/icons.qrc">
+                    <normaloff>:/icons/grid.png</normaloff>:/icons/grid.png</iconset>
                   </property>
                   <property name="iconSize">
                    <size>
                     <width>30</width>
                     <height>30</height>
                    </size>
+                  </property>
+                  <property name="flat">
+                   <bool>true</bool>
                   </property>
                  </widget>
                 </item>
