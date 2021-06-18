@@ -1038,7 +1038,6 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             #print("沒手手")
             self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
 
-
     def mousePressEvent(self, event):
         self.sp = self.mapToScene(event.pos())
         initialWidget.pic_ith = self.in_ith
