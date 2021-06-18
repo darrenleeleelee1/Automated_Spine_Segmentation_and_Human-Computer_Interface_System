@@ -12,6 +12,9 @@ class QGraphicsLabel(QtWidgets.QGraphicsTextItem):
         # self.setBrush(QtGui.QBrush(QtGui.QColor(60, 30, 30)))
         self.movable = False
         self.setVisible(False)
+        self.setRotation(window.rotate_angle)
+
+        
     def setMovable(self, enable):
         self.setAcceptHoverEvents(enable)
         self.movable = enable
@@ -37,6 +40,9 @@ class QGraphicsLabel(QtWidgets.QGraphicsTextItem):
 
     def mouseReleaseEvent(self, event):
         pass
+
+    def setRotate(self, rotate_angle):
+        self.setRotation(-rotate_angle)
 
 class Protractor(QtWidgets.QGraphicsPathItem):
     def __init__(self, qpainterpath):
@@ -263,6 +269,11 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             self.pen_start = True
         super(PhotoViewer, self).mousePressEvent(event)
 
+    def labelRotate(self):
+        for item in self._scene.items():
+            if isinstance(item, QGraphicsLabel):
+                item.setRotate(-window.rotate_angle)
+
     def mouseReleaseEvent(self, event):
         self.ep = self.mapToScene(event.pos())
         if PhotoViewer.tool_lock == 'ruler':
@@ -328,7 +339,8 @@ class Window(QtWidgets.QWidget):
     def __init__(self):
         super(Window, self).__init__()
         self.viewer = PhotoViewer(self)
-        self.viewer2 = PhotoViewer(self)
+        # self.viewer2 = PhotoViewer(self)
+        self.rotate_angle = 0
         # 'Load image' button
         self.btnLoad = QtWidgets.QToolButton(self)
         self.btnLoad.setText('Load image')
@@ -348,7 +360,7 @@ class Window(QtWidgets.QWidget):
         # Arrange layout
         VBlayout = QtWidgets.QVBoxLayout(self)
         VBlayout.addWidget(self.viewer)
-        VBlayout.addWidget(self.viewer2)
+        # VBlayout.addWidget(self.viewer2)
         HBlayout = QtWidgets.QHBoxLayout()
         HBlayout.setAlignment(QtCore.Qt.AlignLeft)
         HBlayout.addWidget(self.btnLoad)
@@ -357,7 +369,7 @@ class Window(QtWidgets.QWidget):
 
     def setToolLock(self, lock):
         self.viewer.resetFlags()
-        self.viewer.Moveable(False)
+        self.viewer.Movable(False)
         PhotoViewer.tool_lock = lock
         if PhotoViewer.tool_lock == 'move':
             self.viewer.toggleDragMode()
@@ -382,8 +394,11 @@ class Window(QtWidgets.QWidget):
         pixmap = QtGui.QPixmap.fromImage(qimage)
         # pixmap = pixmap.scaled(self.photo.width(), self.photo.height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
         self.viewer.setPhoto(pixmap)
-        self.viewer2.setPhoto(pixmap)
-    
+        # self.viewer2.setPhoto(pixmap)
+
+    def save(self):
+        self.viewer.save()
+
     def mappingWindow(self, arr, WL, WW):
         pixel_max = WL + WW/2
         pixel_min = WL - WW/2
@@ -396,9 +411,13 @@ class Window(QtWidgets.QWidget):
 
     def rotate_right(self):
         self.viewer.rotate(90)
+        self.rotate_angle -= 90
+        self.viewer.labelRotate()
 
     def rotate_left(self):
         self.viewer.rotate(-90)
+        self.rotate_angle += 90
+        self.viewer.labelRotate()
 
 if __name__ == '__main__':
     import sys
