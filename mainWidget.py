@@ -157,7 +157,8 @@ class initialWidget(QtWidgets.QMainWindow):
     
     # 設定照片處理的地方有幾格
     def setPicWindows(self, x):
-        # print("i ", self.pic_windows[initialWidget.pic_ith], " x ", x)
+        #print("i ", self.pic_windows[initialWidget.pic_ith], " x ", x)
+        self.now_windows = initialWidget.pic_jth    # 當前按的照片位置
         if self.pic_windows[initialWidget.pic_ith] > x:
             for k in range(x + 1, self.pic_windows[initialWidget.pic_ith] + 1):
                 self.gridLayout_list[initialWidget.pic_ith].removeWidget(self.pic_viewer[initialWidget.pic_ith][k])
@@ -168,6 +169,8 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][2], 0, 1, 1, 1)
                 self.gridLayout_list[initialWidget.pic_ith].removeWidget(self.pic_viewer[initialWidget.pic_ith][3])
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][3], 0, 2, 1, 1)
+            if self.now_windows > x:    # 如果照片當前位置被刪除，則設為x(如4張照片變3張且當前位置在第四張，則設為第三張)
+                initialWidget.pic_jth = x
             self.pic_windows[initialWidget.pic_ith] = x
         if self.pic_windows[initialWidget.pic_ith] < x:
             for k in range(self.pic_windows[initialWidget.pic_ith] + 1, x + 1):
@@ -200,6 +203,8 @@ class initialWidget(QtWidgets.QMainWindow):
                 # self.showPic(initialWidget.pic_ith, 3, "03915480","5F329172_20170623_CR_2_1_1.dcm")
                 # self.showPic( initialWidget.pic_ith, 4, "03915480","5F329172_20170623_CR_2_1_1.dcm")
             self.pic_windows[initialWidget.pic_ith] = x
+            initialWidget.pic_jth = self.now_windows    # 設回原本的位置
+        self.setToolLock(PhotoViewer.tool_lock)    # 傳到setToolLock更新當前總共幾張照片
 #按鈕連結處--------------------------------------------------------------------------------------------------------
     # 鼠標
     def pushButtonMouseClicked(self):
@@ -228,6 +233,9 @@ class initialWidget(QtWidgets.QMainWindow):
     # 筆
     def pushButtonPenClicked(self):
         self.setToolLock('pen')
+    # 儲存
+    def pushButtonSaveClicked(self):
+        self.setToolLock('save')
     # 清除
     def pushButtonEraseClicked(self):
         self.transparent_pix[initialWidget.pic_ith][initialWidget.pic_jth].fill(Qt.transparent)
@@ -253,21 +261,27 @@ class initialWidget(QtWidgets.QMainWindow):
         database_dst = './tmp_database/' + pt_id
         shutil.copy(pic_file_path, tmp_dst)
         shutil.copy(pic_file_path, database_dst)
+
     def picAlreadyExist(self):
         picAlreadyExist_msg = QMessageBox()
         picAlreadyExist_msg.setWindowTitle("Warning")
         picAlreadyExist_msg.setText("Dicom already exist !")
         picAlreadyExist_msg.setIcon(QMessageBox.Warning)
-        x = picAlreadyExist_msg.exec_() 
-    # save photo .png
-    def pushButtonSaveClicked(self):
-        self.setToolLock('save')
-    
+        x = picAlreadyExist_msg.exec_()
+
+
+
     def setToolLock(self, lock):
         self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].resetFlags()
+        # 預設所有item都不能動且沒有手手
+        for k in range(1, self.pic_windows[initialWidget.pic_ith]+1):
+            self.pic_viewer[initialWidget.pic_ith][k].Movable(False)
+            self.pic_viewer[initialWidget.pic_ith][k].toggleDragMode(False)
         PhotoViewer.tool_lock = lock
         if PhotoViewer.tool_lock == 'move':
-            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].toggleDragMode()
+            for k in range(1, self.pic_windows[initialWidget.pic_ith] + 1):
+                self.pic_viewer[initialWidget.pic_ith][k].Movable(True)
+                self.pic_viewer[initialWidget.pic_ith][k].toggleDragMode(True)
         elif PhotoViewer.tool_lock == 'clear':
             self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].setNewScene()
         elif PhotoViewer.tool_lock == 'save':
@@ -276,7 +290,6 @@ class initialWidget(QtWidgets.QMainWindow):
             self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].rotate(90)
         elif PhotoViewer.tool_lock == 'rotate_left':
             self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].rotate(-90)
-
 
     # 對比度的選單設定
     def aboutBrightness(self): 
@@ -290,9 +303,6 @@ class initialWidget(QtWidgets.QMainWindow):
         self.window_menu.addAction('[2560/5120]', lambda: self.getWindow(2560, 5120))
         self.window_menu.addAction('Custom window', lambda: self.getWindow(1, 1))
         self.ui.pushButton_brightness.setMenu(self.window_menu)
-    
-    
-
 
     def slideMagnifierZoomInOrOut(self):
             zoom_frame_width = self.ui.zoom_frame.width()
@@ -377,7 +387,6 @@ class initialWidget(QtWidgets.QMainWindow):
                 copytree(src, dst)
                 self.open_pt_page(pt_id)
 
-                
     def open_pt_page(self, pt_id): #記得要先檢查self.empty_page_stack空->Page滿->pageFull, 用在add和pt_list中打開
         temp = self.empty_page_stack[-1]
         self.empty_page_stack.pop()
@@ -783,8 +792,6 @@ class initialWidget(QtWidgets.QMainWindow):
         # self.showPic(1, 3, "03915480","5F329172_20170623_CR_2_1_1.dcm")
         # self.showPic(1, 4, "03915480","5F329172_20170623_CR_2_1_1.dcm")
 
-
-
     def mousePressEvent(self, event):
         self.clickPosition = event.globalPos()
 
@@ -798,8 +805,6 @@ class initialWidget(QtWidgets.QMainWindow):
             WINDOW_SIZE = 1
             self.showMaximized()
             self.ui.restore_button.setIcon(QtGui.QIcon(u":/icons/icons/window-restore.png"))  # Show minized icon
-
-
         else:
             WINDOW_SIZE = 0
             self.pic_1_1_pos_x = 350
@@ -831,7 +836,7 @@ class QGraphicsLabel(QtWidgets.QGraphicsTextItem):
         self.movable = False
         self.setVisible(False)
     def setMovable(self, enable):
-        self.setAcceptHoverEvents(enable)
+        #self.setAcceptHoverEvents(enable)
         self.movable = enable
     # mouse hover event
     def hoverEnterEvent(self, event):
@@ -863,7 +868,7 @@ class Protractor(QtWidgets.QGraphicsPathItem):
         self.angle_degree = 0
         self.movable = False
     def setMovable(self, enable):
-        self.setAcceptHoverEvents(enable)
+        #self.setAcceptHoverEvents(enable)
         self.movable = enable
     # mouse hover event
     def hoverEnterEvent(self, event):
@@ -895,7 +900,7 @@ class Ruler(QtWidgets.QGraphicsLineItem):
         self.movable = False
         self.length = 0
     def setMovable(self, enable):
-        self.setAcceptHoverEvents(enable)
+        #self.setAcceptHoverEvents(enable)
         self.movable = enable
     # mouse hover event
     def hoverEnterEvent(self, event):
@@ -927,7 +932,7 @@ class Pen(QtWidgets.QGraphicsPathItem):
         self.setPen(QtGui.QPen(QtGui.QColor(250, 25, 0)))
         self.movable = False
     def setMovable(self, enable):
-        self.setAcceptHoverEvents(enable)
+        #self.setAcceptHoverEvents(enable)
         self.movable = enable
     # mouse hover event
     def hoverEnterEvent(self, event):
@@ -980,6 +985,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.ruler_start = False
         self.protractor_start = False
         self.pen_start = False
+
     #save photo
     def save(self):
         save_image = QtGui.QPixmap(self.viewport().size())
@@ -1036,11 +1042,21 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             else:
                 self._zoom = 0
 
-    def toggleDragMode(self):
-        if self.dragMode() == QtWidgets.QGraphicsView.ScrollHandDrag:
-            self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
-        else:
+    # 控制item能否移動
+    def Movable(self, enble):
+        #print("Movable")
+        for item in self._scene.items():
+            if isinstance(item, QGraphicsLabel) or isinstance(item, Pen) or isinstance(item, Protractor) or isinstance(item, Ruler):
+                item.setMovable(enble)
+
+    # move時True,有手手
+    def toggleDragMode(self, enble):
+        if enble:
+            #print("手手")
             self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
+        else:
+            #print("沒手手")
+            self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
 
 
     def mousePressEvent(self, event):
@@ -1048,7 +1064,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         initialWidget.pic_ith = self.in_ith
         initialWidget.pic_jth = self.in_jth
         if PhotoViewer.tool_lock == 'move':
-            print(PhotoViewer.tool_lock)
+            pass
         elif PhotoViewer.tool_lock == 'ruler':
             self.ruler = Ruler(self.sp.x(), self.sp.y(), self.sp.x(), self.sp.y())
             self.ruler_text_label = QGraphicsLabel("")
@@ -1083,8 +1099,8 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.ep = self.mapToScene(event.pos())
         if PhotoViewer.tool_lock == 'ruler':
             self.ruler.setLine(self.sp.x(), self.sp.y(), self.ep.x(), self.ep.y())
-            self.ruler.setMovable(True)
-            self.ruler_text_label.setMovable(True)
+            self.ruler.setMovable(False)
+            self.ruler_text_label.setMovable(False)
             self.ruler_start = False
         elif PhotoViewer.tool_lock == 'angle':
             if self.protractor_start:
@@ -1092,12 +1108,14 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 self.qpainterpath.moveTo(self.sp)
                 self.qpainterpath.lineTo(self.ep)
                 self.protractor.setPath(self.qpainterpath)
+                self.protractor.setMovable(False)
+                self.protractor_text_label.setMovable(False)
                 self.protractor_start = False
                 self.ruler_start = True
         if PhotoViewer.tool_lock == 'pen':
             self.pen_path.lineTo(self.ep)
             self.pen.setPath(self.pen_path)
-            self.pen.setMovable(True)
+            self.pen.setMovable(False)
             self.pen_start = False
         super(PhotoViewer, self).mouseReleaseEvent(event)
 

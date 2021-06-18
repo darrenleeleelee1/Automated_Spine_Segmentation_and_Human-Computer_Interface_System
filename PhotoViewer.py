@@ -109,7 +109,7 @@ class Pen(QtWidgets.QGraphicsPathItem):
         self.setPen(QtGui.QPen(QtGui.QColor(250, 25, 0)))
         self.movable = False
     def setMovable(self, enable):
-        self.setAcceptHoverEvents(enable)
+        #self.setAcceptHoverEvents(enable)
         self.movable = enable
     # mouse hover event
     def hoverEnterEvent(self, event):
@@ -152,14 +152,15 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.protractor_start = False
         self.pen_start = False
 
-
     def setNewScene(self):
         self._scene = QtWidgets.QGraphicsScene(self)
         self.setScene(self._scene)
+
     def resetFlags(self):
         self.ruler_start = False
         self.protractor_start = False
         self.pen_start = False
+
     #save photo
     def save(self):
         save_image = QtGui.QPixmap(self.viewport().size())
@@ -215,6 +216,11 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 self.fitInView()
             else:
                 self._zoom = 0
+
+    def Movable(self, enble):
+        for item in self._scene.items():
+            if isinstance(item, QGraphicsLabel) or isinstance(item, Pen) or isinstance(item, Protractor) or isinstance(item, Ruler):
+                item.setMovable(enble)
 
     def toggleDragMode(self):
         if self.dragMode() == QtWidgets.QGraphicsView.ScrollHandDrag:
@@ -351,9 +357,11 @@ class Window(QtWidgets.QWidget):
 
     def setToolLock(self, lock):
         self.viewer.resetFlags()
+        self.viewer.Moveable(False)
         PhotoViewer.tool_lock = lock
         if PhotoViewer.tool_lock == 'move':
             self.viewer.toggleDragMode()
+            self.viewer.Moveable(True)
         elif PhotoViewer.tool_lock == 'clear':
             self.viewer.setNewScene()
         elif PhotoViewer.tool_lock == 'save':
@@ -362,6 +370,7 @@ class Window(QtWidgets.QWidget):
             self.rotate_right()
         elif PhotoViewer.tool_lock == 'rotate_left':
             self.rotate_left()
+
     def loadImage(self):
         ds = dcmread('./tmp_database/01372635/5F327951.dcm')
         arr = ds.pixel_array
@@ -374,9 +383,6 @@ class Window(QtWidgets.QWidget):
         # pixmap = pixmap.scaled(self.photo.width(), self.photo.height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
         self.viewer.setPhoto(pixmap)
         self.viewer2.setPhoto(pixmap)
-
-    def save(self):
-        self.viewer.save()
     
     def mappingWindow(self, arr, WL, WW):
         pixel_max = WL + WW/2
@@ -384,6 +390,9 @@ class Window(QtWidgets.QWidget):
         arr = np.clip(arr, pixel_min, pixel_max)
         arr = (arr - pixel_min) / (pixel_max - pixel_min) * 65535
         return np.copy(np.uint16(arr))
+
+    def save(self):
+        self.viewer.save()
 
     def rotate_right(self):
         self.viewer.rotate(90)
