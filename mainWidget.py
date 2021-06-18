@@ -54,7 +54,6 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.patient_list.customContextMenuRequested.connect(self.myListWidgetContext)
         self.ui.patient_list.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
-
         #brightness相關
         self.custom_window = custom()
         self.aboutBrightness()
