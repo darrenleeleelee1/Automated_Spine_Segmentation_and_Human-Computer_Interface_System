@@ -73,12 +73,10 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.header.mouseMoveEvent = moveWindow  # 移動視窗
         self.show()
 
-
     def closeEvent(self,event):
         self.saveSearchRecord()
         self.saveOpened()
         event.accept()
-
 
     def backend(self):
         self.ui.stackedWidget_right.setCurrentWidget(self.ui.recently_viewed_page)
