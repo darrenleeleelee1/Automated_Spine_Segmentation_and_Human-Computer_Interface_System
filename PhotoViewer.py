@@ -130,7 +130,7 @@ class Pen(QtWidgets.QGraphicsPathItem):
         self.setPen(QtGui.QPen(QtGui.QColor(250, 25, 0)))
         self.movable = False
     def setMovable(self, enable):
-        self.setAcceptHoverEvents(enable)
+        #self.setAcceptHoverEvents(enable)
         self.movable = enable
     # mouse hover event
     def hoverEnterEvent(self, event):
@@ -172,13 +172,16 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.ruler_start = False
         self.protractor_start = False
         self.pen_start = False
+
     def setNewScene(self):
         self._scene = QtWidgets.QGraphicsScene(self)
         self.setScene(self._scene)
+
     def resetFlags(self):
         self.ruler_start = False
         self.protractor_start = False
         self.pen_start = False
+
     #save photo
     def save(self):
         save_image = QtGui.QPixmap(self.viewport().size())
@@ -235,6 +238,11 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             else:
                 self._zoom = 0
 
+    def Movable(self, enble):
+        for item in self._scene.items():
+            if isinstance(item, QGraphicsLabel) or isinstance(item, Pen) or isinstance(item, Protractor) or isinstance(item, Ruler):
+                item.setMovable(enble)
+
     def toggleDragMode(self):
         if self.dragMode() == QtWidgets.QGraphicsView.ScrollHandDrag:
             self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
@@ -265,6 +273,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 self.protractor_text_label.setMovable(True)
                 self.protractor_start = False
                 self.ruler_start = False
+
         if PhotoViewer.tool_lock == 'pen':
             self.pen_path = QPainterPath()
             self.pen_path.moveTo(self.sp)
@@ -377,9 +386,11 @@ class Window(QtWidgets.QWidget):
 
     def setToolLock(self, lock):
         self.viewer.resetFlags()
+        self.viewer.Movable(False)
         PhotoViewer.tool_lock = lock
         if PhotoViewer.tool_lock == 'move':
             self.viewer.toggleDragMode()
+            self.viewer.Moveable(True)
         elif PhotoViewer.tool_lock == 'clear':
             self.viewer.setNewScene()
         elif PhotoViewer.tool_lock == 'save':
@@ -388,6 +399,7 @@ class Window(QtWidgets.QWidget):
             self.rotate_right()
         elif PhotoViewer.tool_lock == 'rotate_left':
             self.rotate_left()
+
     def loadImage(self):
         ds = dcmread('./tmp_database/01372635/5F327951.dcm')
         arr = ds.pixel_array
@@ -402,13 +414,16 @@ class Window(QtWidgets.QWidget):
 
     def save(self):
         self.viewer.save()
-    
+
     def mappingWindow(self, arr, WL, WW):
         pixel_max = WL + WW/2
         pixel_min = WL - WW/2
         arr = np.clip(arr, pixel_min, pixel_max)
         arr = (arr - pixel_min) / (pixel_max - pixel_min) * 65535
         return np.copy(np.uint16(arr))
+
+    def save(self):
+        self.viewer.save()
 
     def rotate_right(self):
         self.viewer.rotate(90)
