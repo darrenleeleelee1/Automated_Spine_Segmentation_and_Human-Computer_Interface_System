@@ -13,8 +13,23 @@ class QGraphicsLabel(QtWidgets.QGraphicsTextItem):
         self.movable = False
         self.setVisible(False)
         self.setRotation(window.rotate_angle)
+        self.category = None # 標明他是ruler或是Protractor的label
+    def adjustPos(self, view):
+        if self.category == 'ruler':
+            nsp = view.mapToScene(int(self.ruler_sp.x()), int(self.ruler_sp.y()))
+            nmp = view.mapToScene(int(self.ruler_mp.x()), int(self.ruler_mp.y()))
+            print(nsp.x(), nmp.x())
+            if nsp.x() <= nmp.x(): 
+                self.setPos(self.ruler_mp + QtCore.QPointF(10, 0))
+            else:
+                self.setPos(self.ruler_sp + QtCore.QPointF(10, 0))
+    def setRulerLabel(self, sp, mp):
+        self.category = 'ruler'
+        self.ruler_sp = sp
+        self.ruler_mp = mp
+    def setProtractorLabel(self):
+        self.category = 'protractor'
 
-        
     def setMovable(self, enable):
         self.setAcceptHoverEvents(enable)
         self.movable = enable
@@ -264,7 +279,10 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         for item in self._scene.items():
             if isinstance(item, QGraphicsLabel):
                 item.setRotate(-window.rotate_angle)
-
+                if item.category == 'ruler':
+                    item.adjustPos(self)
+                    print("1, ", item.pos())
+                    print("2, ", self.mapToScene(QtCore.QPoint(int(item.pos().x()), int(item.pos().y()))))
     def mouseReleaseEvent(self, event):
         self.ep = self.mapToScene(event.pos())
         if PhotoViewer.tool_lock == 'ruler':
@@ -295,6 +313,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             self.ruler_text_label.setVisible(True)
             # self.ruler_text_label.setText("%.2f pixels" % self.length)
             self.ruler_text_label.setHtml("<div style='background-color:#3c1e1e;font-size:10px;color:#e6e60a;'>" + "%.2f pixels" % self.length + "</div>")
+            self.ruler_text_label.setRulerLabel(self.sp, self.mp)
             if self.sp.x() <= self.mp.x(): 
                 self.ruler_text_label.setPos(self.mp + QtCore.QPointF(10, 0))
             else:
@@ -330,7 +349,6 @@ class Window(QtWidgets.QWidget):
     def __init__(self):
         super(Window, self).__init__()
         self.viewer = PhotoViewer(self)
-        # self.viewer2 = PhotoViewer(self)
         self.rotate_angle = 0
         # 'Load image' button
         self.btnLoad = QtWidgets.QToolButton(self)
@@ -351,7 +369,6 @@ class Window(QtWidgets.QWidget):
         # Arrange layout
         VBlayout = QtWidgets.QVBoxLayout(self)
         VBlayout.addWidget(self.viewer)
-        # VBlayout.addWidget(self.viewer2)
         HBlayout = QtWidgets.QHBoxLayout()
         HBlayout.setAlignment(QtCore.Qt.AlignLeft)
         HBlayout.addWidget(self.btnLoad)
@@ -382,7 +399,6 @@ class Window(QtWidgets.QWidget):
         pixmap = QtGui.QPixmap.fromImage(qimage)
         # pixmap = pixmap.scaled(self.photo.width(), self.photo.height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
         self.viewer.setPhoto(pixmap)
-        # self.viewer2.setPhoto(pixmap)
 
     def save(self):
         self.viewer.save()
