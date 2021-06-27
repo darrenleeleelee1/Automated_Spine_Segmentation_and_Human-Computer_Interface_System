@@ -167,19 +167,21 @@ class initialWidget(QtWidgets.QMainWindow):
             self.pic_windows[initialWidget.pic_ith] = x
         if self.pic_windows[initialWidget.pic_ith] < x:
             for k in range(self.pic_windows[initialWidget.pic_ith] + 1, x + 1):
-                label = QtWidgets.QLabel(self.pic_frame_list[initialWidget.pic_ith])
-                label.setStyleSheet("background-color: black; border: 3px solid black;")
-                # self.pic_viewer[initialWidget.pic_ith][k] = label
-                pointer = PhotoViewer(self, initialWidget.pic_ith, k)
+                pointer = PhotoViewer(self.pic_frame_list[initialWidget.pic_ith], initialWidget.pic_ith, k)
                 self.pic_viewer[initialWidget.pic_ith][k] = pointer
+                print("id: ", id(pointer), id(self.pic_viewer[initialWidget.pic_ith][k]))
+                print(pointer is self.pic_viewer[initialWidget.pic_ith][k])
             if x == 2:
-                print(self.pic_viewer[initialWidget.pic_ith][1].width(), self.pic_viewer[initialWidget.pic_ith][1].height())
-                print(self.pic_viewer[initialWidget.pic_ith][2].width(), self.pic_viewer[initialWidget.pic_ith][2].height())
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][1], 0, 0, 1, 1)
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][2], 0, 1, 1, 1)
+                print("2: ", self.pic_viewer[initialWidget.pic_ith][1].size())
+                print("2: ", self.pic_viewer[initialWidget.pic_ith][2].size())
                 self.showPic(initialWidget.pic_ith, 1, "01372635","5F3279B8.dcm")
                 self.showPic(initialWidget.pic_ith, 2, "01372635","5F327951.dcm")
             elif x == 3:
+                print("3: ", self.pic_viewer[initialWidget.pic_ith][1].size())
+                print("3: ", self.pic_viewer[initialWidget.pic_ith][2].size())
+                print("3: ", self.pic_viewer[initialWidget.pic_ith][3].size())
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][1], 0, 0, 1, 1)
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][2], 0, 1, 1, 1)
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][3], 0, 2, 1, 1)
@@ -191,10 +193,10 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][2], 0, 1, 1, 1)
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][3], 1, 0, 1, 1)
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][4], 1, 1, 1, 1)
-                # self.showPic(initialWidget.pic_ith, 1, "01372635","5F3279B8.dcm")
-                # self.showPic(initialWidget.pic_ith, 2, "01372635","5F327951.dcm")
-                # self.showPic(initialWidget.pic_ith, 3, "03915480","5F329172_20170623_CR_2_1_1.dcm")
-                # self.showPic( initialWidget.pic_ith, 4, "03915480","5F329172_20170623_CR_2_1_1.dcm")
+                self.showPic(initialWidget.pic_ith, 1, "01372635","5F3279B8.dcm")
+                self.showPic(initialWidget.pic_ith, 2, "01372635","5F327951.dcm")
+                self.showPic(initialWidget.pic_ith, 3, "03915480","5F329172_20170623_CR_2_1_1.dcm")
+                self.showPic( initialWidget.pic_ith, 4, "03915480","5F329172_20170623_CR_2_1_1.dcm")
             self.pic_windows[initialWidget.pic_ith] = x
             initialWidget.pic_jth = self.now_windows    # 設回原本的位置
         self.setToolLock(PhotoViewer.tool_lock)    # 傳到setToolLock更新當前總共幾張照片
@@ -636,7 +638,8 @@ class initialWidget(QtWidgets.QMainWindow):
         qimage = QtGui.QImage(self.pic_adjust_pixels[i][j], self.pic_adjust_pixels[i][j].shape[1], self.pic_adjust_pixels[i][j].shape[0], self.pic_adjust_pixels[i][j].shape[1]*2, QtGui.QImage.Format_Grayscale16).copy()
         pixmap = QtGui.QPixmap(qimage)
         pixmap = pixmap.scaled(self.pic_viewer[i][j].width(), self.pic_viewer[i][j].height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
-        # print(self.pic_viewer[i][j].width(), self.pic_viewer[i][j].height())
+        print("show pic size: ", self.pic_viewer[i][j].width(), self.pic_viewer[i][j].height())
+        print("pixmap size: ", pixmap.size())
         self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].setPhoto(pixmap)
 
     def linkPage2Array(self, _MAXIMUM_PAGE = 5, _MAXIMUM_PIC = 4):
@@ -674,10 +677,11 @@ class initialWidget(QtWidgets.QMainWindow):
         # for i in range(1, self.MAXIMUM_PAGE + 1):
         #     exec("%s[%d][1] = %s_%d_1" % (var_array_pic_list, i, var_pic_list, i))
         #     self.pic[i][1].setStyleSheet("background-color: black; border: 3px solid black;")
+
         # pic Viewer
         self.pic_viewer = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 對應到照片的viewer array
         for i in range(1, self.MAXIMUM_PAGE + 1):
-            pointer = PhotoViewer(self, i, 1)
+            pointer = PhotoViewer(self.pic_frame_list[i], i, 1)
             self.pic_viewer[i][1] = pointer
             self.gridLayout_list[i].addWidget(self.pic_viewer[i][1], 0, 0, 1, 1)
         # Image Processing Attributes
@@ -937,7 +941,7 @@ class Pen(QtWidgets.QGraphicsPathItem):
     
 class PhotoViewer(QtWidgets.QGraphicsView):
     tool_lock = 'mouse'
-    def __init__(self, parent, _i, _j):
+    def __init__(self, parent: None, _i, _j):
         super(PhotoViewer, self).__init__(parent)
         self.in_ith = _i
         self.in_jth = _j
@@ -945,16 +949,18 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self._empty = True
         self._scene = QtWidgets.QGraphicsScene(self)
         self.setScene(self._scene)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
         self.setResizeAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
         self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(0, 0, 0)))
-        self.setFrameShape(QtWidgets.QFrame.NoFrame)
+        # self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(0, 0, 0)))
+        # self.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.ruler_start = False
         self.protractor_start = False
         self.pen_start = False
-    
+    # def sizeHint(self) -> QtCore.QSize:
+    #     return QtCore.QSize(512, 512)
     def setNewScene(self):
         self._scene = QtWidgets.QGraphicsScene(self)
         self._empty = True

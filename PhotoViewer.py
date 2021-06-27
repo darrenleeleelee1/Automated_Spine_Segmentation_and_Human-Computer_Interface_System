@@ -172,7 +172,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.ruler_start = False
         self.protractor_start = False
         self.pen_start = False
-
+    
     def setNewScene(self):
         self._scene = QtWidgets.QGraphicsScene(self)
         self.setScene(self._scene)
