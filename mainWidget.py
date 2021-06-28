@@ -276,12 +276,16 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.pic_viewer[initialWidget.pic_ith][k].Movable(True)
         elif PhotoViewer.tool_lock == 'clear':
             self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].setNewScene()
+            PhotoViewer.tool_lock = 'mouse'
         elif PhotoViewer.tool_lock == 'save':
             self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].save()
+            PhotoViewer.tool_lock = 'mouse'
         elif PhotoViewer.tool_lock == 'rotate_right':
             self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].rotate(90)
+            PhotoViewer.tool_lock = 'mouse'
         elif PhotoViewer.tool_lock == 'rotate_left':
             self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].rotate(-90)
+            PhotoViewer.tool_lock = 'mouse'
 
     # 對比度的選單設定
     def aboutBrightness(self): 
