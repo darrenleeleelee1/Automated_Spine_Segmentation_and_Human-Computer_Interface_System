@@ -273,8 +273,10 @@ class initialWidget(QtWidgets.QMainWindow):
         PhotoViewer.tool_lock = lock
         if PhotoViewer.tool_lock == 'move':
             for k in range(1, self.pic_windows[initialWidget.pic_ith] + 1):
-                self.pic_viewer[initialWidget.pic_ith][k].Movable(True)
                 self.pic_viewer[initialWidget.pic_ith][k].toggleDragMode(True)
+        elif PhotoViewer.tool_lock == 'mouse':
+            for k in range(1, self.pic_windows[initialWidget.pic_ith] + 1):
+                self.pic_viewer[initialWidget.pic_ith][k].Movable(True)
         elif PhotoViewer.tool_lock == 'clear':
             self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].setNewScene()
         elif PhotoViewer.tool_lock == 'save':
@@ -808,7 +810,7 @@ class QGraphicsLabel(QtWidgets.QGraphicsTextItem):
         self.movable = False
         self.setVisible(False)
     def setMovable(self, enable):
-        #self.setAcceptHoverEvents(enable)
+        self.setAcceptHoverEvents(enable)
         self.movable = enable
     # mouse hover event
     def hoverEnterEvent(self, event):
@@ -840,7 +842,7 @@ class Protractor(QtWidgets.QGraphicsPathItem):
         self.angle_degree = 0
         self.movable = False
     def setMovable(self, enable):
-        #self.setAcceptHoverEvents(enable)
+        self.setAcceptHoverEvents(enable)
         self.movable = enable
     # mouse hover event
     def hoverEnterEvent(self, event):
@@ -872,7 +874,7 @@ class Ruler(QtWidgets.QGraphicsLineItem):
         self.movable = False
         self.length = 0
     def setMovable(self, enable):
-        #self.setAcceptHoverEvents(enable)
+        self.setAcceptHoverEvents(enable)
         self.movable = enable
     # mouse hover event
     def hoverEnterEvent(self, event):
@@ -904,7 +906,7 @@ class Pen(QtWidgets.QGraphicsPathItem):
         self.setPen(QtGui.QPen(QtGui.QColor(250, 25, 0)))
         self.movable = False
     def setMovable(self, enable):
-        #self.setAcceptHoverEvents(enable)
+        self.setAcceptHoverEvents(enable)
         self.movable = enable
     # mouse hover event
     def hoverEnterEvent(self, event):
