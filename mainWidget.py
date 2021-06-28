@@ -54,7 +54,6 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.patient_list.customContextMenuRequested.connect(self.myListWidgetContext)
         self.ui.patient_list.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
-
         #brightness相關
         self.custom_window = custom()
         self.aboutBrightness()
@@ -117,7 +116,7 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.patient_list.itemClicked.connect(self.patient_listItemClicked)
         self.ui.recently_list.itemClicked.connect(self.recently_listItemClicked)
         self.ui.thumbnail_list_1.itemClicked.connect(self.thumbnail_listItemClicked)
-        # self.set_thumbnail('03915480')
+        # self.setThumbnail('03915480')
 
 
 #照片Show Pic----------------------------------------------------------------------
@@ -335,7 +334,6 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.pushButton_windows.setMenu(self.windows_menu)
 
 
-    # def pushButtonBrightnessClicked(self):
 #MENU選單---------------------------------------------------------------------------------------------------------
     #add patient
     def addPatient(self): 
@@ -380,10 +378,10 @@ class initialWidget(QtWidgets.QMainWindow):
                 if(not os.path.exists(dst)):
                     os.makedirs(dst)
                 copytree(src, dst)
-                self.open_pt_page(pt_id)
+                self.openPtPage(pt_id)
 
                 
-    def open_pt_page(self, pt_id): #記得要先檢查self.empty_page_stack空->Page滿->pageFull, 用在add和pt_list中打開
+    def openPtPage(self, pt_id): #記得要先檢查self.empty_page_stack空->Page滿->pageFull, 用在add和pt_list中打開
         temp = self.empty_page_stack[-1]
         self.empty_page_stack.pop()
         self.patient_mapto_page[pt_id] = temp
@@ -393,7 +391,7 @@ class initialWidget(QtWidgets.QMainWindow):
         temp_page = self.patient_mapto_page[pt_id]
         self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[temp_page])
         self.opened_list.append(pt_id)
-        self.set_thumbnail(pt_id)
+        self.setThumbnail(pt_id)
 
     def pageFull(self):
         pageFull_msg = QMessageBox()
@@ -462,7 +460,7 @@ class initialWidget(QtWidgets.QMainWindow):
 
 
 # Thumbnail-------------------------------------------------------------------------------------------------------
-    def set_thumbnail(self, pt_id):
+    def setThumbnail(self, pt_id):
         pt_path = './tmp/' + pt_id
         i = self.patient_mapto_page[pt_id]
         self.thumbnail_list[i].setViewMode(QListWidget.IconMode)
@@ -490,10 +488,14 @@ class initialWidget(QtWidgets.QMainWindow):
 
         size = QSize(215, 215)
         self.thumbnail_list[i].setIconSize(size)
+        self.thumbnail_list[i].setDragEnabled(True)
+        self.thumbnail_list[i].setDragDropMode(QAbstractItemView.DragOnly)
 
     def thumbnail_listItemClicked(self):
         print("test")
-# search page-----------------------------------------------------------------------------------------------------
+#         setDragEnabled(true)
+#  setDragDropMode(QAbstractItemView::DragOnly)
+# search page----------------------------------------------------------------------------------------------------
     # search
     def loadSearchRecord(self):
         self.search_record_cnt = 0
@@ -546,7 +548,7 @@ class initialWidget(QtWidgets.QMainWindow):
                 if(not os.path.exists(dst)):
                     os.makedirs(dst)
                 copytree(src, dst)
-                self.open_pt_page(pt_id)
+                self.openPtPage(pt_id)
             else:
                 self.ui.stackedWidget_right.setCurrentWidget(self.ui.thumbnail_page)
                 temp_page = self.patient_mapto_page[pt_id]
@@ -583,7 +585,7 @@ class initialWidget(QtWidgets.QMainWindow):
         if(not os.path.exists(dst)):
             os.makedirs(dst)
         copytree(src, dst)
-        self.open_pt_page(pt_id)
+        self.openPtPage(pt_id)
 
 # 其他/初始--------------------------------------------------------------------------------------------------------
     def loadPtList(self):
@@ -834,6 +836,7 @@ class QGraphicsLabel(QtWidgets.QGraphicsTextItem):
         # self.setBrush(QtGui.QBrush(QtGui.QColor(60, 30, 30)))
         self.movable = False
         self.setVisible(False)
+
     def setMovable(self, enable):
         self.setAcceptHoverEvents(enable)
         self.movable = enable
@@ -859,6 +862,8 @@ class QGraphicsLabel(QtWidgets.QGraphicsTextItem):
 
     def mouseReleaseEvent(self, event):
         pass
+
+
 
 class Protractor(QtWidgets.QGraphicsPathItem):
     def __init__(self, qpainterpath):
@@ -965,6 +970,8 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self._zoom = 0
         self._empty = True
         self._scene = QtWidgets.QGraphicsScene(self)
+        self._photo = QtWidgets.QGraphicsPixmapItem()
+        self._scene.addItem(self._photo)
         self.setScene(self._scene)
         self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
         self.setResizeAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
@@ -975,6 +982,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.ruler_start = False
         self.protractor_start = False
         self.pen_start = False
+        self.setAcceptDrops(True)
     
     def setNewScene(self):
         self._scene = QtWidgets.QGraphicsScene(self)
@@ -1013,8 +1021,8 @@ class PhotoViewer(QtWidgets.QGraphicsView):
 
     def setPhoto(self, pixmap=None):
         self._zoom = 0
-        self._photo = QtWidgets.QGraphicsPixmapItem()
-        self._scene.addItem(self._photo)
+        # self._photo = QtWidgets.QGraphicsPixmapItem()
+        # self._scene.addItem(self._photo)
         if pixmap and not pixmap.isNull():
             self._empty = False
             self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
@@ -1143,6 +1151,42 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             self.pen_path.lineTo(self.mp)
             self.pen.setPath(self.pen_path)
         super(PhotoViewer, self).mouseMoveEvent(event)
+
+    def dropEvent(self, e):
+        print("ckeck")
+        data = e.mimeData()
+        if(data.hasUrls()):
+            print("y")
+        # if data.hasFormat('application/x-qabstractitemmodeldatalist'):
+        #     print("yes")
+        #     ba = e.mimeData().data('application/x-qabstractitemmodeldatalist')
+        #     data_items = self.decode_data(ba)
+            # print(data_items)
+            # for data_item in enumerate(data_items):
+            #     print(data_item.type)
+        e.accept()
+
+    def decode_data(self, bytearray):
+        data = []
+        item = {}
+        ds = QtCore.QDataStream(bytearray)
+        while not ds.atEnd():
+            row = ds.readInt32()
+            column = ds.readInt32()
+            map_items = ds.readInt32()
+            for i in range(map_items):
+                key = ds.readInt32()
+                value = QtCore.QVariant()
+                ds >> value
+                item[Qt.ItemDataRole(key)] = value
+            data.append(item)
+        return data
+
+    def dragEnterEvent(self, e):
+        e.accept()  
+
+    def dragMoveEvent(self, event):
+        event.accept()
 
 if __name__ == '__main__':
     import sys
