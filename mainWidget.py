@@ -26,8 +26,6 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.search_record = QStandardItemModel()
-        self.pic_label_width = 512
-        self.pic_label_height = 512
         self.pic_windows = [0, 1, 1, 1, 1, 1]
         
         self.loadPtList()
@@ -699,85 +697,16 @@ class initialWidget(QtWidgets.QMainWindow):
             self.pic_viewer[i][1].show()
         # Image Processing Attributes
         var_pic = 'self.ui.pic'
-        self.pen_start_x = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] #---筆---
-        self.pen_start_y = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
-        self.pen_end_x = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
-        self.pen_end_y = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
-        self.tsx = [[None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
-        self.tsy = [[None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
-        self.tmx = [[None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
-        self.tmy = [[None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
-        self.tex = [[None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
-        self.tey = [[None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)] #---筆---
-        self.ruler_start_x = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] #---尺---
-        self.ruler_start_y = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
-        self.ruler_end_x = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
-        self.ruler_end_y = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
-        self.trex = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
-        self.trey = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]  # ---尺---
-        self.angle_start_x = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] #---角度---
-        self.angle_start_y = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
-        self.angle_middle_x = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
-        self.angle_middle_y = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
-        self.angle_end_x = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
-        self.angle_end_y = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # ---角度---
         self.pic_clicked = [ [False] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 哪張照片被clicked
         self.pic_released = [ [False] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 哪張照片被 released
-        self.ruler_coordinate_list = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 每張照片中的所有尺存在[][]中
-        self.angle_coordinate_list = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 每張照片中的所有角度存在[][]中
-        self.rotate_angle = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)] # 旋轉角度
-        self.size = [[1] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)] # 每張照片被放大縮小的倍率
-        self.magnifier_pad_x = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)] # --magnifier--
-        self.magnifier_pad_y = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
-        self.tmpx = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
-        self.tmpy = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)] # --magnifier--
-        self.move_start_x = [ [0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # --move--
-        self.move_start_y = [ [0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
-        self.move_moving_x = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
-        self.move_moving_y = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
-        self.tmmx = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
-        self.tmmy = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
-        self.move_x = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
-        self.move_y = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]  # # --move--
         self.pic_adjust_pixels = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 照片對比度須存改過的pixel array用
         self.pic_original_pixels = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 照片對比度須存原本的pixel array用
-
         self.dicoms = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 存Dicoms
-        self.x = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)] # 每張照片的總位移量 x
-        self.y = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)] # 每張照片的總位移量 y
 
         var_array_pic = 'self.pic'
-        for i in range(1, self.MAXIMUM_PAGE + 1):
-            for j in range(1, (self.MAXIMUM_PIC + 1)):
-                # exec("%s[%d][%d] = %s_%d_%d" % (var_array_pic, i, j, var_pic, i, j))
-                # self.pic[i][j].setText("%d-%d" % (i, j))
-                # self.pic[i][j].setStyleSheet("background-color: black; border: 3px solid black;")
-                self.pen_start_x[i][j] = self.pen_start_y[i][j] = 0
-                self.pen_end_x[i][j] = self.pen_end_y[i][j] = 0
-
-                self.pen_start_x[i][j] = self.pen_start_y[i][j] = -10
-                self.pen_end_x[i][j] = self.pen_end_y[i][j] = -10
-
-                self.ruler_start_x[i][j] = self.ruler_start_y[i][j] = 0
-                self.ruler_end_x[i][j] = self.ruler_end_y[i][j] = 0                
-                self.angle_start_x[i][j] = self.angle_start_y[i][j] = 0
-                self.angle_middle_x[i][j] = self.angle_middle_y[i][j] = 0
-                self.angle_end_x[i][j] = self.angle_end_y[i][j] = 0
-                self.tsx[i][j] = self.tsy[i][j] = 0
-                self.tmx[i][j] = self.tmy[i][j] = 0
-                self.tex[i][j] = self.tey[i][j] = 0
-                self.angle_coordinate_list[i][j] = []
-                self.ruler_coordinate_list[i][j] = []
-
         self.pic_cnt = [0] * (self.MAXIMUM_PAGE + 1)
         initialWidget.pic_ith = initialWidget.pic_jth = 1
-        self.rotate_coordinate_system = [[0, 0], [512, 0], [512, 512], [0, 512]]
-        # 畫圖透明canvas
-        self.transparent_pix = [ [0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
-        for i in range(1, self.MAXIMUM_PAGE + 1):
-            for j in range(1, (self.MAXIMUM_PIC + 1)):
-                self.transparent_pix[i][j] = QtGui.QPixmap(1114 ,701) # 有改
-                self.transparent_pix[i][j].fill(Qt.transparent)
+
 
     def mousePressEvent(self, event):
         self.clickPosition = event.globalPos()
