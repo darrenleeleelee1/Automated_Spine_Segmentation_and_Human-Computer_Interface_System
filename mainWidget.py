@@ -108,7 +108,6 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.patient_list.itemClicked.connect(self.patient_listItemClicked)
         self.ui.recently_list.itemClicked.connect(self.recently_listItemClicked)
         self.ui.thumbnail_list_1.itemClicked.connect(self.thumbnail_listItemClicked)
-        # self.setThumbnail('03915480')
 
 
 #照片Show Pic----------------------------------------------------------------------
@@ -130,7 +129,6 @@ class initialWidget(QtWidgets.QMainWindow):
         qimage = QtGui.QImage(self.pic_adjust_pixels[self.pic_ith][self.pic_jth], self.pic_adjust_pixels[self.pic_ith][self.pic_jth].shape[1], self.pic_adjust_pixels[self.pic_ith][self.pic_jth].shape[0], self.pic_adjust_pixels[self.pic_ith][self.pic_jth].shape[1]*2, QtGui.QImage.Format_Grayscale16).copy()
         pixmap = QtGui.QPixmap(qimage)
         pixmap = pixmap.scaled(self.pic_viewer[self.pic_ith][self.pic_jth].width(), self.pic_viewer[self.pic_ith][self.pic_jth].height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
-        # print(self.pic_viewer[i][j].width(), self.pic_viewer[i][j].height())
         self.pic_viewer[self.pic_ith][self.pic_jth].setPhoto(pixmap)
         self.update()
 
@@ -153,13 +151,11 @@ class initialWidget(QtWidgets.QMainWindow):
         
     # 設定照片處理的地方有幾格
     def setPicWindows(self, x):
-        #print("i ", self.pic_windows[initialWidget.pic_ith], " x ", x)
         self.now_windows = initialWidget.pic_jth    # 當前按的照片位置
         if self.pic_windows[initialWidget.pic_ith] > x:
             for k in range(x + 1, self.pic_windows[initialWidget.pic_ith] + 1):
                 self.gridLayout_list[initialWidget.pic_ith].removeWidget(self.pic_viewer[initialWidget.pic_ith][k])
                 self.pic_viewer[initialWidget.pic_ith][k].deleteLater()
-                # self.pic_viewer[initialWidget.pic_ith][k].setNewScence()
             if x == 3:
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][1], 0, 0, 1, 1)
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][2], 0, 1, 1, 1)
@@ -248,7 +244,6 @@ class initialWidget(QtWidgets.QMainWindow):
                 print("\n取消")
                 return
         print(pic_file_path)
-        #print(initialWidget.pic_ith)
         pt_id = list(self.patient_mapto_page.keys())[list(self.patient_mapto_page.values()).index(initialWidget.pic_ith)]
         tmp_dst = './tmp/' + pt_id
         if(os.path.exists(tmp_dst)):
@@ -681,14 +676,6 @@ class initialWidget(QtWidgets.QMainWindow):
         var_array_pic_frame_list = 'self.pic_frame_list'
         for i in range(1, self.MAXIMUM_PAGE + 1):
             exec("%s[%d] = %s_%d" % (var_array_pic_frame_list, i, var_pic_frame_list, i))
-        # # pic
-        # self.pic = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 對應到照片的label array
-        # var_pic_list = 'self.ui.pic'
-        # var_array_pic_list = 'self.pic'
-        # for i in range(1, self.MAXIMUM_PAGE + 1):
-        #     exec("%s[%d][1] = %s_%d_1" % (var_array_pic_list, i, var_pic_list, i))
-        #     self.pic[i][1].setStyleSheet("background-color: black; border: 3px solid black;")
-
         # pic Viewer
         self.pic_viewer = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 對應到照片的viewer array
         for i in range(1, self.MAXIMUM_PAGE + 1):
@@ -717,7 +704,6 @@ class initialWidget(QtWidgets.QMainWindow):
         if win_status == 0:
             self.pic_1_1_pos_x = 700
             self.pic_1_1_pos_y = 15
-            # self.showPic(1, 1, "01372635", "5F327951")
             WINDOW_SIZE = 1
             self.showMaximized()
             self.ui.restore_button.setIcon(QtGui.QIcon(u":/icons/icons/window-restore.png"))  # Show minized icon
@@ -725,7 +711,6 @@ class initialWidget(QtWidgets.QMainWindow):
             WINDOW_SIZE = 0
             self.pic_1_1_pos_x = 350
             self.pic_1_1_pos_y = 15
-            # self.showPic(1, 1, "01372635", "5F327951")
             self.showNormal()
             self.ui.restore_button.setIcon(QtGui.QIcon(u":/icons/icons/window-maximize.png"))
 
