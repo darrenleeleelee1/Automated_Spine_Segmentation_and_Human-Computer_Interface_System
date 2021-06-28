@@ -147,7 +147,7 @@ class initialWidget(QtWidgets.QMainWindow):
         arr = np.clip(arr, pixel_min, pixel_max)
         arr = (arr - pixel_min) / (pixel_max - pixel_min) * 65535
         return np.copy(np.uint16(arr))
-    
+        
     # 設定照片處理的地方有幾格
     def setPicWindows(self, x):
         #print("i ", self.pic_windows[initialWidget.pic_ith], " x ", x)
@@ -167,24 +167,21 @@ class initialWidget(QtWidgets.QMainWindow):
             self.pic_windows[initialWidget.pic_ith] = x
         if self.pic_windows[initialWidget.pic_ith] < x:
             for k in range(self.pic_windows[initialWidget.pic_ith] + 1, x + 1):
-                pointer = PhotoViewer(self.pic_frame_list[initialWidget.pic_ith], initialWidget.pic_ith, k)
-                self.pic_viewer[initialWidget.pic_ith][k] = pointer
-                print("id: ", id(pointer), id(self.pic_viewer[initialWidget.pic_ith][k]))
-                print(pointer is self.pic_viewer[initialWidget.pic_ith][k])
+                self.pic_viewer[initialWidget.pic_ith][k] = PhotoViewer(self.pic_frame_list[initialWidget.pic_ith], initialWidget.pic_ith, k)
             if x == 2:
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][1], 0, 0, 1, 1)
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][2], 0, 1, 1, 1)
-                print("2: ", self.pic_viewer[initialWidget.pic_ith][1].size())
-                print("2: ", self.pic_viewer[initialWidget.pic_ith][2].size())
+                self.pic_viewer[initialWidget.pic_ith][1].show()
+                self.pic_viewer[initialWidget.pic_ith][2].show()
                 self.showPic(initialWidget.pic_ith, 1, "01372635","5F3279B8.dcm")
                 self.showPic(initialWidget.pic_ith, 2, "01372635","5F327951.dcm")
             elif x == 3:
-                print("3: ", self.pic_viewer[initialWidget.pic_ith][1].size())
-                print("3: ", self.pic_viewer[initialWidget.pic_ith][2].size())
-                print("3: ", self.pic_viewer[initialWidget.pic_ith][3].size())
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][1], 0, 0, 1, 1)
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][2], 0, 1, 1, 1)
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][3], 0, 2, 1, 1)
+                self.pic_viewer[initialWidget.pic_ith][1].show()
+                self.pic_viewer[initialWidget.pic_ith][2].show()
+                self.pic_viewer[initialWidget.pic_ith][3].show()
                 self.showPic(initialWidget.pic_ith, 1, "01372635","5F3279B8.dcm")
                 self.showPic(initialWidget.pic_ith, 2, "01372635","5F327951.dcm")
                 self.showPic(initialWidget.pic_ith, 3, "03915480","5F329172_20170623_CR_2_1_1.dcm")
@@ -193,6 +190,10 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][2], 0, 1, 1, 1)
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][3], 1, 0, 1, 1)
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][4], 1, 1, 1, 1)
+                self.pic_viewer[initialWidget.pic_ith][1].show()
+                self.pic_viewer[initialWidget.pic_ith][2].show()
+                self.pic_viewer[initialWidget.pic_ith][3].show()
+                self.pic_viewer[initialWidget.pic_ith][4].show()
                 self.showPic(initialWidget.pic_ith, 1, "01372635","5F3279B8.dcm")
                 self.showPic(initialWidget.pic_ith, 2, "01372635","5F327951.dcm")
                 self.showPic(initialWidget.pic_ith, 3, "03915480","5F329172_20170623_CR_2_1_1.dcm")
@@ -637,9 +638,6 @@ class initialWidget(QtWidgets.QMainWindow):
         self.pic_adjust_pixels[i][j] = self.mappingWindow(arr, dicom_WL, dicom_WW)
         qimage = QtGui.QImage(self.pic_adjust_pixels[i][j], self.pic_adjust_pixels[i][j].shape[1], self.pic_adjust_pixels[i][j].shape[0], self.pic_adjust_pixels[i][j].shape[1]*2, QtGui.QImage.Format_Grayscale16).copy()
         pixmap = QtGui.QPixmap(qimage)
-        pixmap = pixmap.scaled(self.pic_viewer[i][j].width(), self.pic_viewer[i][j].height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
-        print("show pic size: ", self.pic_viewer[i][j].width(), self.pic_viewer[i][j].height())
-        print("pixmap size: ", pixmap.size())
         self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].setPhoto(pixmap)
 
     def linkPage2Array(self, _MAXIMUM_PAGE = 5, _MAXIMUM_PIC = 4):
@@ -681,9 +679,9 @@ class initialWidget(QtWidgets.QMainWindow):
         # pic Viewer
         self.pic_viewer = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 對應到照片的viewer array
         for i in range(1, self.MAXIMUM_PAGE + 1):
-            pointer = PhotoViewer(self.pic_frame_list[i], i, 1)
-            self.pic_viewer[i][1] = pointer
+            self.pic_viewer[i][1] = PhotoViewer(self.pic_frame_list[i], i, 1)
             self.gridLayout_list[i].addWidget(self.pic_viewer[i][1], 0, 0, 1, 1)
+            self.pic_viewer[i][1].show()
         # Image Processing Attributes
         var_pic = 'self.ui.pic'
         self.pen_start_x = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] #---筆---
@@ -765,14 +763,6 @@ class initialWidget(QtWidgets.QMainWindow):
             for j in range(1, (self.MAXIMUM_PIC + 1)):
                 self.transparent_pix[i][j] = QtGui.QPixmap(1114 ,701) # 有改
                 self.transparent_pix[i][j].fill(Qt.transparent)
-
-
-        # 暫時試試放照片
-
-        # self.showPic(1, 1, "01372635","5F3279B8.dcm")
-        # self.showPic(1, 2, "01372635","5F327951.dcm")
-        # self.showPic(1, 3, "03915480","5F329172_20170623_CR_2_1_1.dcm")
-        # self.showPic(1, 4, "03915480","5F329172_20170623_CR_2_1_1.dcm")
 
     def mousePressEvent(self, event):
         self.clickPosition = event.globalPos()
@@ -948,19 +938,20 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self._zoom = 0
         self._empty = True
         self._scene = QtWidgets.QGraphicsScene(self)
+        self._photo = QtWidgets.QGraphicsPixmapItem()
+        self._pixmap = None
+        self._scene.addItem(self._photo)
         self.setScene(self._scene)
         self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
         self.setResizeAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
         self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        # self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(0, 0, 0)))
-        # self.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(0, 0, 0)))
+        self.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.ruler_start = False
         self.protractor_start = False
         self.pen_start = False
-    # def sizeHint(self) -> QtCore.QSize:
-    #     return QtCore.QSize(512, 512)
     def setNewScene(self):
         self._scene = QtWidgets.QGraphicsScene(self)
         self._empty = True
@@ -982,7 +973,9 @@ class PhotoViewer(QtWidgets.QGraphicsView):
 
     def hasPhoto(self):
         return not self._empty
-
+    def resizeEvent(self, event: QtGui.QResizeEvent) -> None:
+        self.fitInView()
+        return super().resizeEvent(event)
     def fitInView(self, scale=True):
         rect = QtCore.QRectF(self._photo.pixmap().rect())
         if not rect.isNull():
@@ -998,15 +991,15 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             self._zoom = 0
 
     def setPhoto(self, pixmap=None):
-        self._zoom = 0
-        self._photo = QtWidgets.QGraphicsPixmapItem()
-        self._scene.addItem(self._photo)
+        self._zoom = 0  
         if pixmap and not pixmap.isNull():
             self._empty = False
+            self._pixmap = pixmap
             self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
-            self._photo.setPixmap(pixmap)
+            self._photo.setPixmap(pixmap.scaled(self.width(), self.height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
         else:
             self._empty = True
+            self.pixmap = None
             self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
             self._photo.setPixmap(QtGui.QPixmap())
         self.fitInView()
