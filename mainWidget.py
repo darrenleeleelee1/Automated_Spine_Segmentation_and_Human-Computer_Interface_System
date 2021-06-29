@@ -26,8 +26,6 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.search_record = QStandardItemModel()
-        self.pic_label_width = 512
-        self.pic_label_height = 512
         self.pic_windows = [0, 1, 1, 1, 1, 1]
         
         self.loadPtList()
@@ -110,7 +108,6 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.patient_list.itemClicked.connect(self.patient_listItemClicked)
         self.ui.recently_list.itemClicked.connect(self.recently_listItemClicked)
         self.ui.thumbnail_list_1.itemClicked.connect(self.thumbnail_listItemClicked)
-        # self.setThumbnail('03915480')
 
 
 #照片Show Pic----------------------------------------------------------------------
@@ -132,7 +129,6 @@ class initialWidget(QtWidgets.QMainWindow):
         qimage = QtGui.QImage(self.pic_adjust_pixels[self.pic_ith][self.pic_jth], self.pic_adjust_pixels[self.pic_ith][self.pic_jth].shape[1], self.pic_adjust_pixels[self.pic_ith][self.pic_jth].shape[0], self.pic_adjust_pixels[self.pic_ith][self.pic_jth].shape[1]*2, QtGui.QImage.Format_Grayscale16).copy()
         pixmap = QtGui.QPixmap(qimage)
         pixmap = pixmap.scaled(self.pic_viewer[self.pic_ith][self.pic_jth].width(), self.pic_viewer[self.pic_ith][self.pic_jth].height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
-        # print(self.pic_viewer[i][j].width(), self.pic_viewer[i][j].height())
         self.pic_viewer[self.pic_ith][self.pic_jth].setPhoto(pixmap)
         self.update()
 
@@ -155,13 +151,11 @@ class initialWidget(QtWidgets.QMainWindow):
         
     # 設定照片處理的地方有幾格
     def setPicWindows(self, x):
-        #print("i ", self.pic_windows[initialWidget.pic_ith], " x ", x)
         self.now_windows = initialWidget.pic_jth    # 當前按的照片位置
         if self.pic_windows[initialWidget.pic_ith] > x:
             for k in range(x + 1, self.pic_windows[initialWidget.pic_ith] + 1):
                 self.gridLayout_list[initialWidget.pic_ith].removeWidget(self.pic_viewer[initialWidget.pic_ith][k])
                 self.pic_viewer[initialWidget.pic_ith][k].deleteLater()
-                # self.pic_viewer[initialWidget.pic_ith][k].setNewScence()
             if x == 3:
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][1], 0, 0, 1, 1)
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][2], 0, 1, 1, 1)
@@ -236,12 +230,8 @@ class initialWidget(QtWidgets.QMainWindow):
         self.setToolLock('save')
     # 清除
     def pushButtonEraseClicked(self):
-        self.transparent_pix[initialWidget.pic_ith][initialWidget.pic_jth].fill(Qt.transparent)
-        self.angle_coordinate_list[initialWidget.pic_ith][initialWidget.pic_jth].clear()
-        self.update()
-        # 清除後必須將畫筆設為初始位置，否則會存到上次最後的位置，而有一小黑點
-        self.pen_start_x[initialWidget.pic_ith][initialWidget.pic_jth] = self.pen_start_y[initialWidget.pic_ith][initialWidget.pic_jth] = -10
-        self.pen_end_x[initialWidget.pic_ith][initialWidget.pic_jth] = self.pen_end_y[initialWidget.pic_ith][initialWidget.pic_jth] = -10
+        pass
+
     
     # 加照片
     def pushButtonAddPicClicked(self):
@@ -250,7 +240,6 @@ class initialWidget(QtWidgets.QMainWindow):
                 print("\n取消")
                 return
         print(pic_file_path)
-        #print(initialWidget.pic_ith)
         pt_id = list(self.patient_mapto_page.keys())[list(self.patient_mapto_page.values()).index(initialWidget.pic_ith)]
         tmp_dst = './tmp/' + pt_id
         if(os.path.exists(tmp_dst)):
@@ -290,9 +279,11 @@ class initialWidget(QtWidgets.QMainWindow):
             PhotoViewer.tool_lock = 'mouse'
         elif PhotoViewer.tool_lock == 'rotate_right':
             self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].rotate(90)
+            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].turnBack(90)
             PhotoViewer.tool_lock = 'mouse'
         elif PhotoViewer.tool_lock == 'rotate_left':
             self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].rotate(-90)
+            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].turnBack(-90)
             PhotoViewer.tool_lock = 'mouse'
 
     # 對比度的選單設定
@@ -322,7 +313,7 @@ class initialWidget(QtWidgets.QMainWindow):
         self.animation.setEasingCurve(QtCore.QEasingCurve.InOutQuart)
         self.animation.start()
 
-    def aboutWindows(self): # 對比度的選單設定
+    def aboutWindows(self): # 格數選單設定
         self.ui.pushButton_windows.setStyleSheet("::menu-indicator{ image: none; }") #remove triangle
         self.windows_menu = QtWidgets.QMenu()
         self.windows_menu.addAction('1', lambda: self.setPicWindows(1))
@@ -355,8 +346,6 @@ class initialWidget(QtWidgets.QMainWindow):
                 fullpath = join(dir_choose, f)
                 # dicom的名字
                 dicom_id = os.path.basename(fullpath)
-                # print(dicom_id)
-                # print(fullpath)
                 dic_file.append(('files', (dicom_id, open(fullpath, 'rb'))))
             response = requests.post(url, files=dic_file)
             print(response.reason)
@@ -368,9 +357,7 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.pt_list.sort()
                 self.ui.no_list.clear()
                 for ptid in self.pt_list:
-                    self.ui.no_list.addItem(ptid)
-                for i in self.pt_list:
-                    print(i)    
+                    self.ui.no_list.addItem(ptid) 
                 src = './tmp_database/' + pt_id
                 dst = './tmp/' + pt_id
                 if(not os.path.exists(dst)):
@@ -491,8 +478,7 @@ class initialWidget(QtWidgets.QMainWindow):
 
     def thumbnail_listItemClicked(self):
         print("test")
-#         setDragEnabled(true)
-#  setDragDropMode(QAbstractItemView::DragOnly)
+
 # search page----------------------------------------------------------------------------------------------------
     # search
     def loadSearchRecord(self):
@@ -505,7 +491,6 @@ class initialWidget(QtWidgets.QMainWindow):
         
     def saveSearchRecord(self):
         with open('./record/search_record.txt', 'w') as f:
-            #print(self.search_record_cnt)
             for i in range(self.search_record_cnt):
                 f.write(self.search_record.item(i).text() + "\n")
 
@@ -514,7 +499,6 @@ class initialWidget(QtWidgets.QMainWindow):
         if entryItem != '':
             self.ui.input_no.clear()
             self.ui.no_list.clear()
-
             for id in self.pt_list:
                 if id.startswith(entryItem):
                     self.ui.no_list.addItem(id)
@@ -530,7 +514,6 @@ class initialWidget(QtWidgets.QMainWindow):
             self.search_record_cnt += 1
             self.search_record.insertRow(0, QStandardItem(entryItem))
 
-
     # open patient
     def no_listItemClicked(self, item):
         #print(str(item.text()))
@@ -538,9 +521,7 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.pageFull()
         else:
             pt_id = str(item.text())
-            print(pt_id)
             if(pt_id not in self.patient_mapto_page):
-                print("no")
                 src = './tmp_database/' + pt_id
                 dst = './tmp/' + pt_id
                 if(not os.path.exists(dst)):
@@ -553,7 +534,6 @@ class initialWidget(QtWidgets.QMainWindow):
                 initialWidget.pic_ith = self.patient_mapto_page[pt_id]
                 self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[temp_page])
                 self.opened_list.append(pt_id)
-            # print(pt_id + "test")
 
 # Recently viewed page--------------------------------------------------------------------------------------------
     def loadOpened(self):
@@ -577,7 +557,6 @@ class initialWidget(QtWidgets.QMainWindow):
 
     def recently_listItemClicked(self, item):
         pt_id = str(item.text())
-        # self.ui.patient_list.addItem(pt_id)
         src = './tmp_database/' + pt_id
         dst = './tmp/' + pt_id
         if(not os.path.exists(dst)):
@@ -594,11 +573,8 @@ class initialWidget(QtWidgets.QMainWindow):
         medical_numbers = response.json()['medical_numbers']
         self.pt_list = []
         for i in medical_numbers:
-            # print(i)
-            # print(type(i))
             self.pt_list.append(i)
 
-        # print(type(response.json()['medical_numbers']))
 
     def myListWidgetContext(self,position): # 設定patient list 右鍵功能 關閉
         popMenu = QMenu()
@@ -683,14 +659,6 @@ class initialWidget(QtWidgets.QMainWindow):
         var_array_pic_frame_list = 'self.pic_frame_list'
         for i in range(1, self.MAXIMUM_PAGE + 1):
             exec("%s[%d] = %s_%d" % (var_array_pic_frame_list, i, var_pic_frame_list, i))
-        # # pic
-        # self.pic = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 對應到照片的label array
-        # var_pic_list = 'self.ui.pic'
-        # var_array_pic_list = 'self.pic'
-        # for i in range(1, self.MAXIMUM_PAGE + 1):
-        #     exec("%s[%d][1] = %s_%d_1" % (var_array_pic_list, i, var_pic_list, i))
-        #     self.pic[i][1].setStyleSheet("background-color: black; border: 3px solid black;")
-
         # pic Viewer
         self.pic_viewer = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 對應到照片的viewer array
         for i in range(1, self.MAXIMUM_PAGE + 1):
@@ -699,85 +667,16 @@ class initialWidget(QtWidgets.QMainWindow):
             self.pic_viewer[i][1].show()
         # Image Processing Attributes
         var_pic = 'self.ui.pic'
-        self.pen_start_x = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] #---筆---
-        self.pen_start_y = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
-        self.pen_end_x = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
-        self.pen_end_y = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
-        self.tsx = [[None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
-        self.tsy = [[None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
-        self.tmx = [[None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
-        self.tmy = [[None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
-        self.tex = [[None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
-        self.tey = [[None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)] #---筆---
-        self.ruler_start_x = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] #---尺---
-        self.ruler_start_y = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
-        self.ruler_end_x = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
-        self.ruler_end_y = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
-        self.trex = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
-        self.trey = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]  # ---尺---
-        self.angle_start_x = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] #---角度---
-        self.angle_start_y = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
-        self.angle_middle_x = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
-        self.angle_middle_y = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
-        self.angle_end_x = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
-        self.angle_end_y = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # ---角度---
         self.pic_clicked = [ [False] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 哪張照片被clicked
         self.pic_released = [ [False] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 哪張照片被 released
-        self.ruler_coordinate_list = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 每張照片中的所有尺存在[][]中
-        self.angle_coordinate_list = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 每張照片中的所有角度存在[][]中
-        self.rotate_angle = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)] # 旋轉角度
-        self.size = [[1] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)] # 每張照片被放大縮小的倍率
-        self.magnifier_pad_x = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)] # --magnifier--
-        self.magnifier_pad_y = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
-        self.tmpx = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
-        self.tmpy = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)] # --magnifier--
-        self.move_start_x = [ [0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # --move--
-        self.move_start_y = [ [0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
-        self.move_moving_x = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
-        self.move_moving_y = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
-        self.tmmx = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
-        self.tmmy = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
-        self.move_x = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
-        self.move_y = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]  # # --move--
         self.pic_adjust_pixels = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 照片對比度須存改過的pixel array用
         self.pic_original_pixels = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 照片對比度須存原本的pixel array用
-
         self.dicoms = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 存Dicoms
-        self.x = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)] # 每張照片的總位移量 x
-        self.y = [[0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)] # 每張照片的總位移量 y
 
         var_array_pic = 'self.pic'
-        for i in range(1, self.MAXIMUM_PAGE + 1):
-            for j in range(1, (self.MAXIMUM_PIC + 1)):
-                # exec("%s[%d][%d] = %s_%d_%d" % (var_array_pic, i, j, var_pic, i, j))
-                # self.pic[i][j].setText("%d-%d" % (i, j))
-                # self.pic[i][j].setStyleSheet("background-color: black; border: 3px solid black;")
-                self.pen_start_x[i][j] = self.pen_start_y[i][j] = 0
-                self.pen_end_x[i][j] = self.pen_end_y[i][j] = 0
-
-                self.pen_start_x[i][j] = self.pen_start_y[i][j] = -10
-                self.pen_end_x[i][j] = self.pen_end_y[i][j] = -10
-
-                self.ruler_start_x[i][j] = self.ruler_start_y[i][j] = 0
-                self.ruler_end_x[i][j] = self.ruler_end_y[i][j] = 0                
-                self.angle_start_x[i][j] = self.angle_start_y[i][j] = 0
-                self.angle_middle_x[i][j] = self.angle_middle_y[i][j] = 0
-                self.angle_end_x[i][j] = self.angle_end_y[i][j] = 0
-                self.tsx[i][j] = self.tsy[i][j] = 0
-                self.tmx[i][j] = self.tmy[i][j] = 0
-                self.tex[i][j] = self.tey[i][j] = 0
-                self.angle_coordinate_list[i][j] = []
-                self.ruler_coordinate_list[i][j] = []
-
         self.pic_cnt = [0] * (self.MAXIMUM_PAGE + 1)
         initialWidget.pic_ith = initialWidget.pic_jth = 1
-        self.rotate_coordinate_system = [[0, 0], [512, 0], [512, 512], [0, 512]]
-        # 畫圖透明canvas
-        self.transparent_pix = [ [0] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ]
-        for i in range(1, self.MAXIMUM_PAGE + 1):
-            for j in range(1, (self.MAXIMUM_PIC + 1)):
-                self.transparent_pix[i][j] = QtGui.QPixmap(1114 ,701) # 有改
-                self.transparent_pix[i][j].fill(Qt.transparent)
+
 
     def mousePressEvent(self, event):
         self.clickPosition = event.globalPos()
@@ -788,7 +687,6 @@ class initialWidget(QtWidgets.QMainWindow):
         if win_status == 0:
             self.pic_1_1_pos_x = 700
             self.pic_1_1_pos_y = 15
-            # self.showPic(1, 1, "01372635", "5F327951")
             WINDOW_SIZE = 1
             self.showMaximized()
             self.ui.restore_button.setIcon(QtGui.QIcon(u":/icons/icons/window-restore.png"))  # Show minized icon
@@ -796,7 +694,6 @@ class initialWidget(QtWidgets.QMainWindow):
             WINDOW_SIZE = 0
             self.pic_1_1_pos_x = 350
             self.pic_1_1_pos_y = 15
-            # self.showPic(1, 1, "01372635", "5F327951")
             self.showNormal()
             self.ui.restore_button.setIcon(QtGui.QIcon(u":/icons/icons/window-maximize.png"))
 
@@ -848,8 +745,6 @@ class QGraphicsLabel(QtWidgets.QGraphicsTextItem):
 
     def mouseReleaseEvent(self, event):
         pass
-
-
 
 class Protractor(QtWidgets.QGraphicsPathItem):
     def __init__(self, qpainterpath):
@@ -976,6 +871,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self._scene = QtWidgets.QGraphicsScene(self)
         self._empty = True
         self.setScene(self._scene)
+
     def resetFlags(self):
         self.ruler_start = False
         self.protractor_start = False
@@ -993,9 +889,11 @@ class PhotoViewer(QtWidgets.QGraphicsView):
 
     def hasPhoto(self):
         return not self._empty
+
     def resizeEvent(self, event: QtGui.QResizeEvent) -> None:
         self.fitInView()
         return super().resizeEvent(event)
+
     def fitInView(self, scale=True):
         rect = QtCore.QRectF(self._photo.pixmap().rect())
         if not rect.isNull():
@@ -1047,13 +945,19 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             if isinstance(item, QGraphicsLabel) or isinstance(item, Pen) or isinstance(item, Protractor) or isinstance(item, Ruler):
                 item.setMovable(enble)
 
+    # 控制Label轉正
+    def turnBack(self, angle):
+        for item in self._scene.items():
+            if isinstance(item, QGraphicsLabel):
+                print(item.rotation())
+                print(type(item.rotation()))
+                item.setRotation(item.rotation() - angle)
+
     # move時True,有手手
     def toggleDragMode(self, enble):
         if enble:
-            #print("手手")
             self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
         else:
-            #print("沒手手")
             self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
 
     def mousePressEvent(self, event):
@@ -1158,15 +1062,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
     def dropEvent(self, e):
         print("ckeck")
         data = e.mimeData()
-        if(data.hasUrls()):
-            print("y")
-        # if data.hasFormat('application/x-qabstractitemmodeldatalist'):
-        #     print("yes")
-        #     ba = e.mimeData().data('application/x-qabstractitemmodeldatalist')
-        #     data_items = self.decode_data(ba)
-            # print(data_items)
-            # for data_item in enumerate(data_items):
-            #     print(data_item.type)
+
         e.accept()
 
     def decode_data(self, bytearray):
@@ -1195,6 +1091,5 @@ if __name__ == '__main__':
     import sys
     app = QtWidgets.QApplication(sys.argv)
     mw = initialWidget()
-    # custom = customDialog()
     mw.show()
     sys.exit(app.exec_())
