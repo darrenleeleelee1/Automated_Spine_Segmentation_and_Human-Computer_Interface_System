@@ -230,12 +230,8 @@ class initialWidget(QtWidgets.QMainWindow):
         self.setToolLock('save')
     # 清除
     def pushButtonEraseClicked(self):
-        self.transparent_pix[initialWidget.pic_ith][initialWidget.pic_jth].fill(Qt.transparent)
-        self.angle_coordinate_list[initialWidget.pic_ith][initialWidget.pic_jth].clear()
-        self.update()
-        # 清除後必須將畫筆設為初始位置，否則會存到上次最後的位置，而有一小黑點
-        self.pen_start_x[initialWidget.pic_ith][initialWidget.pic_jth] = self.pen_start_y[initialWidget.pic_ith][initialWidget.pic_jth] = -10
-        self.pen_end_x[initialWidget.pic_ith][initialWidget.pic_jth] = self.pen_end_y[initialWidget.pic_ith][initialWidget.pic_jth] = -10
+        pass
+
     
     # 加照片
     def pushButtonAddPicClicked(self):
@@ -875,6 +871,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self._scene = QtWidgets.QGraphicsScene(self)
         self._empty = True
         self.setScene(self._scene)
+
     def resetFlags(self):
         self.ruler_start = False
         self.protractor_start = False
@@ -892,9 +889,11 @@ class PhotoViewer(QtWidgets.QGraphicsView):
 
     def hasPhoto(self):
         return not self._empty
+
     def resizeEvent(self, event: QtGui.QResizeEvent) -> None:
         self.fitInView()
         return super().resizeEvent(event)
+
     def fitInView(self, scale=True):
         rect = QtCore.QRectF(self._photo.pixmap().rect())
         if not rect.isNull():
@@ -945,6 +944,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         for item in self._scene.items():
             if isinstance(item, QGraphicsLabel) or isinstance(item, Pen) or isinstance(item, Protractor) or isinstance(item, Ruler):
                 item.setMovable(enble)
+
     # 控制Label轉正
     def turnBack(self, angle):
         for item in self._scene.items():
@@ -956,10 +956,8 @@ class PhotoViewer(QtWidgets.QGraphicsView):
     # move時True,有手手
     def toggleDragMode(self, enble):
         if enble:
-            #print("手手")
             self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
         else:
-            #print("沒手手")
             self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
 
     def mousePressEvent(self, event):
