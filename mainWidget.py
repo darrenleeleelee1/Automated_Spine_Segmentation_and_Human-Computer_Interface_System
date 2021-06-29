@@ -317,7 +317,7 @@ class initialWidget(QtWidgets.QMainWindow):
         self.animation.setEasingCurve(QtCore.QEasingCurve.InOutQuart)
         self.animation.start()
 
-    def aboutWindows(self): # 對比度的選單設定
+    def aboutWindows(self): # 格數選單設定
         self.ui.pushButton_windows.setStyleSheet("::menu-indicator{ image: none; }") #remove triangle
         self.windows_menu = QtWidgets.QMenu()
         self.windows_menu.addAction('1', lambda: self.setPicWindows(1))
@@ -350,8 +350,6 @@ class initialWidget(QtWidgets.QMainWindow):
                 fullpath = join(dir_choose, f)
                 # dicom的名字
                 dicom_id = os.path.basename(fullpath)
-                # print(dicom_id)
-                # print(fullpath)
                 dic_file.append(('files', (dicom_id, open(fullpath, 'rb'))))
             response = requests.post(url, files=dic_file)
             print(response.reason)
@@ -363,9 +361,7 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.pt_list.sort()
                 self.ui.no_list.clear()
                 for ptid in self.pt_list:
-                    self.ui.no_list.addItem(ptid)
-                for i in self.pt_list:
-                    print(i)    
+                    self.ui.no_list.addItem(ptid) 
                 src = './tmp_database/' + pt_id
                 dst = './tmp/' + pt_id
                 if(not os.path.exists(dst)):
@@ -486,8 +482,7 @@ class initialWidget(QtWidgets.QMainWindow):
 
     def thumbnail_listItemClicked(self):
         print("test")
-#         setDragEnabled(true)
-#  setDragDropMode(QAbstractItemView::DragOnly)
+
 # search page----------------------------------------------------------------------------------------------------
     # search
     def loadSearchRecord(self):
@@ -500,7 +495,6 @@ class initialWidget(QtWidgets.QMainWindow):
         
     def saveSearchRecord(self):
         with open('./record/search_record.txt', 'w') as f:
-            #print(self.search_record_cnt)
             for i in range(self.search_record_cnt):
                 f.write(self.search_record.item(i).text() + "\n")
 
@@ -509,7 +503,6 @@ class initialWidget(QtWidgets.QMainWindow):
         if entryItem != '':
             self.ui.input_no.clear()
             self.ui.no_list.clear()
-
             for id in self.pt_list:
                 if id.startswith(entryItem):
                     self.ui.no_list.addItem(id)
@@ -525,7 +518,6 @@ class initialWidget(QtWidgets.QMainWindow):
             self.search_record_cnt += 1
             self.search_record.insertRow(0, QStandardItem(entryItem))
 
-
     # open patient
     def no_listItemClicked(self, item):
         #print(str(item.text()))
@@ -533,9 +525,7 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.pageFull()
         else:
             pt_id = str(item.text())
-            print(pt_id)
             if(pt_id not in self.patient_mapto_page):
-                print("no")
                 src = './tmp_database/' + pt_id
                 dst = './tmp/' + pt_id
                 if(not os.path.exists(dst)):
@@ -548,7 +538,6 @@ class initialWidget(QtWidgets.QMainWindow):
                 initialWidget.pic_ith = self.patient_mapto_page[pt_id]
                 self.ui.stackedWidget_patients.setCurrentWidget(self.patient_page[temp_page])
                 self.opened_list.append(pt_id)
-            # print(pt_id + "test")
 
 # Recently viewed page--------------------------------------------------------------------------------------------
     def loadOpened(self):
@@ -572,7 +561,6 @@ class initialWidget(QtWidgets.QMainWindow):
 
     def recently_listItemClicked(self, item):
         pt_id = str(item.text())
-        # self.ui.patient_list.addItem(pt_id)
         src = './tmp_database/' + pt_id
         dst = './tmp/' + pt_id
         if(not os.path.exists(dst)):
@@ -589,11 +577,8 @@ class initialWidget(QtWidgets.QMainWindow):
         medical_numbers = response.json()['medical_numbers']
         self.pt_list = []
         for i in medical_numbers:
-            # print(i)
-            # print(type(i))
             self.pt_list.append(i)
 
-        # print(type(response.json()['medical_numbers']))
 
     def myListWidgetContext(self,position): # 設定patient list 右鍵功能 關閉
         popMenu = QMenu()
@@ -764,8 +749,6 @@ class QGraphicsLabel(QtWidgets.QGraphicsTextItem):
 
     def mouseReleaseEvent(self, event):
         pass
-
-
 
 class Protractor(QtWidgets.QGraphicsPathItem):
     def __init__(self, qpainterpath):
@@ -1081,15 +1064,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
     def dropEvent(self, e):
         print("ckeck")
         data = e.mimeData()
-        if(data.hasUrls()):
-            print("y")
-        # if data.hasFormat('application/x-qabstractitemmodeldatalist'):
-        #     print("yes")
-        #     ba = e.mimeData().data('application/x-qabstractitemmodeldatalist')
-        #     data_items = self.decode_data(ba)
-            # print(data_items)
-            # for data_item in enumerate(data_items):
-            #     print(data_item.type)
+
         e.accept()
 
     def decode_data(self, bytearray):
@@ -1118,6 +1093,5 @@ if __name__ == '__main__':
     import sys
     app = QtWidgets.QApplication(sys.argv)
     mw = initialWidget()
-    # custom = customDialog()
     mw.show()
     sys.exit(app.exec_())
