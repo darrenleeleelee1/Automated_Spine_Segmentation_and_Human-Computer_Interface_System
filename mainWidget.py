@@ -865,6 +865,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.ruler_start = False
         self.protractor_start = False
         self.pen_start = False
+        self.press_key = None
         self.setAcceptDrops(True)
     
     def setNewScene(self):
@@ -921,9 +922,11 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
             self._photo.setPixmap(QtGui.QPixmap())
         self.fitInView()
-
+    def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
+        self.press_key = event.key()
+        return super().keyPressEvent(event)
     def wheelEvent(self, event):
-        if PhotoViewer.tool_lock == 'magnifier':
+        if PhotoViewer.tool_lock == 'magnifier' or self.press_key == 16777249:
             if self.hasPhoto():
                 if event.angleDelta().y() > 0:
                     factor = 1.25
