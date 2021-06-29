@@ -283,9 +283,11 @@ class initialWidget(QtWidgets.QMainWindow):
             PhotoViewer.tool_lock = 'mouse'
         elif PhotoViewer.tool_lock == 'rotate_right':
             self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].rotate(90)
+            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].turnBack(90)
             PhotoViewer.tool_lock = 'mouse'
         elif PhotoViewer.tool_lock == 'rotate_left':
             self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].rotate(-90)
+            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].turnBack(-90)
             PhotoViewer.tool_lock = 'mouse'
 
     # 對比度的選單設定
@@ -960,6 +962,13 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         for item in self._scene.items():
             if isinstance(item, QGraphicsLabel) or isinstance(item, Pen) or isinstance(item, Protractor) or isinstance(item, Ruler):
                 item.setMovable(enble)
+    # 控制Label轉正
+    def turnBack(self, angle):
+        for item in self._scene.items():
+            if isinstance(item, QGraphicsLabel):
+                print(item.rotation())
+                print(type(item.rotation()))
+                item.setRotation(item.rotation() - angle)
 
     # move時True,有手手
     def toggleDragMode(self, enble):
