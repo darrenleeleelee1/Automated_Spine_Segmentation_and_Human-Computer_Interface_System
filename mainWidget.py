@@ -922,9 +922,11 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
             self._photo.setPixmap(QtGui.QPixmap())
         self.fitInView()
+
     def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
         self.press_key = event.key()
         return super().keyPressEvent(event)
+
     def wheelEvent(self, event):
         if PhotoViewer.tool_lock == 'magnifier' or self.press_key == 16777249:
             if self.hasPhoto():
