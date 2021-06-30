@@ -872,6 +872,8 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.protractor_start = False
         self.pen_start = False
         self.press_key = None
+        self.instance_of_series = 0
+        self.number_of_instance = 0
 
     def resetWindow(self, WL, WW):
         if (WL == 0 and WW == 0):
@@ -942,6 +944,9 @@ class PhotoViewer(QtWidgets.QGraphicsView):
     def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
         self.press_key = event.key()
         return super().keyPressEvent(event)
+    def keyReleaseEvent(self, event: QtGui.QKeyEvent) -> None:
+        self.press_key = None
+        return super().keyReleaseEvent(event)
     def wheelEvent(self, event):
         if PhotoViewer.tool_lock == 'magnifier' or self.press_key == 16777249:
             if self.hasPhoto():
@@ -957,7 +962,13 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                     self.fitInView()
                 else:
                     self._zoom = 0
-
+        else:
+            if self.number_of_instance > 1:
+                self.instance_of_series += 1
+                self.instance_of_series %= self.number_of_instance
+                print(self.instance_of_series)
+                pixmap = self.ndarray2QPixmap(self.instance_of_series)
+                self.setPhoto(pixmap)
     # 控制item能否移動
     def Movable(self, enble):
         #print("Movable")
@@ -1094,25 +1105,25 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 item[Qt.ItemDataRole(key)] = value
             data.append(item)
         return data
-
-    def dropEvent(self, event: QtGui.QDropEvent) -> None:
-        event.accept()
-        print('check')
-        super().dropEvent(event)
-        print(type(event.mimeData().data('application/x-qabstractitemmodeldatalist')))
-        mimeReader = event.mimeData().data('application/x-qabstractitemmodeldatalist')
-        data_items = self.decode_data(mimeReader)
-        series = data_items[0][Qt.DisplayRole].value()
-        self.ds_copy = initialWidget.series_2_dicoms[initialWidget.pic_ith][series][0]
-        print(type(initialWidget.series_2_dicoms[initialWidget.pic_ith][series]))
-        print(len(initialWidget.series_2_dicoms[initialWidget.pic_ith][series]))
-        arr = initialWidget.mappingWindow(self.ds_copy.pixel_array, self.ds_copy.window_level, self.ds_copy.window_width)
+    def ndarray2QPixmap(self, index):
+        arr = initialWidget.mappingWindow(self.ds_copy[index].pixel_array, self.ds_copy[index].window_level, self.ds_copy[index].window_width)
         qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1]*2, QtGui.QImage.Format_Grayscale16).copy()
         pixmap = QtGui.QPixmap(qimage)
         pixmap = pixmap.scaled(self.width(), self.height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+        return pixmap
+    def dropEvent(self, event: QtGui.QDropEvent) -> None:
+        event.accept()
+        super().dropEvent(event)
+        mimeReader = event.mimeData().data('application/x-qabstractitemmodeldatalist')
+        data_items = self.decode_data(mimeReader)
+        series = data_items[0][Qt.DisplayRole].value()
+        self.ds_copy = initialWidget.series_2_dicoms[initialWidget.pic_ith][series]
+        self.number_of_instance = len(initialWidget.series_2_dicoms[initialWidget.pic_ith][series])
+        self.instance_of_series = 0
+        pixmap = self.ndarray2QPixmap(self.instance_of_series)
         self.setPhoto(pixmap)
     def dragEnterEvent(self, event):
-        event.accept()  
+        event.accept()
 
     def dragMoveEvent(self, event):
         event.accept()
