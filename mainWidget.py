@@ -1,7 +1,7 @@
 from os import listdir
 from os.path import join
-from PyQt5.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
-                          QSize, QTime, QUrl, Qt, QEvent, QPointF)
+from PyQt5.QtCore import (QCoreApplication, QDataStream, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
+                          QSize, QTime, QUrl, QVariant, Qt, QEvent, QPointF)
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QCoreApplication, Qt
 from PyQt5.QtGui import QStandardItem, QStandardItemModel, QTransform, QPainter
@@ -16,11 +16,16 @@ import numpy as np
 from PIL import ImageQt
 import shutil
 import copy
+from collections import defaultdict
 WINDOW_SIZE = 0
 
 class initialWidget(QtWidgets.QMainWindow):
     pic_ith = 1 
     pic_jth = 1
+    # dictionary mapping series(str) to Dicoms(.dcm)
+    series_2_dicoms = [None] * (5 + 1)
+    for i in range(1, 5 + 1):
+        series_2_dicoms[i] = defaultdict(list)
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.ui = Ui_MainWindow()
@@ -107,29 +112,17 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.pushButton_move.clicked.connect(self.pushButtonMoveClicked) # 移動
         self.ui.patient_list.itemClicked.connect(self.patient_listItemClicked)
         self.ui.recently_list.itemClicked.connect(self.recently_listItemClicked)
-        self.ui.thumbnail_list_1.itemClicked.connect(self.thumbnail_listItemClicked)
 
 
 #照片Show Pic----------------------------------------------------------------------
 
     #brightness 
     def getWindow(self, WL, WW):
-        print(WL, WW)
-        if(WL == 0 & WW == 0): # default
-            ds = self.dicoms[initialWidget.pic_ith][initialWidget.pic_jth]
-            WL = ds[0x0028, 0x1050].value
-            WW = ds[0x0028, 0x1051].value
-        elif(WL == 1 & WW == 1): # custom
+        if(WL == 1 and WW == 1): # custom
             WL, WW = self.showCustom()
             if(WL == 0 & WW == 0):
                 return
-        self.pic_adjust_pixels[self.pic_ith][self.pic_jth] = np.copy(self.pic_original_pixels[self.pic_ith][self.pic_jth])
-        arr = self.pic_adjust_pixels[self.pic_ith][self.pic_jth]
-        self.pic_adjust_pixels[self.pic_ith][self.pic_jth] = np.copy(np.uint16(self.mappingWindow(arr, WL, WW)))
-        qimage = QtGui.QImage(self.pic_adjust_pixels[self.pic_ith][self.pic_jth], self.pic_adjust_pixels[self.pic_ith][self.pic_jth].shape[1], self.pic_adjust_pixels[self.pic_ith][self.pic_jth].shape[0], self.pic_adjust_pixels[self.pic_ith][self.pic_jth].shape[1]*2, QtGui.QImage.Format_Grayscale16).copy()
-        pixmap = QtGui.QPixmap(qimage)
-        pixmap = pixmap.scaled(self.pic_viewer[self.pic_ith][self.pic_jth].width(), self.pic_viewer[self.pic_ith][self.pic_jth].height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
-        self.pic_viewer[self.pic_ith][self.pic_jth].setPhoto(pixmap)
+        self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].resetWindow(WL, WW)
         self.update()
 
     def showCustom(self):
@@ -141,8 +134,8 @@ class initialWidget(QtWidgets.QMainWindow):
             WL = 0
             WW = 0
         return WL, WW
-
-    def mappingWindow(self, arr, WL, WW):
+    @staticmethod
+    def mappingWindow(arr, WL, WW):
         pixel_max = WL + WW/2
         pixel_min = WL - WW/2
         arr = np.clip(arr, pixel_min, pixel_max)
@@ -172,8 +165,6 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][2], 0, 1, 1, 1)
                 self.pic_viewer[initialWidget.pic_ith][1].show()
                 self.pic_viewer[initialWidget.pic_ith][2].show()
-                self.showPic(initialWidget.pic_ith, 1, "01372635","5F3279B8.dcm")
-                self.showPic(initialWidget.pic_ith, 2, "01372635","5F327951.dcm")
             elif x == 3:
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][1], 0, 0, 1, 1)
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][2], 0, 1, 1, 1)
@@ -181,9 +172,6 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.pic_viewer[initialWidget.pic_ith][1].show()
                 self.pic_viewer[initialWidget.pic_ith][2].show()
                 self.pic_viewer[initialWidget.pic_ith][3].show()
-                self.showPic(initialWidget.pic_ith, 1, "01372635","5F3279B8.dcm")
-                self.showPic(initialWidget.pic_ith, 2, "01372635","5F327951.dcm")
-                self.showPic(initialWidget.pic_ith, 3, "03915480","5F329172_20170623_CR_2_1_1.dcm")
             elif x == 4:
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][1], 0, 0, 1, 1)
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][2], 0, 1, 1, 1)
@@ -193,10 +181,6 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.pic_viewer[initialWidget.pic_ith][2].show()
                 self.pic_viewer[initialWidget.pic_ith][3].show()
                 self.pic_viewer[initialWidget.pic_ith][4].show()
-                self.showPic(initialWidget.pic_ith, 1, "01372635","5F3279B8.dcm")
-                self.showPic(initialWidget.pic_ith, 2, "01372635","5F327951.dcm")
-                self.showPic(initialWidget.pic_ith, 3, "03915480","5F329172_20170623_CR_2_1_1.dcm")
-                self.showPic( initialWidget.pic_ith, 4, "03915480","5F329172_20170623_CR_2_1_1.dcm")
             self.pic_windows[initialWidget.pic_ith] = x
             initialWidget.pic_jth = self.now_windows    # 設回原本的位置
         self.setToolLock(PhotoViewer.tool_lock)    # 傳到setToolLock更新當前總共幾張照片
@@ -450,23 +434,22 @@ class initialWidget(QtWidgets.QMainWindow):
         i = self.patient_mapto_page[pt_id]
         self.thumbnail_list[i].setViewMode(QListWidget.IconMode)
         self.thumbnail_list[i].setItemAlignment(Qt.AlignCenter)
+        initialWidget.series_2_dicoms[i].clear()
         for filename in os.listdir(pt_path):
             if not filename.endswith('.dcm') :
                 continue
             dicom_path = pt_path + '/' + filename
-            ds = dcmread(dicom_path)
-            arr = ds.pixel_array
-            arr = np.uint16(arr)
-            dicom_WL = ds[0x0028, 0x1050].value
-            dicom_WW = ds[0x0028, 0x1051].value
-            SD = ds[0x0008, 0x103e].value #Series_Description
-            # SN = str(ds[0x0020, 0x0011].value) #Series Number
-            arr = self.mappingWindow(arr, dicom_WL, dicom_WW)
+            ds = customDicom(dicom_path)
+            if ds.series_description in initialWidget.series_2_dicoms[i].keys():
+                initialWidget.series_2_dicoms[i][ds.series_description].append(ds)
+                continue
+            initialWidget.series_2_dicoms[i][ds.series_description].append(ds)
+            arr = initialWidget.mappingWindow(ds.pixel_array, ds.window_level, ds.window_width)
             qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1]*2, QtGui.QImage.Format_Grayscale16).copy()
             pixmap = QtGui.QPixmap(qimage)
-            item = QListWidgetItem()
+            item = QtWidgets.QListWidgetItem(filename)
             item.setSizeHint(QSize(219, 250))
-            item.setText(SD)
+            item.setText(ds.series_description)
             icon = QtGui.QIcon(pixmap)
             item.setIcon(icon)
             self.thumbnail_list[i].addItem(item) 
@@ -476,8 +459,7 @@ class initialWidget(QtWidgets.QMainWindow):
         self.thumbnail_list[i].setDragEnabled(True)
         self.thumbnail_list[i].setDragDropMode(QAbstractItemView.DragOnly)
 
-    def thumbnail_listItemClicked(self):
-        print("test")
+    
 
 # search page----------------------------------------------------------------------------------------------------
     # search
@@ -614,23 +596,7 @@ class initialWidget(QtWidgets.QMainWindow):
                 arr[x, y] = (arr[x, y] - pixel_min) / (pixel_max - pixel_min) * 65535
         return np.copy(arr)
 
-    def showPic(self, i, j, patient_no, patient_dics):
-        dicom_path = "./tmp_database/" + patient_no + "/" + patient_dics
-        ds = dcmread(dicom_path)
-
-        self.dicoms[i][j] = ds
-        arr = copy.deepcopy(ds.pixel_array)
-        arr = np.uint16(arr)
-        self.pic_original_pixels[i][j] = np.copy(arr)
-        initialWidget.pic_ith = i
-        initialWidget.pic_jth = j
-        dicom_WL = ds[0x0028, 0x1050].value
-        dicom_WW = ds[0x0028, 0x1051].value
-        self.pic_adjust_pixels[i][j] = self.mappingWindow(arr, dicom_WL, dicom_WW)
-        qimage = QtGui.QImage(self.pic_adjust_pixels[i][j], self.pic_adjust_pixels[i][j].shape[1], self.pic_adjust_pixels[i][j].shape[0], self.pic_adjust_pixels[i][j].shape[1]*2, QtGui.QImage.Format_Grayscale16).copy()
-        pixmap = QtGui.QPixmap(qimage)
-        self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].setPhoto(pixmap)
-
+    
     def linkPage2Array(self, _MAXIMUM_PAGE = 5, _MAXIMUM_PIC = 4):
         # 把QtDesigner的一些重複的Widget用array對應
         # patient_page
@@ -659,6 +625,7 @@ class initialWidget(QtWidgets.QMainWindow):
         var_array_pic_frame_list = 'self.pic_frame_list'
         for i in range(1, self.MAXIMUM_PAGE + 1):
             exec("%s[%d] = %s_%d" % (var_array_pic_frame_list, i, var_pic_frame_list, i))
+        
         # pic Viewer
         self.pic_viewer = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 對應到照片的viewer array
         self.title_bar = [[None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
@@ -670,10 +637,7 @@ class initialWidget(QtWidgets.QMainWindow):
         var_pic = 'self.ui.pic'
         self.pic_clicked = [ [False] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 哪張照片被clicked
         self.pic_released = [ [False] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 哪張照片被 released
-        self.pic_adjust_pixels = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 照片對比度須存改過的pixel array用
-        self.pic_original_pixels = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 照片對比度須存原本的pixel array用
         self.dicoms = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 存Dicoms
-
         var_array_pic = 'self.pic'
         self.pic_cnt = [0] * (self.MAXIMUM_PAGE + 1)
         initialWidget.pic_ith = initialWidget.pic_jth = 1
@@ -706,13 +670,53 @@ def copytree(src, dst, symlinks=False, ignore=None):
             shutil.copytree(s, d, symlinks, ignore)
         else:
             shutil.copy2(s, d)
-
+# classes
 class custom(QDialog):
   def __init__(self):
     super().__init__()
     self.customui = Ui_Dialog()
     self.customui.setupUi(self)
     
+class customDicom():
+    def __init__(self, _dcm_path):
+        self.dcm_path = _dcm_path 
+        # self.dicom = self.dcmreader(self.dcm_path) # 若要存dicom
+        self.pixel_array = None
+        self.series_description = None
+        self.series_number = None
+        self.instance_no_of_series = None
+        self.echotime = None
+        self.content_time = None
+        self.repetition_time = None
+        self.magnetic = None
+        self.window_level = None # WL
+        self.window_width = None # WW
+        self.scropInfo(self.dcmreader(self.dcm_path))
+    def dcmreader(self, _dcm_path):
+        ds = dcmread(_dcm_path)
+        return ds
+    def scropInfo(self, ds):
+        self.pixel_array = np.uint16(ds.pixel_array).copy()
+        self.series_description = ds[0x0008, 0x103e].value if (0x0008, 0x103e) in ds else None
+        self.series_number = ds[0x0020, 0x0011].value if (0x0020, 0x0011) in ds else None
+        self.instance_no_of_series = ds[0x0020, 0x0013].value if (0x0020, 0x0013) in ds else None
+        self.echotime = ds[0x0018, 0x0081].value if (0x0018, 0x0081) in ds else None
+        self.content_time = ds[0x0008, 0x0033].value if (0x0008, 0x0033) in ds else None
+        self.repetition_time = ds[0x0019, 0x1087].value if (0x0019, 0x1087) in ds else None
+        self.magnetic = ds[0x0018, 0x0087].value if (0x0018, 0x0087) in ds else None
+        self.window_level = ds[0x0028, 0x1050].value if (0x0028, 0x1050) in ds else None
+        self.window_width = ds[0x0028, 0x1051].value if (0x0028, 0x1051) in ds else None
+    def print(self):
+        print("pixel_array: ", self.pixel_array)
+        print("series_description: ", self.series_description)
+        print("series_number: ", self.series_number)
+        print("instance_no_of_series: ", self.instance_no_of_series)
+        print("echotime: ", self.echotime)
+        print("content_time: ", self.content_time)
+        print("repetition_time: ", self.repetition_time)
+        print("magnetic: ", self.magnetic)
+        print("window_level: ", self.window_level)
+        print("window_width: ", self.window_width)
 class QGraphicsLabel(QtWidgets.QGraphicsTextItem):
     def __init__(self, text):
         super().__init__(text)
@@ -849,6 +853,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         super(PhotoViewer, self).__init__(parent)
         self.in_ith = _i
         self.in_jth = _j
+        self.ds_copy = None
         self._zoom = 0
         self._empty = True
         self._scene = QtWidgets.QGraphicsScene(self)
@@ -863,12 +868,26 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(0, 0, 0)))
         self.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.setAcceptDrops(True)
         self.ruler_start = False
         self.protractor_start = False
         self.pen_start = False
         self.press_key = None
-        self.setAcceptDrops(True)
-    
+        self.instance_of_series = 0
+        self.number_of_instance = 0
+
+    def resetWindow(self, WL, WW):
+        if (WL == 0 and WW == 0):
+            WL = self.ds_copy.window_level
+            WW = self.ds_copy.window_width
+        arr = self.ds_copy.pixel_array
+        arr = np.copy(np.uint16(initialWidget.mappingWindow(arr, WL, WW)))
+        print(WL, WW)
+        qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1]*2, QtGui.QImage.Format_Grayscale16).copy()
+        pixmap = QtGui.QPixmap(qimage)
+        pixmap = pixmap.scaled(self.width(), self.height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+        self.setPhoto(pixmap)
+
     def setNewScene(self):
         self._scene = QtWidgets.QGraphicsScene(self)
         self._empty = True
@@ -926,6 +945,9 @@ class PhotoViewer(QtWidgets.QGraphicsView):
     def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
         self.press_key = event.key()
         return super().keyPressEvent(event)
+    def keyReleaseEvent(self, event: QtGui.QKeyEvent) -> None:
+        self.press_key = None
+        return super().keyReleaseEvent(event)
     def wheelEvent(self, event):
         if PhotoViewer.tool_lock == 'magnifier' or self.press_key == 16777249:
             if self.hasPhoto():
@@ -941,7 +963,13 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                     self.fitInView()
                 else:
                     self._zoom = 0
-
+        else:
+            if self.number_of_instance > 1:
+                self.instance_of_series += 1
+                self.instance_of_series %= self.number_of_instance
+                print(self.instance_of_series)
+                pixmap = self.ndarray2QPixmap(self.instance_of_series)
+                self.setPhoto(pixmap)
     # 控制item能否移動
     def Movable(self, enble):
         #print("Movable")
@@ -1063,12 +1091,6 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             self.pen.setPath(self.pen_path)
         super(PhotoViewer, self).mouseMoveEvent(event)
 
-    def dropEvent(self, e):
-        print("ckeck")
-        data = e.mimeData()
-
-        e.accept()
-
     def decode_data(self, bytearray):
         data = []
         item = {}
@@ -1084,12 +1106,29 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 item[Qt.ItemDataRole(key)] = value
             data.append(item)
         return data
-
-    def dragEnterEvent(self, e):
-        e.accept()  
+    def ndarray2QPixmap(self, index):
+        arr = initialWidget.mappingWindow(self.ds_copy[index].pixel_array, self.ds_copy[index].window_level, self.ds_copy[index].window_width)
+        qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1]*2, QtGui.QImage.Format_Grayscale16).copy()
+        pixmap = QtGui.QPixmap(qimage)
+        pixmap = pixmap.scaled(self.width(), self.height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+        return pixmap
+    def dropEvent(self, event: QtGui.QDropEvent) -> None:
+        event.accept()
+        super().dropEvent(event)
+        mimeReader = event.mimeData().data('application/x-qabstractitemmodeldatalist')
+        data_items = self.decode_data(mimeReader)
+        series = data_items[0][Qt.DisplayRole].value()
+        self.ds_copy = initialWidget.series_2_dicoms[initialWidget.pic_ith][series]
+        self.number_of_instance = len(initialWidget.series_2_dicoms[initialWidget.pic_ith][series])
+        self.instance_of_series = 0
+        pixmap = self.ndarray2QPixmap(self.instance_of_series)
+        self.setPhoto(pixmap)
+    def dragEnterEvent(self, event):
+        event.accept()
 
     def dragMoveEvent(self, event):
         event.accept()
+
 # Title bar
 class TitleBar(QtWidgets.QDialog):
     def __init__(self, parent=None):
@@ -1148,23 +1187,23 @@ class TitleBar(QtWidgets.QDialog):
         self.minimize.clicked.connect(self.showSmall)
         self.maximize.clicked.connect(self.showMaxRestore)
 
-    def showSmall(self):
-        box.showMinimized()
-
-    def showMaxRestore(self):
-        if (self.maxNormal):
-            box.showNormal()
-            self.maxNormal = False
-            self.maximize.setIcon(QtGui.QIcon('img/max.png'))
-            print('1')
-        else:
-            box.showMaximized()
-            self.maxNormal = True
-            print('2')
-            self.maximize.setIcon(QtGui.QIcon('img/max2.png'))
-
-    def close(self):
-        box.close()
+    # def showSmall(self):
+    #     box.showMinimized()
+    #
+    # def showMaxRestore(self):
+    #     if (self.maxNormal):
+    #         box.showNormal()
+    #         self.maxNormal = False
+    #         self.maximize.setIcon(QtGui.QIcon('img/max.png'))
+    #         print('1')
+    #     else:
+    #         box.showMaximized()
+    #         self.maxNormal = True
+    #         print('2')
+    #         self.maximize.setIcon(QtGui.QIcon('img/max2.png'))
+    #
+    # def close(self):
+    #     box.close()
 
     # def mousePressEvent(self, event):
     #     if event.button() == Qt.LeftButton:
