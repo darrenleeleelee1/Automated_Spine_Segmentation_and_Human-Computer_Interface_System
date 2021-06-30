@@ -230,7 +230,7 @@ class initialWidget(QtWidgets.QMainWindow):
         self.setToolLock('save')
     # 清除
     def pushButtonEraseClicked(self):
-        pass
+        self.setToolLock('clear')
 
     
     # 加照片
@@ -271,9 +271,6 @@ class initialWidget(QtWidgets.QMainWindow):
         elif PhotoViewer.tool_lock == 'mouse':
             for k in range(1, self.pic_windows[initialWidget.pic_ith] + 1):
                 self.pic_viewer[initialWidget.pic_ith][k].Movable(True)
-        elif PhotoViewer.tool_lock == 'clear':
-            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].setNewScene()
-            PhotoViewer.tool_lock = 'mouse'
         elif PhotoViewer.tool_lock == 'save':
             self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].save()
             PhotoViewer.tool_lock = 'mouse'
@@ -285,6 +282,10 @@ class initialWidget(QtWidgets.QMainWindow):
             self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].rotate(-90)
             self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].turnBack(-90)
             PhotoViewer.tool_lock = 'mouse'
+        elif PhotoViewer.tool_lock == 'clear':
+            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].clear()
+            PhotoViewer.tool_lock = 'mouse'
+
 
     # 對比度的選單設定
     def aboutBrightness(self): 
@@ -711,6 +712,19 @@ class custom(QDialog):
     super().__init__()
     self.customui = Ui_Dialog()
     self.customui.setupUi(self)
+
+# class Group(QtWidgets.QGraphicsItemGroup):
+#     def __init__(self):
+#         super().__init__()
+#
+#     def hoverEnterEvent(self, event):
+#         app.instance().setOverrideCursor(QtCore.Qt.OpenHandCursor)
+#
+#     def hoverLeaveEvent(self, event):
+#         app.instance().restoreOverrideCursor()
+
+
+
     
 class QGraphicsLabel(QtWidgets.QGraphicsTextItem):
     def __init__(self, text):
@@ -888,6 +902,11 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             return
         save_image.save(filePath)
 
+    def clear(self):
+        for item in self._scene.items():
+            if isinstance(item, QGraphicsLabel) or isinstance(item, Pen) or isinstance(item, Protractor) or isinstance(item, Ruler):
+                self._scene.removeItem(item)
+
     def hasPhoto(self):
         return not self._empty
 
@@ -925,6 +944,19 @@ class PhotoViewer(QtWidgets.QGraphicsView):
 
     def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
         self.press_key = event.key()
+        # 刪除所選item
+        if self.press_key == 16777223 and PhotoViewer.tool_lock == 'mouse':
+            item = self._scene.itemAt(self.sp, QTransform())
+            # print(item)
+            # if isinstance(item, Group):
+            #     for i in item.childItems():
+            #         print(i)
+            #         self._scene.removeItem(i)
+            #         #app.instance().restoreOverrideCursor()  # 需要hoverLeaveEvent，否則會刪掉後會一直有手手
+            #     self._scene.destroyItemGroup(item)
+            if isinstance(item, QGraphicsLabel) or isinstance(item, Pen) or isinstance(item, Protractor) or isinstance(item, Ruler):
+                self._scene.removeItem(item)
+                app.instance().restoreOverrideCursor() # 需要hoverLeaveEvent，否則會刪掉後會一直有手手
         return super().keyPressEvent(event)
 
     def wheelEvent(self, event):
@@ -945,7 +977,6 @@ class PhotoViewer(QtWidgets.QGraphicsView):
 
     # 控制item能否移動
     def Movable(self, enble):
-        #print("Movable")
         for item in self._scene.items():
             if isinstance(item, QGraphicsLabel) or isinstance(item, Pen) or isinstance(item, Protractor) or isinstance(item, Ruler):
                 item.setMovable(enble)
@@ -991,6 +1022,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 self.protractor_text_label.setMovable(True)
                 self.protractor_start = False
                 self.ruler_start = False
+
         if PhotoViewer.tool_lock == 'pen':
             self.pen_path = QtGui.QPainterPath()
             self.pen_path.moveTo(self.sp)
@@ -1008,6 +1040,15 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             self.ruler.setMovable(False)
             self.ruler_text_label.setMovable(False)
             self.ruler_start = False
+
+            #self.ruler_text_label.setParentItem(self.ruler)
+            # self.group = Group()
+            # self.group.addToGroup(self.ruler_text_label)
+            # self.group.addToGroup(self.ruler)
+            # self._scene.addItem(self.group)
+            # self.group.setAcceptHoverEvents(True)
+            #self._scene.addItem(self.group)
+
         elif PhotoViewer.tool_lock == 'angle':
             if self.protractor_start:
                 self.qpainterpath.clear()
