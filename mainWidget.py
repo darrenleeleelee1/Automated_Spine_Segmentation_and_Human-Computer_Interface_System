@@ -628,7 +628,6 @@ class initialWidget(QtWidgets.QMainWindow):
         
         # pic Viewer
         self.pic_viewer = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 對應到照片的viewer array
-        self.title_bar = [[None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1)]
         for i in range(1, self.MAXIMUM_PAGE + 1):
             self.pic_viewer[i][1] = PhotoViewer(self.pic_frame_list[i], i, 1)
             self.gridLayout_list[i].addWidget(self.pic_viewer[i][1], 0, 0, 1, 1)
@@ -876,6 +875,14 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.instance_of_series = 0
         self.number_of_instance = 0
 
+        # title bar
+        self.title = TitleBar(self.in_ith, self.in_jth)
+        self.vbox = QtWidgets.QVBoxLayout(self)
+        self.vbox.addWidget(self.title)
+        self.vbox.setAlignment(Qt.AlignTop)
+        self.vbox.setContentsMargins(0, 0, 0, 0)
+
+
     def resetWindow(self, WL, WW):
         if (WL == 0 and WW == 0):
             WL = self.ds_copy.window_level
@@ -942,6 +949,8 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
             self._photo.setPixmap(QtGui.QPixmap())
         self.fitInView()
+
+        print(self.title.size())
     def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
         self.press_key = event.key()
         return super().keyPressEvent(event)
@@ -1129,91 +1138,103 @@ class PhotoViewer(QtWidgets.QGraphicsView):
     def dragMoveEvent(self, event):
         event.accept()
 
-# Title bar
+    # title bar
 class TitleBar(QtWidgets.QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, _i, _j,  parent = None):
         QtWidgets.QDialog.__init__(self, parent)
-        # self.in_ith = _i
-        # self.in_jth = _j
         self.setWindowFlags(Qt.FramelessWindowHint)
+        self.t_ith = _i
+        self.t_jth = _j
+        self.parent = parent
         css = """
-            QWidget{
-                Background: #000000;
-                color:white;
-                font:12px bold;
-                font-weight:bold;
-                border-radius: 1px;
-                height: 11px;
-            }
-            QDialog{
-                Background-image:url('img/titlebar bg.png');
-                font-size:12px;                    
-                color: black;
-            }
-            QToolButton{
-                Background:#AAAAAA;
-                font-size:11px;
-            }
-            QToolButton:hover{
-                Background: #FFFFFF;
-                font-size:11px;                
-            }
-        """
+                QWidget{
+                    Background: #000000;
+                    color:white;
+                    font:12px bold;
+                    font-weight:bold;
+                    border-radius: 1px;
+                    height: 11px;
+                }
+                QDialog{
+                    font-size:12px;                    
+                    color: black;
+                }
+                QToolButton{
+                    Background:#AAAAAA;
+                    font-size:11px;
+                }
+                QToolButton:hover{
+                    Background: #FFFFFF;
+                    font-size:11px;                
+                }
+            """
         self.setAutoFillBackground(True)
         self.setBackgroundRole(QtGui.QPalette.Highlight)
         self.setStyleSheet(css)
-        self.minimize = QtWidgets.QToolButton(self)
-        self.minimize.setIcon(QtGui.QIcon('img/min.png'))
-        self.maximize = QtWidgets.QToolButton(self)
-        self.maximize.setIcon(QtGui.QIcon('img/max.png'))
+
+        self.button_frame_spine = QtWidgets.QToolButton(self)
+        self.button_frame_spine.setIcon(QtGui.QIcon('generatedUiFile/res/icons/img_frame_spine.png'))
+
+        self.button_heat_map = QtWidgets.QToolButton(self)
+        self.button_heat_map.setIcon(QtGui.QIcon('generatedUiFile/res/icons/img_heat_map.png'))
+
+        self.button_scoliosis_angle = QtWidgets.QToolButton(self)
+        self.button_scoliosis_angle.setIcon(QtGui.QIcon('generatedUiFile/res/icons/img_scoliosis_angle.png'))
+
         close = QtWidgets.QToolButton(self)
         close.setIcon(QtGui.QIcon('generatedUiFile/res/icons/x 3.png'))
-        self.minimize.setMinimumHeight(10)
+
+        self.button_frame_spine.setMinimumHeight(10)
+        self.button_heat_map.setMinimumHeight(10)
+        self.button_scoliosis_angle.setMinimumHeight(10)
         close.setMinimumHeight(10)
-        self.maximize.setMinimumHeight(10)
+
         label = QtWidgets.QLabel(self)
-        label.setText("Window Title")
-        self.setWindowTitle("Window Title")
+        label.setText("patient number")
+        self.setWindowTitle("patient number")
+
         hbox = QtWidgets.QHBoxLayout(self)
         hbox.addWidget(label)
-        hbox.addWidget(self.minimize)
-        hbox.addWidget(self.maximize)
+        hbox.addWidget(self.button_frame_spine)
+        hbox.addWidget(self.button_heat_map)
+        hbox.addWidget(self.button_scoliosis_angle)
         hbox.addWidget(close)
         hbox.insertStretch(1, 500)
         hbox.setSpacing(0)
         self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-        self.maxNormal = False
+
+        self.button_frame_spine.clicked.connect(self.frameSpine)
+        self.button_heat_map.clicked.connect(self.heatMap)
+        self.button_scoliosis_angle.clicked.connect(self.scoliosis_angle)
         close.clicked.connect(self.close)
-        self.minimize.clicked.connect(self.showSmall)
-        self.maximize.clicked.connect(self.showMaxRestore)
 
-    # def showSmall(self):
-    #     box.showMinimized()
-    #
-    # def showMaxRestore(self):
-    #     if (self.maxNormal):
-    #         box.showNormal()
-    #         self.maxNormal = False
-    #         self.maximize.setIcon(QtGui.QIcon('img/max.png'))
-    #         print('1')
-    #     else:
-    #         box.showMaximized()
-    #         self.maxNormal = True
-    #         print('2')
-    #         self.maximize.setIcon(QtGui.QIcon('img/max2.png'))
-    #
-    # def close(self):
-    #     box.close()
+    def mousePressEvent(self, event):
+        self.sp = self.mapToScene(event.pos())
+        initialWidget.pic_ith = self.t_ith
+        initialWidget.pic_jth = self.t_jth
 
-    # def mousePressEvent(self, event):
-    #     if event.button() == Qt.LeftButton:
-    #         box.moving = True
-    #         box.offset = event.pos()
-    #
-    #
-    #
-    # def mouseMoveEvent(self, event):
-    #     if box.moving: box.move(event.globalPos() - box.offset)
+    def mapToScene(self, x):
+        initialWidget.pic_ith = self.t_ith
+        initialWidget.pic_jth = self.t_jth
+        print("initialWidget.pic_ith = ", initialWidget.pic_ith ,initialWidget.pic_jth )
+
+    def frameSpine(self):
+        print("frameSpine")
+
+    def heatMap(self):
+        print("heatmap")
+
+    def scoliosis_angle(self):
+        print("scoliosis_angle")
+
+    def close(self):
+        # print("close", self.t_ith, self.t_jth)
+        super(TitleBar, self).close()
+        # box.close()
+        # self.removeWidget(self)
+        # self.init = initialWidget()
+        # initialWidget.gridLayout_list[self.t_ith].removeWidget(initialWidget.pic_viewer[self.t_ith][self.t_jth])
+
 
 if __name__ == '__main__':
     import sys

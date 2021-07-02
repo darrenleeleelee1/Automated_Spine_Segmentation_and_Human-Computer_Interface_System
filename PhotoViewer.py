@@ -173,6 +173,17 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.ruler_start = False
         self.protractor_start = False
         self.pen_start = False
+
+
+        self.title = self.TitleBar()
+        self.vbox = QtWidgets.QVBoxLayout(self)
+        self.vbox.addWidget(self.title)
+        self.vbox.setAlignment(Qt.AlignTop)
+        self.vbox.setContentsMargins(0, 0, 0, 0)
+
+
+
+        # self._scene.addWidget(self.title)
     
     def setNewScene(self):
         self._scene = QtWidgets.QGraphicsScene(self)
@@ -214,7 +225,6 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self._zoom = 0
         self._photo = QtWidgets.QGraphicsPixmapItem()
         self._scene.addItem(self._photo)
-
         if pixmap and not pixmap.isNull():
             self._empty = False
             self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
@@ -356,86 +366,88 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             self.pen.setPath(self.pen_path)
         super(PhotoViewer, self).mouseMoveEvent(event)
 
-class TitleBar(QtWidgets.QDialog):
-    def __init__(self, parent=None):
-        QtWidgets.QDialog.__init__(self, parent)
-        self.setWindowFlags(Qt.FramelessWindowHint)
-        css = """
-            QWidget{
-                Background: #000000;
-                color:white;
-                font:12px bold;
-                font-weight:bold;
-                border-radius: 1px;
-                height: 11px;
-            }
-            QDialog{
-                Background-image:url('img/titlebar bg.png');
-                font-size:12px;                    
-                color: black;
-            }
-            QToolButton{
-                Background:#AAAAAA;
-                font-size:11px;
-            }
-            QToolButton:hover{
-                Background: #FFFFFF;
-                font-size:11px;                
-            }
-        """
-        self.setAutoFillBackground(True)
-        self.setBackgroundRole(QtGui.QPalette.Highlight)
-        self.setStyleSheet(css)
-        self.minimize = QtWidgets.QToolButton(self)
-        self.minimize.setIcon(QtGui.QIcon('img/min.png'))
-        self.maximize = QtWidgets.QToolButton(self)
-        self.maximize.setIcon(QtGui.QIcon('img/max.png'))
-        close = QtWidgets.QToolButton(self)
-        close.setIcon(QtGui.QIcon('generatedUiFile/res/icons/x 3.png'))
-        self.minimize.setMinimumHeight(10)
-        close.setMinimumHeight(10)
-        self.maximize.setMinimumHeight(10)
-        label = QtWidgets.QLabel(self)
-        label.setText("Window Title")
-        self.setWindowTitle("Window Title")
-        hbox = QtWidgets.QHBoxLayout(self)
-        hbox.addWidget(label)
-        hbox.addWidget(self.minimize)
-        hbox.addWidget(self.maximize)
-        hbox.addWidget(close)
-        hbox.insertStretch(1, 500)
-        hbox.setSpacing(0)
-        self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-        self.maxNormal = False
-        close.clicked.connect(self.close)
-        self.minimize.clicked.connect(self.showSmall)
-        self.maximize.clicked.connect(self.showMaxRestore)
-
-    def showSmall(self):
-        box.showMinimized()
-
-    def showMaxRestore(self):
-        if (self.maxNormal):
-            box.showNormal()
-            self.maxNormal = False
+    class TitleBar(QtWidgets.QDialog):
+        def __init__(self, parent=None):
+            QtWidgets.QDialog.__init__(self, parent)
+            self.setWindowFlags(Qt.FramelessWindowHint)
+            css = """
+                    QWidget{
+                        Background: #000000;
+                        color:white;
+                        font:12px bold;
+                        font-weight:bold;
+                        border-radius: 1px;
+                        height: 11px;
+                    }
+                    QDialog{
+                        Background-image:url('img/titlebar bg.png');
+                        font-size:12px;                    
+                        color: black;
+                    }
+                    QToolButton{
+                        Background:#AAAAAA;
+                        font-size:11px;
+                    }
+                    QToolButton:hover{
+                        Background: #FFFFFF;
+                        font-size:11px;                
+                    }
+                """
+            self.setAutoFillBackground(True)
+            self.setBackgroundRole(QtGui.QPalette.Highlight)
+            self.setStyleSheet(css)
+            self.minimize = QtWidgets.QToolButton(self)
+            self.minimize.setIcon(QtGui.QIcon('img/min.png'))
+            self.maximize = QtWidgets.QToolButton(self)
             self.maximize.setIcon(QtGui.QIcon('img/max.png'))
-            print('1')
-        else:
-            box.showMaximized()
-            self.maxNormal = True
-            print('2')
-            self.maximize.setIcon(QtGui.QIcon('img/max2.png'))
+            close = QtWidgets.QToolButton(self)
+            close.setIcon(QtGui.QIcon('generatedUiFile/res/icons/x 3.png'))
+            self.minimize.setMinimumHeight(10)
+            close.setMinimumHeight(10)
+            self.maximize.setMinimumHeight(10)
+            label = QtWidgets.QLabel(self)
+            label.setText("Window Title")
+            self.setWindowTitle("Window Title")
+            hbox = QtWidgets.QHBoxLayout(self)
+            hbox.addWidget(label)
+            hbox.addWidget(self.minimize)
+            hbox.addWidget(self.maximize)
+            hbox.addWidget(close)
+            hbox.insertStretch(1, 500)
+            hbox.setSpacing(0)
+            self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+            self.maxNormal = False
+            close.clicked.connect(self.close)
+            # self.minimize.clicked.connect(self.showSmall)
+            # self.maximize.clicked.connect(self.showMaxRestore)
 
-    def close(self):
-        box.close()
+        # def showSmall(self):
+        #     box.showMinimized()
+        #
+        # def showMaxRestore(self):
+        #     if (self.maxNormal):
+        #         box.showNormal()
+        #         self.maxNormal = False
+        #         self.maximize.setIcon(QtGui.QIcon('img/max.png'))
+        #         print('1')
+        #     else:
+        #         box.showMaximized()
+        #         self.maxNormal = True
+        #         print('2')
+        #         self.maximize.setIcon(QtGui.QIcon('img/max2.png'))
+        #
+        def close(self):
+            # box.close()
+            self.removeWidget(self)
+        # def mousePressEvent(self, event):
+        #     if event.button() == Qt.LeftButton:
+        #         box.moving = True
+        #         box.offset = event.pos()
+        #
+        # def mouseMoveEvent(self, event):
+        #     if box.moving: box.move(event.globalPos() - box.offset)
 
-    # def mousePressEvent(self, event):
-    #     if event.button() == Qt.LeftButton:
-    #         box.moving = True
-    #         box.offset = event.pos()
 
-    # def mouseMoveEvent(self, event):
-    #     if box.moving: box.move(event.globalPos() - box.offset)
 
 class Window(QtWidgets.QWidget):
     def __init__(self):
@@ -448,8 +460,8 @@ class Window(QtWidgets.QWidget):
         self.btnLoad.setText('Load image')
         self.btnLoad.clicked.connect(self.loadImage)
         # title bar
-        self.m_titleBar = TitleBar(self)
-        self.m_titleBar2 = TitleBar(self)
+        self.m_titleBar = PhotoViewer.TitleBar(self)
+        self.m_titleBar2 = PhotoViewer.TitleBar(self)
 
         #  tmp
 
@@ -466,10 +478,10 @@ class Window(QtWidgets.QWidget):
 
         # Arrange layout
         VBlayout = QtWidgets.QVBoxLayout(self)
-        VBlayout.addWidget(self.m_titleBar)
+        # VBlayout.addWidget(self.m_titleBar)
         VBlayout.addWidget(self.viewer)
 
-        VBlayout.addWidget(self.m_titleBar2)
+        # VBlayout.addWidget(self.m_titleBar2)
         VBlayout.addWidget(self.viewer2)
 
         HBlayout = QtWidgets.QHBoxLayout()
