@@ -712,19 +712,6 @@ class custom(QDialog):
     super().__init__()
     self.customui = Ui_Dialog()
     self.customui.setupUi(self)
-
-# class Group(QtWidgets.QGraphicsItemGroup):
-#     def __init__(self):
-#         super().__init__()
-#
-#     def hoverEnterEvent(self, event):
-#         app.instance().setOverrideCursor(QtCore.Qt.OpenHandCursor)
-#
-#     def hoverLeaveEvent(self, event):
-#         app.instance().restoreOverrideCursor()
-
-
-
     
 class QGraphicsLabel(QtWidgets.QGraphicsTextItem):
     def __init__(self, text):
@@ -733,7 +720,6 @@ class QGraphicsLabel(QtWidgets.QGraphicsTextItem):
         # self.setBrush(QtGui.QBrush(QtGui.QColor(60, 30, 30)))
         self.movable = False
         self.setVisible(False)
-
     def setMovable(self, enable):
         self.setAcceptHoverEvents(enable)
         self.movable = enable
@@ -944,19 +930,17 @@ class PhotoViewer(QtWidgets.QGraphicsView):
 
     def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
         self.press_key = event.key()
+        item = self._scene.itemAt(self.sp, QTransform())
         # 刪除所選item
         if self.press_key == 16777223 and PhotoViewer.tool_lock == 'mouse':
-            item = self._scene.itemAt(self.sp, QTransform())
-            # print(item)
-            # if isinstance(item, Group):
-            #     for i in item.childItems():
-            #         print(i)
-            #         self._scene.removeItem(i)
-            #         #app.instance().restoreOverrideCursor()  # 需要hoverLeaveEvent，否則會刪掉後會一直有手手
-            #     self._scene.destroyItemGroup(item)
-            if isinstance(item, QGraphicsLabel) or isinstance(item, Pen) or isinstance(item, Protractor) or isinstance(item, Ruler):
+            print("yes")
+            if isinstance(item, Pen) or isinstance(item, Protractor) or isinstance(item, Ruler):
                 self._scene.removeItem(item)
-                app.instance().restoreOverrideCursor() # 需要hoverLeaveEvent，否則會刪掉後會一直有手手
+            elif isinstance(item, QGraphicsLabel):
+                fi = item.parentItem()
+                self._scene.removeItem(fi)
+                app.instance().restoreOverrideCursor()  # label需要兩次hoverLeaveEvent
+            app.instance().restoreOverrideCursor()  # 需要hoverLeaveEvent，否則會刪掉後會一直有手手
         return super().keyPressEvent(event)
 
     def wheelEvent(self, event):
@@ -1014,6 +998,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 self.qpainterpath = QtGui.QPainterPath(self.sp)
                 self.protractor = Protractor(self.qpainterpath)
                 self.protractor_text_label = QGraphicsLabel("")
+                #self.protractor_text_label.setParentItem(self.protractor)
                 self._scene.addItem(self.protractor_text_label)
                 self._scene.addItem(self.protractor)
                 self.protractor_start = True
@@ -1022,7 +1007,6 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 self.protractor_text_label.setMovable(True)
                 self.protractor_start = False
                 self.ruler_start = False
-
         if PhotoViewer.tool_lock == 'pen':
             self.pen_path = QtGui.QPainterPath()
             self.pen_path.moveTo(self.sp)
@@ -1040,15 +1024,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             self.ruler.setMovable(False)
             self.ruler_text_label.setMovable(False)
             self.ruler_start = False
-
-            #self.ruler_text_label.setParentItem(self.ruler)
-            # self.group = Group()
-            # self.group.addToGroup(self.ruler_text_label)
-            # self.group.addToGroup(self.ruler)
-            # self._scene.addItem(self.group)
-            # self.group.setAcceptHoverEvents(True)
-            #self._scene.addItem(self.group)
-
+            self.ruler_text_label.setParentItem(self.ruler)
         elif PhotoViewer.tool_lock == 'angle':
             if self.protractor_start:
                 self.qpainterpath.clear()
@@ -1059,6 +1035,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 self.protractor_text_label.setMovable(False)
                 self.protractor_start = False
                 self.ruler_start = True
+                self.protractor_text_label.setParentItem(self.protractor)
         if PhotoViewer.tool_lock == 'pen':
             self.pen_path.lineTo(self.ep)
             self.pen.setPath(self.pen_path)
