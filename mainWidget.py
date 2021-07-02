@@ -22,6 +22,8 @@ WINDOW_SIZE = 0
 class initialWidget(QtWidgets.QMainWindow):
     pic_ith = 1 
     pic_jth = 1
+    rotate_angle = 0
+
     # dictionary mapping series(str) to Dicoms(.dcm)
     series_2_dicoms = [None] * (5 + 1)
     for i in range(1, 5 + 1):
@@ -32,6 +34,7 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.setupUi(self)
         self.search_record = QStandardItemModel()
         self.pic_windows = [0, 1, 1, 1, 1, 1]
+
         
         self.loadPtList()
         self.pt_list.sort()
@@ -197,9 +200,11 @@ class initialWidget(QtWidgets.QMainWindow):
     # 順時鐘轉
     def rotate_image_right(self):
         self.setToolLock('rotate_right')
+        initialWidget.rotate_angle += 90
     # 逆時鐘轉
     def rotate_image_left(self):
         self.setToolLock('rotate_left')
+        initialWidget.rotate_angle -= 90
     # 角度
     def pushButtonAngleClicked(self):
         self.setToolLock('angle')
@@ -723,6 +728,8 @@ class QGraphicsLabel(QtWidgets.QGraphicsTextItem):
         # self.setBrush(QtGui.QBrush(QtGui.QColor(60, 30, 30)))
         self.movable = False
         self.setVisible(False)
+        # 轉過照片後要把label轉回來
+        self.setRotation(-initialWidget.rotate_angle)
 
     def setMovable(self, enable):
         self.setAcceptHoverEvents(enable)
@@ -874,6 +881,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.press_key = None
         self.instance_of_series = 0
         self.number_of_instance = 0
+       # print(self._scene.items().rotation)
 
     def resetWindow(self, WL, WW):
         if (WL == 0 and WW == 0):
@@ -1136,10 +1144,12 @@ class PhotoProcessing(QtWidgets.QWidget):
         # title bar
         self.title = TitleBar(self.pv.in_ith, self.pv.in_jth)
         self.vbox = QtWidgets.QVBoxLayout(self)
+        self.vbox.setContentsMargins(0, 0, 0, 0)
+        self.vbox.setSpacing(0)
         self.vbox.addWidget(self.title)
         self.vbox.addWidget(self.pv)
         # self.vbox.setAlignment(Qt.AlignTop)
-        self.vbox.setContentsMargins(0, 0, 0, 0)
+
 # title bar
 class TitleBar(QtWidgets.QDialog):
     def __init__(self, _i, _j,  parent = None):
