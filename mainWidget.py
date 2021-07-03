@@ -1144,6 +1144,7 @@ class PhotoProcessing(QtWidgets.QWidget):
         # title bar
         self.title = TitleBar(self.pv.in_ith, self.pv.in_jth)
         self.vbox = QtWidgets.QVBoxLayout(self)
+        self.vbox.setSpacing(0)
         self.vbox.addWidget(self.title)
         self.vbox.addWidget(self.pv)
         # self.vbox.setAlignment(Qt.AlignTop)
