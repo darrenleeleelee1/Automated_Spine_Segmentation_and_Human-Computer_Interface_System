@@ -122,7 +122,7 @@ class initialWidget(QtWidgets.QMainWindow):
             WL, WW = self.showCustom()
             if(WL == 0 & WW == 0):
                 return
-        self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].resetWindow(WL, WW)
+        self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].pv.resetWindow(WL, WW)
         self.update()
 
     def showCustom(self):
@@ -159,28 +159,28 @@ class initialWidget(QtWidgets.QMainWindow):
             self.pic_windows[initialWidget.pic_ith] = x
         if self.pic_windows[initialWidget.pic_ith] < x:
             for k in range(self.pic_windows[initialWidget.pic_ith] + 1, x + 1):
-                self.pic_viewer[initialWidget.pic_ith][k] = PhotoViewer(self.pic_frame_list[initialWidget.pic_ith], initialWidget.pic_ith, k)
+                self.pic_viewer[initialWidget.pic_ith][k] = PhotoProcessing(self.pic_frame_list[initialWidget.pic_ith], initialWidget.pic_ith, k)
             if x == 2:
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][1], 0, 0, 1, 1)
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][2], 0, 1, 1, 1)
-                self.pic_viewer[initialWidget.pic_ith][1].show()
-                self.pic_viewer[initialWidget.pic_ith][2].show()
+                self.pic_viewer[initialWidget.pic_ith][1].pv.show()
+                self.pic_viewer[initialWidget.pic_ith][2].pv.show()
             elif x == 3:
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][1], 0, 0, 1, 1)
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][2], 0, 1, 1, 1)
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][3], 0, 2, 1, 1)
-                self.pic_viewer[initialWidget.pic_ith][1].show()
-                self.pic_viewer[initialWidget.pic_ith][2].show()
-                self.pic_viewer[initialWidget.pic_ith][3].show()
+                self.pic_viewer[initialWidget.pic_ith][1].pv.show()
+                self.pic_viewer[initialWidget.pic_ith][2].pv.show()
+                self.pic_viewer[initialWidget.pic_ith][3].pv.show()
             elif x == 4:
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][1], 0, 0, 1, 1)
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][2], 0, 1, 1, 1)
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][3], 1, 0, 1, 1)
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][4], 1, 1, 1, 1)
-                self.pic_viewer[initialWidget.pic_ith][1].show()
-                self.pic_viewer[initialWidget.pic_ith][2].show()
-                self.pic_viewer[initialWidget.pic_ith][3].show()
-                self.pic_viewer[initialWidget.pic_ith][4].show()
+                self.pic_viewer[initialWidget.pic_ith][1].pv.show()
+                self.pic_viewer[initialWidget.pic_ith][2].pv.show()
+                self.pic_viewer[initialWidget.pic_ith][3].pv.show()
+                self.pic_viewer[initialWidget.pic_ith][4].pv.show()
             self.pic_windows[initialWidget.pic_ith] = x
             initialWidget.pic_jth = self.now_windows    # 設回原本的位置
         self.setToolLock(PhotoViewer.tool_lock)    # 傳到setToolLock更新當前總共幾張照片
@@ -243,31 +243,31 @@ class initialWidget(QtWidgets.QMainWindow):
 
 
     def setToolLock(self, lock):
-        self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].resetFlags()
+        self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].pv.resetFlags()
         # 預設所有item都不能動且沒有手手
         for k in range(1, self.pic_windows[initialWidget.pic_ith]+1):
-            self.pic_viewer[initialWidget.pic_ith][k].Movable(False)
-            self.pic_viewer[initialWidget.pic_ith][k].toggleDragMode(False)
+            self.pic_viewer[initialWidget.pic_ith][k].pv.Movable(False)
+            self.pic_viewer[initialWidget.pic_ith][k].pv.toggleDragMode(False)
         PhotoViewer.tool_lock = lock
         if PhotoViewer.tool_lock == 'move':
             for k in range(1, self.pic_windows[initialWidget.pic_ith] + 1):
-                self.pic_viewer[initialWidget.pic_ith][k].toggleDragMode(True)
+                self.pic_viewer[initialWidget.pic_ith][k].pv.toggleDragMode(True)
         elif PhotoViewer.tool_lock == 'mouse':
             for k in range(1, self.pic_windows[initialWidget.pic_ith] + 1):
-                self.pic_viewer[initialWidget.pic_ith][k].Movable(True)
+                self.pic_viewer[initialWidget.pic_ith][k].pv.Movable(True)
         elif PhotoViewer.tool_lock == 'clear':
-            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].setNewScene()
+            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].pv.setNewScene()
             PhotoViewer.tool_lock = 'mouse'
         elif PhotoViewer.tool_lock == 'save':
-            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].save()
+            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].pv.save()
             PhotoViewer.tool_lock = 'mouse'
         elif PhotoViewer.tool_lock == 'rotate_right':
-            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].rotate(90)
-            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].turnBack(90)
+            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].pv.rotate(90)
+            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].pv.turnBack(90)
             PhotoViewer.tool_lock = 'mouse'
         elif PhotoViewer.tool_lock == 'rotate_left':
-            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].rotate(-90)
-            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].turnBack(-90)
+            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].pv.rotate(-90)
+            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].pv.turnBack(-90)
             PhotoViewer.tool_lock = 'mouse'
 
     # 對比度的選單設定
@@ -629,9 +629,9 @@ class initialWidget(QtWidgets.QMainWindow):
         # pic Viewer
         self.pic_viewer = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 對應到照片的viewer array
         for i in range(1, self.MAXIMUM_PAGE + 1):
-            self.pic_viewer[i][1] = PhotoViewer(self.pic_frame_list[i], i, 1)
+            self.pic_viewer[i][1] = PhotoProcessing(self.pic_frame_list[i], i, 1)
             self.gridLayout_list[i].addWidget(self.pic_viewer[i][1], 0, 0, 1, 1)
-            self.pic_viewer[i][1].show()
+            self.pic_viewer[i][1].pv.show()
         # Image Processing Attributes
         var_pic = 'self.ui.pic'
         self.pic_clicked = [ [False] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 哪張照片被clicked
@@ -848,7 +848,7 @@ class Pen(QtWidgets.QGraphicsPathItem):
     
 class PhotoViewer(QtWidgets.QGraphicsView):
     tool_lock = 'mouse'
-    def __init__(self, parent: None, _i, _j):
+    def __init__(self, _i, _j, parent = None):
         super(PhotoViewer, self).__init__(parent)
         self.in_ith = _i
         self.in_jth = _j
@@ -941,6 +941,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
             self._photo.setPixmap(QtGui.QPixmap())
         self.fitInView()
+
     def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
         self.press_key = event.key()
         return super().keyPressEvent(event)
@@ -1135,7 +1136,116 @@ class PhotoViewer(QtWidgets.QGraphicsView):
 
     def dragMoveEvent(self, event):
         event.accept()
-    
+
+class PhotoProcessing(QtWidgets.QWidget):
+    def __init__(self, parent: None, _i, _j):
+        super().__init__(parent)
+        self.pv = PhotoViewer(_i, _j)
+        # title bar
+        self.title = TitleBar(self.pv.in_ith, self.pv.in_jth)
+        self.vbox = QtWidgets.QVBoxLayout(self)
+        self.vbox.addWidget(self.title)
+        self.vbox.addWidget(self.pv)
+        # self.vbox.setAlignment(Qt.AlignTop)
+        self.vbox.setContentsMargins(0, 0, 0, 0)
+# title bar
+class TitleBar(QtWidgets.QDialog):
+    def __init__(self, _i, _j,  parent = None):
+        QtWidgets.QDialog.__init__(self, parent)
+        self.setWindowFlags(Qt.FramelessWindowHint)
+        self.t_ith = _i
+        self.t_jth = _j
+        self.parent = parent
+        css = """
+                QWidget{
+                    Background: #000000;
+                    color:white;
+                    font:12px bold;
+                    font-weight:bold;
+                    border-radius: 1px;
+                    height: 11px;
+                }
+                QDialog{
+                    font-size:12px;                    
+                    color: black;
+                }
+                QToolButton{
+                    Background:#AAAAAA;
+                    font-size:11px;
+                }
+                QToolButton:hover{
+                    Background: #FFFFFF;
+                    font-size:11px;                
+                }
+            """
+        self.setAutoFillBackground(True)
+        self.setBackgroundRole(QtGui.QPalette.Highlight)
+        self.setStyleSheet(css)
+
+        self.button_frame_spine = QtWidgets.QToolButton(self)
+        self.button_frame_spine.setIcon(QtGui.QIcon('generatedUiFile/res/icons/img_frame_spine.png'))
+
+        self.button_heat_map = QtWidgets.QToolButton(self)
+        self.button_heat_map.setIcon(QtGui.QIcon('generatedUiFile/res/icons/img_heat_map.png'))
+
+        self.button_scoliosis_angle = QtWidgets.QToolButton(self)
+        self.button_scoliosis_angle.setIcon(QtGui.QIcon('generatedUiFile/res/icons/img_scoliosis_angle.png'))
+
+        close = QtWidgets.QToolButton(self)
+        close.setIcon(QtGui.QIcon('generatedUiFile/res/icons/x 3.png'))
+
+        self.button_frame_spine.setMinimumHeight(10)
+        self.button_heat_map.setMinimumHeight(10)
+        self.button_scoliosis_angle.setMinimumHeight(10)
+        close.setMinimumHeight(10)
+
+        label = QtWidgets.QLabel(self)
+        label.setText("patient number")
+        self.setWindowTitle("patient number")
+
+        hbox = QtWidgets.QHBoxLayout(self)
+        hbox.addWidget(label)
+        hbox.addWidget(self.button_frame_spine)
+        hbox.addWidget(self.button_heat_map)
+        hbox.addWidget(self.button_scoliosis_angle)
+        hbox.addWidget(close)
+        hbox.insertStretch(1, 500)
+        hbox.setSpacing(0)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+
+        self.button_frame_spine.clicked.connect(self.frameSpine)
+        self.button_heat_map.clicked.connect(self.heatMap)
+        self.button_scoliosis_angle.clicked.connect(self.scoliosis_angle)
+        close.clicked.connect(self.close)
+
+    def mousePressEvent(self, event):
+        self.sp = self.mapToScene(event.pos())
+        initialWidget.pic_ith = self.t_ith
+        initialWidget.pic_jth = self.t_jth
+
+    def mapToScene(self, x):
+        initialWidget.pic_ith = self.t_ith
+        initialWidget.pic_jth = self.t_jth
+        print("initialWidget.pic_ith = ", initialWidget.pic_ith ,initialWidget.pic_jth )
+
+    def frameSpine(self):
+        print("frameSpine")
+
+    def heatMap(self):
+        print("heatmap")
+
+    def scoliosis_angle(self):
+        print("scoliosis_angle")
+
+    def close(self):
+        # print("close", self.t_ith, self.t_jth)
+        super(TitleBar, self).close()
+        # box.close()
+        # self.removeWidget(self)
+        # self.init = initialWidget()
+        # initialWidget.gridLayout_list[self.t_ith].removeWidget(initialWidget.pic_viewer[self.t_ith][self.t_jth])
+
+
 if __name__ == '__main__':
     import sys
     app = QtWidgets.QApplication(sys.argv)
