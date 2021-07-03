@@ -1064,8 +1064,8 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 self._scene.addItem(self.protractor)
                 self.protractor_start = True
             elif not self.protractor_start and self.ruler_start:
-                self.protractor.setMovable(True)
-                self.protractor_text_label.setMovable(True)
+                self.protractor.setMovable(False)
+                self.protractor_text_label.setMovable(False)
                 self.protractor_start = False
                 self.ruler_start = False
         if PhotoViewer.tool_lock == 'pen':
