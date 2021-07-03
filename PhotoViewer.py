@@ -482,7 +482,7 @@ class Window(QtWidgets.QWidget):
         VBlayout.addWidget(self.viewer)
 
         # VBlayout.addWidget(self.m_titleBar2)
-        VBlayout.addWidget(self.viewer2)
+        # VBlayout.addWidget(self.viewer2)
 
         HBlayout = QtWidgets.QHBoxLayout()
         HBlayout.setAlignment(QtCore.Qt.AlignLeft)
