@@ -1,7 +1,7 @@
 from os import listdir
 from os.path import join
-from PyQt5.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
-                          QSize, QTime, QUrl, Qt, QEvent, QPointF)
+from PyQt5.QtCore import (QCoreApplication, QDataStream, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
+                          QSize, QTime, QUrl, QVariant, Qt, QEvent, QPointF)
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QCoreApplication, Qt
 from PyQt5.QtGui import QStandardItem, QStandardItemModel, QTransform, QPainter
@@ -16,17 +16,25 @@ import numpy as np
 from PIL import ImageQt
 import shutil
 import copy
+from collections import defaultdict
 WINDOW_SIZE = 0
 
 class initialWidget(QtWidgets.QMainWindow):
     pic_ith = 1 
     pic_jth = 1
+    rotate_angle = 0
+
+    # dictionary mapping series(str) to Dicoms(.dcm)
+    series_2_dicoms = [None] * (5 + 1)
+    for i in range(1, 5 + 1):
+        series_2_dicoms[i] = defaultdict(list)
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.search_record = QStandardItemModel()
         self.pic_windows = [0, 1, 1, 1, 1, 1]
+
         
         self.loadPtList()
         self.pt_list.sort()
@@ -107,29 +115,17 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.pushButton_move.clicked.connect(self.pushButtonMoveClicked) # 移動
         self.ui.patient_list.itemClicked.connect(self.patient_listItemClicked)
         self.ui.recently_list.itemClicked.connect(self.recently_listItemClicked)
-        self.ui.thumbnail_list_1.itemClicked.connect(self.thumbnail_listItemClicked)
 
 
 #照片Show Pic----------------------------------------------------------------------
 
     #brightness 
     def getWindow(self, WL, WW):
-        print(WL, WW)
-        if(WL == 0 & WW == 0): # default
-            ds = self.dicoms[initialWidget.pic_ith][initialWidget.pic_jth]
-            WL = ds[0x0028, 0x1050].value
-            WW = ds[0x0028, 0x1051].value
-        elif(WL == 1 & WW == 1): # custom
+        if(WL == 1 and WW == 1): # custom
             WL, WW = self.showCustom()
             if(WL == 0 & WW == 0):
                 return
-        self.pic_adjust_pixels[self.pic_ith][self.pic_jth] = np.copy(self.pic_original_pixels[self.pic_ith][self.pic_jth])
-        arr = self.pic_adjust_pixels[self.pic_ith][self.pic_jth]
-        self.pic_adjust_pixels[self.pic_ith][self.pic_jth] = np.copy(np.uint16(self.mappingWindow(arr, WL, WW)))
-        qimage = QtGui.QImage(self.pic_adjust_pixels[self.pic_ith][self.pic_jth], self.pic_adjust_pixels[self.pic_ith][self.pic_jth].shape[1], self.pic_adjust_pixels[self.pic_ith][self.pic_jth].shape[0], self.pic_adjust_pixels[self.pic_ith][self.pic_jth].shape[1]*2, QtGui.QImage.Format_Grayscale16).copy()
-        pixmap = QtGui.QPixmap(qimage)
-        pixmap = pixmap.scaled(self.pic_viewer[self.pic_ith][self.pic_jth].width(), self.pic_viewer[self.pic_ith][self.pic_jth].height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
-        self.pic_viewer[self.pic_ith][self.pic_jth].setPhoto(pixmap)
+        self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].pv.resetWindow(WL, WW)
         self.update()
 
     def showCustom(self):
@@ -141,8 +137,8 @@ class initialWidget(QtWidgets.QMainWindow):
             WL = 0
             WW = 0
         return WL, WW
-
-    def mappingWindow(self, arr, WL, WW):
+    @staticmethod
+    def mappingWindow(arr, WL, WW):
         pixel_max = WL + WW/2
         pixel_min = WL - WW/2
         arr = np.clip(arr, pixel_min, pixel_max)
@@ -166,37 +162,28 @@ class initialWidget(QtWidgets.QMainWindow):
             self.pic_windows[initialWidget.pic_ith] = x
         if self.pic_windows[initialWidget.pic_ith] < x:
             for k in range(self.pic_windows[initialWidget.pic_ith] + 1, x + 1):
-                self.pic_viewer[initialWidget.pic_ith][k] = PhotoViewer(self.pic_frame_list[initialWidget.pic_ith], initialWidget.pic_ith, k)
+                self.pic_viewer[initialWidget.pic_ith][k] = PhotoProcessing(self.pic_frame_list[initialWidget.pic_ith], initialWidget.pic_ith, k)
             if x == 2:
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][1], 0, 0, 1, 1)
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][2], 0, 1, 1, 1)
-                self.pic_viewer[initialWidget.pic_ith][1].show()
-                self.pic_viewer[initialWidget.pic_ith][2].show()
-                self.showPic(initialWidget.pic_ith, 1, "01372635","5F3279B8.dcm")
-                self.showPic(initialWidget.pic_ith, 2, "01372635","5F327951.dcm")
+                self.pic_viewer[initialWidget.pic_ith][1].pv.show()
+                self.pic_viewer[initialWidget.pic_ith][2].pv.show()
             elif x == 3:
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][1], 0, 0, 1, 1)
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][2], 0, 1, 1, 1)
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][3], 0, 2, 1, 1)
-                self.pic_viewer[initialWidget.pic_ith][1].show()
-                self.pic_viewer[initialWidget.pic_ith][2].show()
-                self.pic_viewer[initialWidget.pic_ith][3].show()
-                self.showPic(initialWidget.pic_ith, 1, "01372635","5F3279B8.dcm")
-                self.showPic(initialWidget.pic_ith, 2, "01372635","5F327951.dcm")
-                self.showPic(initialWidget.pic_ith, 3, "03915480","5F329172_20170623_CR_2_1_1.dcm")
+                self.pic_viewer[initialWidget.pic_ith][1].pv.show()
+                self.pic_viewer[initialWidget.pic_ith][2].pv.show()
+                self.pic_viewer[initialWidget.pic_ith][3].pv.show()
             elif x == 4:
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][1], 0, 0, 1, 1)
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][2], 0, 1, 1, 1)
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][3], 1, 0, 1, 1)
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][4], 1, 1, 1, 1)
-                self.pic_viewer[initialWidget.pic_ith][1].show()
-                self.pic_viewer[initialWidget.pic_ith][2].show()
-                self.pic_viewer[initialWidget.pic_ith][3].show()
-                self.pic_viewer[initialWidget.pic_ith][4].show()
-                self.showPic(initialWidget.pic_ith, 1, "01372635","5F3279B8.dcm")
-                self.showPic(initialWidget.pic_ith, 2, "01372635","5F327951.dcm")
-                self.showPic(initialWidget.pic_ith, 3, "03915480","5F329172_20170623_CR_2_1_1.dcm")
-                self.showPic( initialWidget.pic_ith, 4, "03915480","5F329172_20170623_CR_2_1_1.dcm")
+                self.pic_viewer[initialWidget.pic_ith][1].pv.show()
+                self.pic_viewer[initialWidget.pic_ith][2].pv.show()
+                self.pic_viewer[initialWidget.pic_ith][3].pv.show()
+                self.pic_viewer[initialWidget.pic_ith][4].pv.show()
             self.pic_windows[initialWidget.pic_ith] = x
             initialWidget.pic_jth = self.now_windows    # 設回原本的位置
         self.setToolLock(PhotoViewer.tool_lock)    # 傳到setToolLock更新當前總共幾張照片
@@ -213,9 +200,11 @@ class initialWidget(QtWidgets.QMainWindow):
     # 順時鐘轉
     def rotate_image_right(self):
         self.setToolLock('rotate_right')
+        initialWidget.rotate_angle += 90
     # 逆時鐘轉
     def rotate_image_left(self):
         self.setToolLock('rotate_left')
+        initialWidget.rotate_angle -= 90
     # 角度
     def pushButtonAngleClicked(self):
         self.setToolLock('angle')
@@ -256,34 +245,33 @@ class initialWidget(QtWidgets.QMainWindow):
         picAlreadyExist_msg.setIcon(QMessageBox.Warning)
         x = picAlreadyExist_msg.exec_()
 
-
-
     def setToolLock(self, lock):
-        self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].resetFlags()
+        self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].pv.resetFlags()
         # 預設所有item都不能動且沒有手手
         for k in range(1, self.pic_windows[initialWidget.pic_ith]+1):
-            self.pic_viewer[initialWidget.pic_ith][k].Movable(False)
-            self.pic_viewer[initialWidget.pic_ith][k].toggleDragMode(False)
+            self.pic_viewer[initialWidget.pic_ith][k].pv.Movable(False)
+            self.pic_viewer[initialWidget.pic_ith][k].pv.toggleDragMode(False)
         PhotoViewer.tool_lock = lock
         if PhotoViewer.tool_lock == 'move':
             for k in range(1, self.pic_windows[initialWidget.pic_ith] + 1):
-                self.pic_viewer[initialWidget.pic_ith][k].toggleDragMode(True)
+                self.pic_viewer[initialWidget.pic_ith][k].pv.toggleDragMode(True)
         elif PhotoViewer.tool_lock == 'mouse':
             for k in range(1, self.pic_windows[initialWidget.pic_ith] + 1):
-                self.pic_viewer[initialWidget.pic_ith][k].Movable(True)
+                self.pic_viewer[initialWidget.pic_ith][k].pv.Movable(True)
+            PhotoViewer.tool_lock = 'mouse'
         elif PhotoViewer.tool_lock == 'save':
-            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].save()
+            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].pv.save()
             PhotoViewer.tool_lock = 'mouse'
         elif PhotoViewer.tool_lock == 'rotate_right':
-            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].rotate(90)
-            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].turnBack(90)
+            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].pv.rotate(90)
+            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].pv.turnBack(90)
             PhotoViewer.tool_lock = 'mouse'
         elif PhotoViewer.tool_lock == 'rotate_left':
-            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].rotate(-90)
-            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].turnBack(-90)
+            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].pv.rotate(-90)
+            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].pv.turnBack(-90)
             PhotoViewer.tool_lock = 'mouse'
         elif PhotoViewer.tool_lock == 'clear':
-            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].clear()
+            self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].pv.clear()
             PhotoViewer.tool_lock = 'mouse'
 
 
@@ -451,23 +439,22 @@ class initialWidget(QtWidgets.QMainWindow):
         i = self.patient_mapto_page[pt_id]
         self.thumbnail_list[i].setViewMode(QListWidget.IconMode)
         self.thumbnail_list[i].setItemAlignment(Qt.AlignCenter)
+        initialWidget.series_2_dicoms[i].clear()
         for filename in os.listdir(pt_path):
             if not filename.endswith('.dcm') :
                 continue
             dicom_path = pt_path + '/' + filename
-            ds = dcmread(dicom_path)
-            arr = ds.pixel_array
-            arr = np.uint16(arr)
-            dicom_WL = ds[0x0028, 0x1050].value
-            dicom_WW = ds[0x0028, 0x1051].value
-            SD = ds[0x0008, 0x103e].value #Series_Description
-            # SN = str(ds[0x0020, 0x0011].value) #Series Number
-            arr = self.mappingWindow(arr, dicom_WL, dicom_WW)
+            ds = customDicom(dicom_path)
+            if ds.series_description in initialWidget.series_2_dicoms[i].keys():
+                initialWidget.series_2_dicoms[i][ds.series_description].append(ds)
+                continue
+            initialWidget.series_2_dicoms[i][ds.series_description].append(ds)
+            arr = initialWidget.mappingWindow(ds.pixel_array, ds.window_level, ds.window_width)
             qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1]*2, QtGui.QImage.Format_Grayscale16).copy()
             pixmap = QtGui.QPixmap(qimage)
-            item = QListWidgetItem()
+            item = QtWidgets.QListWidgetItem(filename)
             item.setSizeHint(QSize(219, 250))
-            item.setText(SD)
+            item.setText(ds.series_description)
             icon = QtGui.QIcon(pixmap)
             item.setIcon(icon)
             self.thumbnail_list[i].addItem(item) 
@@ -477,8 +464,7 @@ class initialWidget(QtWidgets.QMainWindow):
         self.thumbnail_list[i].setDragEnabled(True)
         self.thumbnail_list[i].setDragDropMode(QAbstractItemView.DragOnly)
 
-    def thumbnail_listItemClicked(self):
-        print("test")
+    
 
 # search page----------------------------------------------------------------------------------------------------
     # search
@@ -615,23 +601,7 @@ class initialWidget(QtWidgets.QMainWindow):
                 arr[x, y] = (arr[x, y] - pixel_min) / (pixel_max - pixel_min) * 65535
         return np.copy(arr)
 
-    def showPic(self, i, j, patient_no, patient_dics):
-        dicom_path = "./tmp_database/" + patient_no + "/" + patient_dics
-        ds = dcmread(dicom_path)
-
-        self.dicoms[i][j] = ds
-        arr = copy.deepcopy(ds.pixel_array)
-        arr = np.uint16(arr)
-        self.pic_original_pixels[i][j] = np.copy(arr)
-        initialWidget.pic_ith = i
-        initialWidget.pic_jth = j
-        dicom_WL = ds[0x0028, 0x1050].value
-        dicom_WW = ds[0x0028, 0x1051].value
-        self.pic_adjust_pixels[i][j] = self.mappingWindow(arr, dicom_WL, dicom_WW)
-        qimage = QtGui.QImage(self.pic_adjust_pixels[i][j], self.pic_adjust_pixels[i][j].shape[1], self.pic_adjust_pixels[i][j].shape[0], self.pic_adjust_pixels[i][j].shape[1]*2, QtGui.QImage.Format_Grayscale16).copy()
-        pixmap = QtGui.QPixmap(qimage)
-        self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].setPhoto(pixmap)
-
+    
     def linkPage2Array(self, _MAXIMUM_PAGE = 5, _MAXIMUM_PIC = 4):
         # 把QtDesigner的一些重複的Widget用array對應
         # patient_page
@@ -660,20 +630,18 @@ class initialWidget(QtWidgets.QMainWindow):
         var_array_pic_frame_list = 'self.pic_frame_list'
         for i in range(1, self.MAXIMUM_PAGE + 1):
             exec("%s[%d] = %s_%d" % (var_array_pic_frame_list, i, var_pic_frame_list, i))
+        
         # pic Viewer
         self.pic_viewer = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 對應到照片的viewer array
         for i in range(1, self.MAXIMUM_PAGE + 1):
-            self.pic_viewer[i][1] = PhotoViewer(self.pic_frame_list[i], i, 1)
+            self.pic_viewer[i][1] = PhotoProcessing(self.pic_frame_list[i], i, 1)
             self.gridLayout_list[i].addWidget(self.pic_viewer[i][1], 0, 0, 1, 1)
-            self.pic_viewer[i][1].show()
+            self.pic_viewer[i][1].pv.show()
         # Image Processing Attributes
         var_pic = 'self.ui.pic'
         self.pic_clicked = [ [False] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 哪張照片被clicked
         self.pic_released = [ [False] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 哪張照片被 released
-        self.pic_adjust_pixels = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 照片對比度須存改過的pixel array用
-        self.pic_original_pixels = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 照片對比度須存原本的pixel array用
         self.dicoms = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 存Dicoms
-
         var_array_pic = 'self.pic'
         self.pic_cnt = [0] * (self.MAXIMUM_PAGE + 1)
         initialWidget.pic_ith = initialWidget.pic_jth = 1
@@ -706,13 +674,53 @@ def copytree(src, dst, symlinks=False, ignore=None):
             shutil.copytree(s, d, symlinks, ignore)
         else:
             shutil.copy2(s, d)
-
+# classes
 class custom(QDialog):
   def __init__(self):
     super().__init__()
     self.customui = Ui_Dialog()
     self.customui.setupUi(self)
     
+class customDicom():
+    def __init__(self, _dcm_path):
+        self.dcm_path = _dcm_path 
+        # self.dicom = self.dcmreader(self.dcm_path) # 若要存dicom
+        self.pixel_array = None
+        self.series_description = None
+        self.series_number = None
+        self.instance_no_of_series = None
+        self.echotime = None
+        self.content_time = None
+        self.repetition_time = None
+        self.magnetic = None
+        self.window_level = None # WL
+        self.window_width = None # WW
+        self.scropInfo(self.dcmreader(self.dcm_path))
+    def dcmreader(self, _dcm_path):
+        ds = dcmread(_dcm_path)
+        return ds
+    def scropInfo(self, ds):
+        self.pixel_array = np.uint16(ds.pixel_array).copy()
+        self.series_description = ds[0x0008, 0x103e].value if (0x0008, 0x103e) in ds else None
+        self.series_number = ds[0x0020, 0x0011].value if (0x0020, 0x0011) in ds else None
+        self.instance_no_of_series = ds[0x0020, 0x0013].value if (0x0020, 0x0013) in ds else None
+        self.echotime = ds[0x0018, 0x0081].value if (0x0018, 0x0081) in ds else None
+        self.content_time = ds[0x0008, 0x0033].value if (0x0008, 0x0033) in ds else None
+        self.repetition_time = ds[0x0019, 0x1087].value if (0x0019, 0x1087) in ds else None
+        self.magnetic = ds[0x0018, 0x0087].value if (0x0018, 0x0087) in ds else None
+        self.window_level = ds[0x0028, 0x1050].value if (0x0028, 0x1050) in ds else None
+        self.window_width = ds[0x0028, 0x1051].value if (0x0028, 0x1051) in ds else None
+    def print(self):
+        print("pixel_array: ", self.pixel_array)
+        print("series_description: ", self.series_description)
+        print("series_number: ", self.series_number)
+        print("instance_no_of_series: ", self.instance_no_of_series)
+        print("echotime: ", self.echotime)
+        print("content_time: ", self.content_time)
+        print("repetition_time: ", self.repetition_time)
+        print("magnetic: ", self.magnetic)
+        print("window_level: ", self.window_level)
+        print("window_width: ", self.window_width)
 class QGraphicsLabel(QtWidgets.QGraphicsTextItem):
     def __init__(self, text):
         super().__init__(text)
@@ -720,6 +728,9 @@ class QGraphicsLabel(QtWidgets.QGraphicsTextItem):
         # self.setBrush(QtGui.QBrush(QtGui.QColor(60, 30, 30)))
         self.movable = False
         self.setVisible(False)
+        # 轉過照片後要把label轉回來
+        self.setRotation(-initialWidget.rotate_angle)
+
     def setMovable(self, enable):
         self.setAcceptHoverEvents(enable)
         self.movable = enable
@@ -846,10 +857,11 @@ class Pen(QtWidgets.QGraphicsPathItem):
     
 class PhotoViewer(QtWidgets.QGraphicsView):
     tool_lock = 'mouse'
-    def __init__(self, parent: None, _i, _j):
+    def __init__(self, _i, _j, parent = None):
         super(PhotoViewer, self).__init__(parent)
         self.in_ith = _i
         self.in_jth = _j
+        self.ds_copy = None
         self._zoom = 0
         self._empty = True
         self._scene = QtWidgets.QGraphicsScene(self)
@@ -864,12 +876,26 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(0, 0, 0)))
         self.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.setAcceptDrops(True)
         self.ruler_start = False
         self.protractor_start = False
         self.pen_start = False
         self.press_key = None
-        self.setAcceptDrops(True)
-    
+        self.instance_of_series = 0
+        self.number_of_instance = 0
+        self.rotate_degree = 0
+    def resetWindow(self, WL, WW):
+        if (WL == 0 and WW == 0):
+            WL = self.ds_copy.window_level
+            WW = self.ds_copy.window_width
+        arr = self.ds_copy.pixel_array
+        arr = np.copy(np.uint16(initialWidget.mappingWindow(arr, WL, WW)))
+        print(WL, WW)
+        qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1]*2, QtGui.QImage.Format_Grayscale16).copy()
+        pixmap = QtGui.QPixmap(qimage)
+        pixmap = pixmap.scaled(self.width(), self.height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+        self.setPhoto(pixmap)
+
     def setNewScene(self):
         self._scene = QtWidgets.QGraphicsScene(self)
         self._empty = True
@@ -944,7 +970,9 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 app.instance().restoreOverrideCursor()  # label需要兩次hoverLeaveEvent
             app.instance().restoreOverrideCursor()  # 需要hoverLeaveEvent，否則會刪掉後會一直有手手
         return super().keyPressEvent(event)
-
+    def keyReleaseEvent(self, event: QtGui.QKeyEvent) -> None:
+        self.press_key = None
+        return super().keyReleaseEvent(event)
     def wheelEvent(self, event):
         if PhotoViewer.tool_lock == 'magnifier' or self.press_key == 16777249:
             if self.hasPhoto():
@@ -960,19 +988,27 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                     self.fitInView()
                 else:
                     self._zoom = 0
-
+        else:
+            if self.number_of_instance > 1:
+                self.instance_of_series += 1
+                self.instance_of_series %= self.number_of_instance
+                print(self.instance_of_series)
+                pixmap = self.ndarray2QPixmap(self.instance_of_series)
+                self.setPhoto(pixmap)
     # 控制item能否移動
     def Movable(self, enble):
         for item in self._scene.items():
             if isinstance(item, QGraphicsLabel) or isinstance(item, Pen) or isinstance(item, Protractor) or isinstance(item, Ruler):
                 item.setMovable(enble)
 
+    def rotate(self, angle: float) -> None:
+        self.rotate_degree += angle
+        self.rotate_degree %= 360
+        return super().rotate(angle)
     # 控制Label轉正
     def turnBack(self, angle):
         for item in self._scene.items():
             if isinstance(item, QGraphicsLabel):
-                print(item.rotation())
-                print(type(item.rotation()))
                 item.setRotation(item.rotation() - angle)
 
     # move時True,有手手
@@ -991,6 +1027,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         elif PhotoViewer.tool_lock == 'ruler':
             self.ruler = Ruler(self.sp.x(), self.sp.y(), self.sp.x(), self.sp.y())
             self.ruler_text_label = QGraphicsLabel("")
+            self.ruler_text_label.setRotation(-self.rotate_degree)
             self._scene.addItem(self.ruler_text_label)
             self.ruler.setMovable(False)
             self._scene.addItem(self.ruler)
@@ -1000,7 +1037,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 self.qpainterpath = QtGui.QPainterPath(self.sp)
                 self.protractor = Protractor(self.qpainterpath)
                 self.protractor_text_label = QGraphicsLabel("")
-                #self.protractor_text_label.setParentItem(self.protractor)
+                self.protractor_text_label.setRotation(-self.rotate_degree)
                 self._scene.addItem(self.protractor_text_label)
                 self._scene.addItem(self.protractor)
                 self.protractor_start = True
@@ -1054,10 +1091,12 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             self.ruler_text_label.setVisible(True)
             # self.ruler_text_label.setText("%.2f pixels" % self.length)
             self.ruler_text_label.setHtml("<div style='background-color:#3c1e1e;font-size:10px;color:#e6e60a;'>" + "%.2f pixels" % self.length + "</div>")
-            if self.sp.x() <= self.mp.x(): 
-                self.ruler_text_label.setPos(self.mp + QtCore.QPointF(10, 0))
+            if self.mapFromScene(self.sp.toPoint()).x() <= self.mapFromScene(self.mp.toPoint()).x(): 
+                tmp = self.mapFromScene(self.mp.toPoint()) + QtCore.QPoint(10, 0)
+                self.ruler_text_label.setPos(self.mapToScene(tmp))
             else:
-                self.ruler_text_label.setPos(self.sp + QtCore.QPointF(10, 0))
+                tmp = self.mapFromScene(self.sp.toPoint()) + QtCore.QPoint(10, 0)
+                self.ruler_text_label.setPos(self.mapToScene(tmp))
         elif PhotoViewer.tool_lock == 'angle':
             if self.protractor_start:
                 self.qpainterpath.clear()
@@ -1076,20 +1115,16 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 self.protractor.angle_degree = np.arccos(QtCore.QPointF.dotProduct(self.ep - self.sp, self.ep - self.mp) / spToep / epTomp) * 180 / np.pi
                 # self.protractor_text_label.setText("%.1f°" % self.protractor.angle_degree)
                 self.protractor_text_label.setHtml("<div style='background-color:#3c1e1e;font-size:10px;color:#e6e60a;'>" + "%.1f°" % self.protractor.angle_degree + "</div>")
-                if self.mp.x() > self.ep.x() and self.mp.y() < self.ep.y(): 
-                    self.protractor_text_label.setPos(self.ep + QtCore.QPointF(5, 10))
+                if self.mapFromScene(self.mp.toPoint()).x() > self.mapFromScene(self.ep.toPoint()).x() and self.mapFromScene(self.mp.toPoint()).y() < self.mapFromScene(self.ep.toPoint()).y(): 
+                    tmp = self.mapFromScene(self.ep.toPoint()) + QtCore.QPoint(5, 10)
+                    self.protractor_text_label.setPos(self.mapToScene(tmp))
                 else:
-                    self.protractor_text_label.setPos(self.ep + QtCore.QPointF(5, -25))
+                    tmp = self.mapFromScene(self.ep.toPoint()) + QtCore.QPoint(5, -25)
+                    self.protractor_text_label.setPos(self.mapToScene(tmp))
         if PhotoViewer.tool_lock == 'pen' and self.pen_start:
             self.pen_path.lineTo(self.mp)
             self.pen.setPath(self.pen_path)
         super(PhotoViewer, self).mouseMoveEvent(event)
-
-    def dropEvent(self, e):
-        print("ckeck")
-        data = e.mimeData()
-
-        e.accept()
 
     def decode_data(self, bytearray):
         data = []
@@ -1106,12 +1141,139 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 item[Qt.ItemDataRole(key)] = value
             data.append(item)
         return data
-
-    def dragEnterEvent(self, e):
-        e.accept()  
+    def ndarray2QPixmap(self, index):
+        arr = initialWidget.mappingWindow(self.ds_copy[index].pixel_array, self.ds_copy[index].window_level, self.ds_copy[index].window_width)
+        qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1]*2, QtGui.QImage.Format_Grayscale16).copy()
+        pixmap = QtGui.QPixmap(qimage)
+        pixmap = pixmap.scaled(self.width(), self.height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+        return pixmap
+    def dropEvent(self, event: QtGui.QDropEvent) -> None:
+        event.accept()
+        super().dropEvent(event)
+        mimeReader = event.mimeData().data('application/x-qabstractitemmodeldatalist')
+        data_items = self.decode_data(mimeReader)
+        series = data_items[0][Qt.DisplayRole].value()
+        self.ds_copy = initialWidget.series_2_dicoms[initialWidget.pic_ith][series]
+        self.number_of_instance = len(initialWidget.series_2_dicoms[initialWidget.pic_ith][series])
+        self.instance_of_series = 0
+        pixmap = self.ndarray2QPixmap(self.instance_of_series)
+        self.setPhoto(pixmap)
+    def dragEnterEvent(self, event):
+        event.accept()
 
     def dragMoveEvent(self, event):
         event.accept()
+
+class PhotoProcessing(QtWidgets.QWidget):
+    def __init__(self, parent: None, _i, _j):
+        super().__init__(parent)
+        self.pv = PhotoViewer(_i, _j)
+        # title bar
+        self.title = TitleBar(self.pv.in_ith, self.pv.in_jth)
+        self.vbox = QtWidgets.QVBoxLayout(self)
+        self.vbox.setContentsMargins(0, 0, 0, 0)
+        self.vbox.setSpacing(0)
+        self.vbox.addWidget(self.title)
+        self.vbox.addWidget(self.pv)
+        # self.vbox.setAlignment(Qt.AlignTop)
+
+# title bar
+class TitleBar(QtWidgets.QDialog):
+    def __init__(self, _i, _j,  parent = None):
+        QtWidgets.QDialog.__init__(self, parent)
+        self.setWindowFlags(Qt.FramelessWindowHint)
+        self.t_ith = _i
+        self.t_jth = _j
+        self.parent = parent
+        css = """
+                QWidget{
+                    Background: #000000;
+                    color:white;
+                    font:12px bold;
+                    font-weight:bold;
+                    border-radius: 1px;
+                    height: 11px;
+                }
+                QDialog{
+                    font-size:12px;                    
+                    color: black;
+                }
+                QToolButton{
+                    Background:#AAAAAA;
+                    font-size:11px;
+                }
+                QToolButton:hover{
+                    Background: #FFFFFF;
+                    font-size:11px;                
+                }
+            """
+        self.setAutoFillBackground(True)
+        self.setBackgroundRole(QtGui.QPalette.Highlight)
+        self.setStyleSheet(css)
+
+        self.button_frame_spine = QtWidgets.QToolButton(self)
+        self.button_frame_spine.setIcon(QtGui.QIcon('generatedUiFile/res/icons/img_frame_spine.png'))
+
+        self.button_heat_map = QtWidgets.QToolButton(self)
+        self.button_heat_map.setIcon(QtGui.QIcon('generatedUiFile/res/icons/img_heat_map.png'))
+
+        self.button_scoliosis_angle = QtWidgets.QToolButton(self)
+        self.button_scoliosis_angle.setIcon(QtGui.QIcon('generatedUiFile/res/icons/img_scoliosis_angle.png'))
+
+        close = QtWidgets.QToolButton(self)
+        close.setIcon(QtGui.QIcon('generatedUiFile/res/icons/x 3.png'))
+
+        self.button_frame_spine.setMinimumHeight(10)
+        self.button_heat_map.setMinimumHeight(10)
+        self.button_scoliosis_angle.setMinimumHeight(10)
+        close.setMinimumHeight(10)
+
+        label = QtWidgets.QLabel(self)
+        label.setText("patient number")
+        self.setWindowTitle("patient number")
+
+        hbox = QtWidgets.QHBoxLayout(self)
+        hbox.addWidget(label)
+        hbox.addWidget(self.button_frame_spine)
+        hbox.addWidget(self.button_heat_map)
+        hbox.addWidget(self.button_scoliosis_angle)
+        hbox.addWidget(close)
+        hbox.insertStretch(1, 500)
+        hbox.setSpacing(0)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+
+        self.button_frame_spine.clicked.connect(self.frameSpine)
+        self.button_heat_map.clicked.connect(self.heatMap)
+        self.button_scoliosis_angle.clicked.connect(self.scoliosis_angle)
+        close.clicked.connect(self.close)
+
+    def mousePressEvent(self, event):
+        self.sp = self.mapToScene(event.pos())
+        initialWidget.pic_ith = self.t_ith
+        initialWidget.pic_jth = self.t_jth
+
+    def mapToScene(self, x):
+        initialWidget.pic_ith = self.t_ith
+        initialWidget.pic_jth = self.t_jth
+        print("initialWidget.pic_ith = ", initialWidget.pic_ith ,initialWidget.pic_jth )
+
+    def frameSpine(self):
+        print("frameSpine")
+
+    def heatMap(self):
+        print("heatmap")
+
+    def scoliosis_angle(self):
+        print("scoliosis_angle")
+
+    def close(self):
+        # print("close", self.t_ith, self.t_jth)
+        super(TitleBar, self).close()
+        # box.close()
+        # self.removeWidget(self)
+        # self.init = initialWidget()
+        # initialWidget.gridLayout_list[self.t_ith].removeWidget(initialWidget.pic_viewer[self.t_ith][self.t_jth])
+
 
 if __name__ == '__main__':
     import sys
