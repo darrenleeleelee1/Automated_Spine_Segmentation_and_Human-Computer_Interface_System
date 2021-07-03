@@ -736,12 +736,13 @@ class QGraphicsLabel(QtWidgets.QGraphicsTextItem):
 
     def mouseMoveEvent(self, event):
         if self.movable:
-            orig_cursor_position = event.lastScenePos()
-            updated_cursor_position = event.scenePos()
-            orig_position = self.scenePos()
-            updated_cursor_x = updated_cursor_position.x() - orig_cursor_position.x() + orig_position.x()
-            updated_cursor_y = updated_cursor_position.y() - orig_cursor_position.y() + orig_position.y()
-            self.setPos(QtCore.QPointF(updated_cursor_x, updated_cursor_y))
+            self.parentItem().mouseMoveEvent(event) # 可以跟parent同時移動
+            # orig_cursor_position = event.lastScenePos()
+            # updated_cursor_position = event.scenePos()
+            # orig_position = self.scenePos()
+            # updated_cursor_x = updated_cursor_position.x() - orig_cursor_position.x() + orig_position.x()
+            # updated_cursor_y = updated_cursor_position.y() - orig_cursor_position.y() + orig_position.y()
+            # self.setPos(QtCore.QPointF(updated_cursor_x, updated_cursor_y))
 
     def mouseReleaseEvent(self, event):
         pass
@@ -803,6 +804,7 @@ class Ruler(QtWidgets.QGraphicsLineItem):
             orig_cursor_position = event.lastScenePos()
             updated_cursor_position = event.scenePos()
             orig_position = self.scenePos()
+            print(orig_position)
             updated_cursor_x = updated_cursor_position.x() - orig_cursor_position.x() + orig_position.x()
             updated_cursor_y = updated_cursor_position.y() - orig_cursor_position.y() + orig_position.y()
             self.setPos(QtCore.QPointF(updated_cursor_x, updated_cursor_y))
@@ -1023,6 +1025,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             self.ruler.setLine(self.sp.x(), self.sp.y(), self.ep.x(), self.ep.y())
             self.ruler.setMovable(False)
             self.ruler_text_label.setMovable(False)
+            print("origin : ", self.ruler_text_label.pos())
             self.ruler_start = False
             self.ruler_text_label.setParentItem(self.ruler)
         elif PhotoViewer.tool_lock == 'angle':
