@@ -763,6 +763,9 @@ class Protractor(QtWidgets.QGraphicsPathItem):
         super().__init__(qpainterpath)
         self.setPen(QtGui.QPen(QtGui.QColor(5, 105, 25)))
         self.angle_degree = 0
+        self.sp = None
+        self.mp = None
+        self.ep = None
         self.movable = False
     def setMovable(self, enable):
         self.setAcceptHoverEvents(enable)
@@ -795,6 +798,8 @@ class Ruler(QtWidgets.QGraphicsLineItem):
         super().__init__(x1, y1, x2, y2)
         self.setPen(QtGui.QPen(QtGui.QColor(5, 105, 25)))
         self.movable = False
+        self.sp = None
+        self.ep = None
         self.length = 0
     def setMovable(self, enable):
         self.setAcceptHoverEvents(enable)
@@ -1009,6 +1014,23 @@ class PhotoViewer(QtWidgets.QGraphicsView):
     def turnBack(self, angle):
         for item in self._scene.items():
             if isinstance(item, QGraphicsLabel):
+                if isinstance(item.parentItem(), Ruler):
+                    pitem = item.parentItem()
+                    if self.mapFromScene(pitem.sp).x() <= self.mapFromScene(pitem.ep).x(): 
+                        tmp = self.mapFromScene(pitem.ep) + QtCore.QPoint(10, 0)
+                        item.setPos(self.mapToScene(tmp))
+                    else:
+                        tmp = self.mapFromScene(pitem.sp) + QtCore.QPoint(10, 0)
+                        item.setPos(self.mapToScene(tmp))
+                elif isinstance(item.parentItem(), Protractor):
+                    pitem = item.parentItem()
+                    scale = 1 if self.mapFromScene(pitem.sp).x() < self.mapFromScene(pitem.ep).x() else -4
+                    if self.mapFromScene(pitem.mp).x() > self.mapFromScene(pitem.ep).x() and self.mapFromScene(pitem.mp).y() < self.mapFromScene(pitem.ep).y(): 
+                        tmp = self.mapFromScene(pitem.ep) + QtCore.QPoint(scale * 5, 10)
+                        item.setPos(self.mapToScene(tmp))
+                    else:
+                        tmp = self.mapFromScene(pitem.ep) + QtCore.QPoint(scale * 5, -25)
+                        item.setPos(self.mapToScene(tmp))
                 item.setRotation(item.rotation() - angle)
 
     # move時True,有手手
@@ -1060,6 +1082,8 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.ep = self.mapToScene(event.pos())
         if PhotoViewer.tool_lock == 'ruler':
             self.ruler.setLine(self.sp.x(), self.sp.y(), self.ep.x(), self.ep.y())
+            self.ruler.sp = self.sp
+            self.ruler.ep = self.ep
             self.ruler.setMovable(False)
             self.ruler_text_label.setMovable(False)
             print("origin : ", self.ruler_text_label.pos())
@@ -1110,16 +1134,20 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 self.qpainterpath.lineTo(self.mp)
                 self.protractor.setPath(self.qpainterpath)
                 self.protractor_text_label.setVisible(True)
+                self.protractor.sp = self.sp
+                self.protractor.mp = self.mp
+                self.protractor.ep = self.ep
                 spToep = np.sqrt(QtCore.QPointF.dotProduct(self.sp - self.ep, self.sp - self.ep))
                 epTomp = np.sqrt(QtCore.QPointF.dotProduct(self.mp - self.ep, self.mp - self.ep))
                 self.protractor.angle_degree = np.arccos(QtCore.QPointF.dotProduct(self.ep - self.sp, self.ep - self.mp) / spToep / epTomp) * 180 / np.pi
                 # self.protractor_text_label.setText("%.1f°" % self.protractor.angle_degree)
                 self.protractor_text_label.setHtml("<div style='background-color:#3c1e1e;font-size:10px;color:#e6e60a;'>" + "%.1f°" % self.protractor.angle_degree + "</div>")
+                scale = 1 if self.mapFromScene(self.sp.toPoint()).x() < self.mapFromScene(self.ep.toPoint()).x() else -4
                 if self.mapFromScene(self.mp.toPoint()).x() > self.mapFromScene(self.ep.toPoint()).x() and self.mapFromScene(self.mp.toPoint()).y() < self.mapFromScene(self.ep.toPoint()).y(): 
-                    tmp = self.mapFromScene(self.ep.toPoint()) + QtCore.QPoint(5, 10)
+                    tmp = self.mapFromScene(self.ep.toPoint()) + QtCore.QPoint(scale * 5, 10)
                     self.protractor_text_label.setPos(self.mapToScene(tmp))
                 else:
-                    tmp = self.mapFromScene(self.ep.toPoint()) + QtCore.QPoint(5, -25)
+                    tmp = self.mapFromScene(self.ep.toPoint()) + QtCore.QPoint(scale * 5, -25)
                     self.protractor_text_label.setPos(self.mapToScene(tmp))
         if PhotoViewer.tool_lock == 'pen' and self.pen_start:
             self.pen_path.lineTo(self.mp)
