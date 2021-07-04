@@ -113,6 +113,11 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.patient_list.itemClicked.connect(self.patient_listItemClicked)
         self.ui.recently_list.itemClicked.connect(self.recently_listItemClicked)
 
+        self.ui.thumbnail_list_1.itemClicked.connect(self.thumbnail_listItemClicked)
+        self.ui.thumbnail_list_2.itemClicked.connect(self.thumbnail_listItemClicked)
+        self.ui.thumbnail_list_3.itemClicked.connect(self.thumbnail_listItemClicked)
+        self.ui.thumbnail_list_4.itemClicked.connect(self.thumbnail_listItemClicked)
+        self.ui.thumbnail_list_5.itemClicked.connect(self.thumbnail_listItemClicked)
 
 #照片Show Pic----------------------------------------------------------------------
 
@@ -443,7 +448,7 @@ class initialWidget(QtWidgets.QMainWindow):
                 continue
             dicom_path = pt_path + '/' + filename
             ds = customDicom(dicom_path)
-            initialWidget.series_2_dicoms[i][ds.study_instance_UID][ds.series_description].append(ds)
+            initialWidget.series_2_dicoms[i][ds.study_description][ds.series_description].append(ds)
             # if ds.series_description in initialWidget.series_2_dicoms[i].keys():
             #     initialWidget.series_2_dicoms[i][ds.series_description].append(ds)
             #     continue
@@ -465,17 +470,15 @@ class initialWidget(QtWidgets.QMainWindow):
                 icon = QtGui.QIcon(pixmap)
                 item.setIcon(icon)
                 self.thumbnail_list[i].addItem(item) 
-
-
-        # item = QtWidgets.QListWidgetItem()
-        # item.setSizeHint(QSize(219, 100))
-        # item.setText('test')
-        # item.setFlags(item.flags() & ~Qt.ItemIsSelectable)
-        # self.thumbnail_list[i].addItem(item) 
-
-
     
 
+
+ 
+    def thumbnail_listItemClicked(self, item):
+        itemstr = str(item.text()) #拿到你按的那個內容是啥
+        print(itemstr)
+        print("click")
+        
 # search page----------------------------------------------------------------------------------------------------
     # search
     def loadSearchRecord(self):
@@ -710,7 +713,7 @@ class customDicom():
         self.scropInfo(self.dcmreader(self.dcm_path))
     def dcmreader(self, _dcm_path):
         ds = dcmread(_dcm_path)
-        print(ds)
+        # print(ds)
 
         return ds
     def scropInfo(self, ds):
