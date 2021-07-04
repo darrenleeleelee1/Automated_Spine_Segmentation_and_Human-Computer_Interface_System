@@ -153,44 +153,59 @@ class initialWidget(QtWidgets.QMainWindow):
         return np.copy(np.uint16(arr))
         
     # 設定照片處理的地方有幾格
+    def windows4to3(self):
+        tp = [0]
+        for t in initialWidget.listShow[initialWidget.pic_ith]:
+            tp.append(t)
+        self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][tp[1]], 0, 0, 1, 1)
+        self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][tp[2]], 0, 1, 1, 1)
+        self.gridLayout_list[initialWidget.pic_ith].removeWidget(self.pic_viewer[initialWidget.pic_ith][tp[3]])
+        self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][tp[3]], 0, 2, 1, 1)
     def setPicWindows(self, x):
         self.now_windows = initialWidget.pic_jth    # 當前按的照片位置
         if initialWidget.pic_windows[initialWidget.pic_ith] > x:
             for k in range(x + 1, initialWidget.pic_windows[initialWidget.pic_ith] + 1):
-                self.gridLayout_list[initialWidget.pic_ith].removeWidget(self.pic_viewer[initialWidget.pic_ith][k])
-                self.pic_viewer[initialWidget.pic_ith][k].deleteLater()
+                index = initialWidget.listShow[initialWidget.pic_ith][-1]
+                initialWidget.listShow[initialWidget.pic_ith].pop()
+                initialWidget.listNoShow[initialWidget.pic_ith].append(index)
+                self.gridLayout_list[initialWidget.pic_ith].removeWidget(self.pic_viewer[initialWidget.pic_ith][index])
+                self.pic_viewer[initialWidget.pic_ith][index].deleteLater()
             if x == 3:
-                self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][1], 0, 0, 1, 1)
-                self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][2], 0, 1, 1, 1)
-                self.gridLayout_list[initialWidget.pic_ith].removeWidget(self.pic_viewer[initialWidget.pic_ith][3])
-                self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][3], 0, 2, 1, 1)
+                self.windows4to3()
+            
             if self.now_windows > x:    # 如果照片當前位置被刪除，則設為x(如4張照片變3張且當前位置在第四張，則設為第三張)
                 initialWidget.pic_jth = x
             initialWidget.pic_windows[initialWidget.pic_ith] = x
         if initialWidget.pic_windows[initialWidget.pic_ith] < x:
             for k in range(initialWidget.pic_windows[initialWidget.pic_ith] + 1, x + 1):
-                self.pic_viewer[initialWidget.pic_ith][k] = PhotoProcessing(self.pic_frame_list[initialWidget.pic_ith], initialWidget.pic_ith, k)
+                index = initialWidget.listNoShow[initialWidget.pic_ith][-1]
+                initialWidget.listNoShow[initialWidget.pic_ith].pop()
+                initialWidget.listShow[initialWidget.pic_ith].append(index)
+                self.pic_viewer[initialWidget.pic_ith][index] = PhotoProcessing(self.pic_frame_list[initialWidget.pic_ith], initialWidget.pic_ith, index)
+            tp = [0]
+            for t in initialWidget.listShow[initialWidget.pic_ith]:
+                tp.append(t)
             if x == 2:
-                self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][1], 0, 0, 1, 1)
-                self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][2], 0, 1, 1, 1)
-                self.pic_viewer[initialWidget.pic_ith][1].pv.show()
-                self.pic_viewer[initialWidget.pic_ith][2].pv.show()
+                self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][tp[1]], 0, 0, 1, 1)
+                self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][tp[2]], 0, 1, 1, 1)
+                self.pic_viewer[initialWidget.pic_ith][tp[1]].pv.show()
+                self.pic_viewer[initialWidget.pic_ith][tp[2]].pv.show()
             elif x == 3:
-                self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][1], 0, 0, 1, 1)
-                self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][2], 0, 1, 1, 1)
-                self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][3], 0, 2, 1, 1)
-                self.pic_viewer[initialWidget.pic_ith][1].pv.show()
-                self.pic_viewer[initialWidget.pic_ith][2].pv.show()
-                self.pic_viewer[initialWidget.pic_ith][3].pv.show()
+                self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][tp[1]], 0, 0, 1, 1)
+                self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][tp[2]], 0, 1, 1, 1)
+                self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][tp[3]], 0, 2, 1, 1)
+                self.pic_viewer[initialWidget.pic_ith][tp[1]].pv.show()
+                self.pic_viewer[initialWidget.pic_ith][tp[2]].pv.show()
+                self.pic_viewer[initialWidget.pic_ith][tp[3]].pv.show()
             elif x == 4:
-                self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][1], 0, 0, 1, 1)
-                self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][2], 0, 1, 1, 1)
-                self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][3], 1, 0, 1, 1)
-                self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][4], 1, 1, 1, 1)
-                self.pic_viewer[initialWidget.pic_ith][1].pv.show()
-                self.pic_viewer[initialWidget.pic_ith][2].pv.show()
-                self.pic_viewer[initialWidget.pic_ith][3].pv.show()
-                self.pic_viewer[initialWidget.pic_ith][4].pv.show()
+                self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][tp[1]], 0, 0, 1, 1)
+                self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][tp[2]], 0, 1, 1, 1)
+                self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][tp[3]], 1, 0, 1, 1)
+                self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][tp[4]], 1, 1, 1, 1)
+                self.pic_viewer[initialWidget.pic_ith][tp[1]].pv.show()
+                self.pic_viewer[initialWidget.pic_ith][tp[2]].pv.show()
+                self.pic_viewer[initialWidget.pic_ith][tp[3]].pv.show()
+                self.pic_viewer[initialWidget.pic_ith][tp[4]].pv.show()
             initialWidget.pic_windows[initialWidget.pic_ith] = x
             initialWidget.pic_jth = self.now_windows    # 設回原本的位置
         self.setToolLock(PhotoViewer.tool_lock)    # 傳到setToolLock更新當前總共幾張照片
@@ -256,15 +271,15 @@ class initialWidget(QtWidgets.QMainWindow):
     def setToolLock(self, lock):
         self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].pv.resetFlags()
         # 預設所有item都不能動且沒有手手
-        for k in range(1, initialWidget.pic_windows[initialWidget.pic_ith]+1):
+        for k in initialWidget.listShow[initialWidget.pic_ith]:
             self.pic_viewer[initialWidget.pic_ith][k].pv.Movable(False)
             self.pic_viewer[initialWidget.pic_ith][k].pv.toggleDragMode(False)
         PhotoViewer.tool_lock = lock
         if PhotoViewer.tool_lock == 'move':
-            for k in range(1, initialWidget.pic_windows[initialWidget.pic_ith] + 1):
+            for k in initialWidget.listShow[initialWidget.pic_ith]:
                 self.pic_viewer[initialWidget.pic_ith][k].pv.toggleDragMode(True)
         elif PhotoViewer.tool_lock == 'mouse':
-            for k in range(1, initialWidget.pic_windows[initialWidget.pic_ith] + 1):
+            for k in initialWidget.listShow[initialWidget.pic_ith]:
                 self.pic_viewer[initialWidget.pic_ith][k].pv.Movable(True)
             PhotoViewer.tool_lock = 'mouse'
         elif PhotoViewer.tool_lock == 'save':
@@ -1215,7 +1230,9 @@ class PhotoProcessing(QtWidgets.QWidget):
     def close(self):
         if initialWidget.pic_windows[self.title.t_ith] != 1:
             initialWidget.pic_windows[self.title.t_ith] -= 1
-            print(initialWidget.pic_windows)
+            initialWidget.listShow[initialWidget.pic_ith].remove(self.pv.in_jth)
+            initialWidget.listNoShow[initialWidget.pic_ith].append(self.pv.in_jth)
+            print(initialWidget.pic_windows[self.title.t_ith])
             super().close()
 
 
