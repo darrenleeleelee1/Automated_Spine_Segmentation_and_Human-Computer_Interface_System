@@ -437,8 +437,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         #         self.maximize.setIcon(QtGui.QIcon('img/max2.png'))
         #
         def close(self):
-            # box.close()
-            self.removeWidget(self)
+            box.close()
         # def mousePressEvent(self, event):
         #     if event.button() == Qt.LeftButton:
         #         box.moving = True
