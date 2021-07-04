@@ -997,7 +997,6 @@ class PhotoViewer(QtWidgets.QGraphicsView):
 
     def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
         self.press_key = event.key()
-        print(self.delete)
         if self.delete:
             item = self._scene.itemAt(self.sp, QTransform())
             # 刪除所選item
