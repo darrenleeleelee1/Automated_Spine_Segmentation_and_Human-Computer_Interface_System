@@ -443,7 +443,7 @@ class initialWidget(QtWidgets.QMainWindow):
                 continue
             dicom_path = pt_path + '/' + filename
             ds = customDicom(dicom_path)
-            initialWidget.series_2_dicoms[i][ds.study_instance_UID][ds.series_description].append(ds)
+            initialWidget.series_2_dicoms[i][ds.study_description][ds.series_description].append(ds)
             # if ds.series_description in initialWidget.series_2_dicoms[i].keys():
             #     initialWidget.series_2_dicoms[i][ds.series_description].append(ds)
             #     continue
@@ -462,10 +462,10 @@ class initialWidget(QtWidgets.QMainWindow):
                 item = QtWidgets.QListWidgetItem()
                 item.setSizeHint(QSize(219, 250))
                 item.setText(key)
+                item.setData(Qt.UserRole, study)
                 icon = QtGui.QIcon(pixmap)
                 item.setIcon(icon)
                 self.thumbnail_list[i].addItem(item) 
-
 
         # item = QtWidgets.QListWidgetItem()
         # item.setSizeHint(QSize(219, 100))
@@ -710,7 +710,6 @@ class customDicom():
         self.scropInfo(self.dcmreader(self.dcm_path))
     def dcmreader(self, _dcm_path):
         ds = dcmread(_dcm_path)
-        print(ds)
 
         return ds
     def scropInfo(self, ds):
@@ -1133,16 +1132,35 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         pixmap = pixmap.scaled(self.width(), self.height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
         return pixmap
     def dropEvent(self, event: QtGui.QDropEvent) -> None:
-        event.accept()
         super().dropEvent(event)
+        event.accept()
+        fake_model = QtGui.QStandardItemModel()
+        fake_model.dropMimeData(
+            event.mimeData(), event.dropAction(), 0, 0, QtCore.QModelIndex()
+        )
+        for r in range(fake_model.rowCount()):
+            for c in range(fake_model.columnCount()):
+                ix = fake_model.index(r, c)
+                key_study = ix.data(Qt.UserRole)
+                key_series = ix.data(Qt.DisplayRole)
+                print(ix.data(Qt.UserRole))
+                print(ix.data(Qt.DisplayRole))
+        self.ds_copy = initialWidget.series_2_dicoms[initialWidget.pic_ith][key_study][key_series]
+        self.number_of_instance = len(initialWidget.series_2_dicoms[initialWidget.pic_ith][key_study][key_series])
+        self.instance_of_series = 0
+        pixmap = self.ndarray2QPixmap(self.instance_of_series)
+        self.setPhoto(pixmap)
+        """
         mimeReader = event.mimeData().data('application/x-qabstractitemmodeldatalist')
         data_items = self.decode_data(mimeReader)
         series = data_items[0][Qt.DisplayRole].value()
+        print(series)
         self.ds_copy = initialWidget.series_2_dicoms[initialWidget.pic_ith][series]
         self.number_of_instance = len(initialWidget.series_2_dicoms[initialWidget.pic_ith][series])
         self.instance_of_series = 0
         pixmap = self.ndarray2QPixmap(self.instance_of_series)
         self.setPhoto(pixmap)
+        # """
     def dragEnterEvent(self, event):
         event.accept()
 
