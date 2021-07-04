@@ -22,7 +22,16 @@ WINDOW_SIZE = 0
 class initialWidget(QtWidgets.QMainWindow):
     pic_ith = 1 
     pic_jth = 1
-    rotate_angle = 0
+    pic_windows = [0, 1, 1, 1, 1, 1]
+    listShow = [[], [], [], [], [], []]
+    listNoShow = [[], [], [], [], [], []]
+    for i in range(1, 6):
+        listShow[i].append(1)
+    print(listShow)
+    for i in range(1, 6):
+        for j in range(2, 5):
+            listNoShow[i].append(j)
+    print(listNoShow)
 
     # dictionary mapping series(str) to Dicoms(.dcm)
     series_2_dicoms = [None] * (5 + 1)
@@ -33,8 +42,6 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.search_record = QStandardItemModel()
-        self.pic_windows = [0, 1, 1, 1, 1, 1]
-
         
         self.loadPtList()
         self.pt_list.sort()
@@ -148,8 +155,8 @@ class initialWidget(QtWidgets.QMainWindow):
     # 設定照片處理的地方有幾格
     def setPicWindows(self, x):
         self.now_windows = initialWidget.pic_jth    # 當前按的照片位置
-        if self.pic_windows[initialWidget.pic_ith] > x:
-            for k in range(x + 1, self.pic_windows[initialWidget.pic_ith] + 1):
+        if initialWidget.pic_windows[initialWidget.pic_ith] > x:
+            for k in range(x + 1, initialWidget.pic_windows[initialWidget.pic_ith] + 1):
                 self.gridLayout_list[initialWidget.pic_ith].removeWidget(self.pic_viewer[initialWidget.pic_ith][k])
                 self.pic_viewer[initialWidget.pic_ith][k].deleteLater()
             if x == 3:
@@ -159,9 +166,9 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][3], 0, 2, 1, 1)
             if self.now_windows > x:    # 如果照片當前位置被刪除，則設為x(如4張照片變3張且當前位置在第四張，則設為第三張)
                 initialWidget.pic_jth = x
-            self.pic_windows[initialWidget.pic_ith] = x
-        if self.pic_windows[initialWidget.pic_ith] < x:
-            for k in range(self.pic_windows[initialWidget.pic_ith] + 1, x + 1):
+            initialWidget.pic_windows[initialWidget.pic_ith] = x
+        if initialWidget.pic_windows[initialWidget.pic_ith] < x:
+            for k in range(initialWidget.pic_windows[initialWidget.pic_ith] + 1, x + 1):
                 self.pic_viewer[initialWidget.pic_ith][k] = PhotoProcessing(self.pic_frame_list[initialWidget.pic_ith], initialWidget.pic_ith, k)
             if x == 2:
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][1], 0, 0, 1, 1)
@@ -184,9 +191,12 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.pic_viewer[initialWidget.pic_ith][2].pv.show()
                 self.pic_viewer[initialWidget.pic_ith][3].pv.show()
                 self.pic_viewer[initialWidget.pic_ith][4].pv.show()
-            self.pic_windows[initialWidget.pic_ith] = x
+            initialWidget.pic_windows[initialWidget.pic_ith] = x
             initialWidget.pic_jth = self.now_windows    # 設回原本的位置
         self.setToolLock(PhotoViewer.tool_lock)    # 傳到setToolLock更新當前總共幾張照片
+    def closeWindowX(self, _i, _j):
+        print(_i, _j)
+
 #按鈕連結處--------------------------------------------------------------------------------------------------------
     # 鼠標
     def pushButtonMouseClicked(self):
@@ -200,11 +210,9 @@ class initialWidget(QtWidgets.QMainWindow):
     # 順時鐘轉
     def rotate_image_right(self):
         self.setToolLock('rotate_right')
-        initialWidget.rotate_angle += 90
     # 逆時鐘轉
     def rotate_image_left(self):
         self.setToolLock('rotate_left')
-        initialWidget.rotate_angle -= 90
     # 角度
     def pushButtonAngleClicked(self):
         self.setToolLock('angle')
@@ -248,15 +256,15 @@ class initialWidget(QtWidgets.QMainWindow):
     def setToolLock(self, lock):
         self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].pv.resetFlags()
         # 預設所有item都不能動且沒有手手
-        for k in range(1, self.pic_windows[initialWidget.pic_ith]+1):
+        for k in range(1, initialWidget.pic_windows[initialWidget.pic_ith]+1):
             self.pic_viewer[initialWidget.pic_ith][k].pv.Movable(False)
             self.pic_viewer[initialWidget.pic_ith][k].pv.toggleDragMode(False)
         PhotoViewer.tool_lock = lock
         if PhotoViewer.tool_lock == 'move':
-            for k in range(1, self.pic_windows[initialWidget.pic_ith] + 1):
+            for k in range(1, initialWidget.pic_windows[initialWidget.pic_ith] + 1):
                 self.pic_viewer[initialWidget.pic_ith][k].pv.toggleDragMode(True)
         elif PhotoViewer.tool_lock == 'mouse':
-            for k in range(1, self.pic_windows[initialWidget.pic_ith] + 1):
+            for k in range(1, initialWidget.pic_windows[initialWidget.pic_ith] + 1):
                 self.pic_viewer[initialWidget.pic_ith][k].pv.Movable(True)
             PhotoViewer.tool_lock = 'mouse'
         elif PhotoViewer.tool_lock == 'save':
@@ -728,8 +736,6 @@ class QGraphicsLabel(QtWidgets.QGraphicsTextItem):
         # self.setBrush(QtGui.QBrush(QtGui.QColor(60, 30, 30)))
         self.movable = False
         self.setVisible(False)
-        # 轉過照片後要把label轉回來
-        self.setRotation(-initialWidget.rotate_angle)
 
     def setMovable(self, enable):
         self.setAcceptHoverEvents(enable)
@@ -1203,7 +1209,16 @@ class PhotoProcessing(QtWidgets.QWidget):
         self.vbox.setSpacing(0)
         self.vbox.addWidget(self.title)
         self.vbox.addWidget(self.pv)
+        self.title.close_button.clicked.connect(self.close)
         # self.vbox.setAlignment(Qt.AlignTop)
+
+    def close(self):
+        if initialWidget.pic_windows[self.title.t_ith] != 1:
+            initialWidget.pic_windows[self.title.t_ith] -= 1
+            print(initialWidget.pic_windows)
+            super().close()
+
+
 
 # title bar
 class TitleBar(QtWidgets.QDialog):
@@ -1217,22 +1232,24 @@ class TitleBar(QtWidgets.QDialog):
                 QWidget{
                     Background: #000000;
                     color:white;
-                    font:12px bold;
+                    font:11px bold;
                     font-weight:bold;
                     border-radius: 1px;
-                    height: 11px;
+                    height:30px;
                 }
                 QDialog{
-                    font-size:12px;                    
+                    font-size:30px;                    
                     color: black;
                 }
                 QToolButton{
                     Background:#AAAAAA;
-                    font-size:11px;
+                    font-size:30px;
+                    height: 30px;
+                    width: 30px;
                 }
                 QToolButton:hover{
                     Background: #FFFFFF;
-                    font-size:11px;                
+                    font-size:30px;                
                 }
             """
         self.setAutoFillBackground(True)
@@ -1241,39 +1258,45 @@ class TitleBar(QtWidgets.QDialog):
 
         self.button_frame_spine = QtWidgets.QToolButton(self)
         self.button_frame_spine.setIcon(QtGui.QIcon('generatedUiFile/res/icons/img_frame_spine.png'))
+        self.button_frame_spine.setIconSize(QtCore.QSize(25, 25))
 
         self.button_heat_map = QtWidgets.QToolButton(self)
         self.button_heat_map.setIcon(QtGui.QIcon('generatedUiFile/res/icons/img_heat_map.png'))
+        self.button_heat_map.setIconSize(QtCore.QSize(25, 25))
 
         self.button_scoliosis_angle = QtWidgets.QToolButton(self)
         self.button_scoliosis_angle.setIcon(QtGui.QIcon('generatedUiFile/res/icons/img_scoliosis_angle.png'))
+        self.button_scoliosis_angle.setIconSize(QtCore.QSize(25, 25))
 
-        close = QtWidgets.QToolButton(self)
-        close.setIcon(QtGui.QIcon('generatedUiFile/res/icons/x 3.png'))
-
-        self.button_frame_spine.setMinimumHeight(10)
-        self.button_heat_map.setMinimumHeight(10)
-        self.button_scoliosis_angle.setMinimumHeight(10)
-        close.setMinimumHeight(10)
-
+        self.close_button = QtWidgets.QToolButton(self)
+        self.close_button.setIcon(QtGui.QIcon('generatedUiFile/res/icons/x 3.png'))
+        self.close_button.setIconSize(QtCore.QSize(15, 15))
+        self.close_button.setStyleSheet("""
+                            QToolButton{
+                                Background:#000;
+                            }
+                            QToolButton::hover{
+                                Background: #fff;
+                            }
+                            """)
         label = QtWidgets.QLabel(self)
-        label.setText("patient number")
+        # label.setText(" ")
         self.setWindowTitle("patient number")
+
 
         hbox = QtWidgets.QHBoxLayout(self)
         hbox.addWidget(label)
         hbox.addWidget(self.button_frame_spine)
         hbox.addWidget(self.button_heat_map)
         hbox.addWidget(self.button_scoliosis_angle)
-        hbox.addWidget(close)
+        hbox.addWidget(self.close_button)
         hbox.insertStretch(1, 500)
-        hbox.setSpacing(0)
+        hbox.setSpacing(10)
         self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
 
         self.button_frame_spine.clicked.connect(self.frameSpine)
         self.button_heat_map.clicked.connect(self.heatMap)
         self.button_scoliosis_angle.clicked.connect(self.scoliosis_angle)
-        close.clicked.connect(self.close)
 
     def mousePressEvent(self, event):
         self.sp = self.mapToScene(event.pos())
@@ -1283,24 +1306,23 @@ class TitleBar(QtWidgets.QDialog):
     def mapToScene(self, x):
         initialWidget.pic_ith = self.t_ith
         initialWidget.pic_jth = self.t_jth
-        print("initialWidget.pic_ith = ", initialWidget.pic_ith ,initialWidget.pic_jth )
 
     def frameSpine(self):
-        print("frameSpine")
+        print("frameSpine", self.t_ith, self.t_jth)
 
     def heatMap(self):
-        print("heatmap")
+        print("heatmap", self.t_ith, self.t_jth)
 
     def scoliosis_angle(self):
-        print("scoliosis_angle")
+        print("scoliosis_angle", self.t_ith, self.t_jth)
 
-    def close(self):
-        # print("close", self.t_ith, self.t_jth)
-        super(TitleBar, self).close()
-        # box.close()
-        # self.removeWidget(self)
-        # self.init = initialWidget()
+    # def close(self):
+    #     # print("close", self.t_ith, self.t_jth)
+    #     super(TitleBar, self).close()
+        # initialWidget.closePicWindowX(self.t_ith, self.t_jth)
         # initialWidget.gridLayout_list[self.t_ith].removeWidget(initialWidget.pic_viewer[self.t_ith][self.t_jth])
+
+
 
 
 if __name__ == '__main__':
