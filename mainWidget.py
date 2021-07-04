@@ -25,7 +25,7 @@ class initialWidget(QtWidgets.QMainWindow):
     # dictionary mapping series(str) to Dicoms(.dcm)
     series_2_dicoms = [None] * (5 + 1)
     for i in range(1, 5 + 1):
-        series_2_dicoms[i] = defaultdict(list)
+        series_2_dicoms[i] = defaultdict(lambda: defaultdict(list))
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.ui = Ui_MainWindow()
@@ -434,30 +434,45 @@ class initialWidget(QtWidgets.QMainWindow):
         i = self.patient_mapto_page[pt_id]
         self.thumbnail_list[i].setViewMode(QListWidget.IconMode)
         self.thumbnail_list[i].setItemAlignment(Qt.AlignCenter)
+        self.thumbnail_list[i].setIconSize(QSize(215, 215))
+        self.thumbnail_list[i].setDragEnabled(True)
+        self.thumbnail_list[i].setDragDropMode(QAbstractItemView.DragOnly)
         initialWidget.series_2_dicoms[i].clear()
-        for filename in os.listdir(pt_path):
+        for filename in os.listdir(pt_path):    #set map
             if not filename.endswith('.dcm') :
                 continue
             dicom_path = pt_path + '/' + filename
             ds = customDicom(dicom_path)
-            if ds.series_description in initialWidget.series_2_dicoms[i].keys():
-                initialWidget.series_2_dicoms[i][ds.series_description].append(ds)
-                continue
-            initialWidget.series_2_dicoms[i][ds.series_description].append(ds)
-            arr = initialWidget.mappingWindow(ds.pixel_array, ds.window_level, ds.window_width)
-            qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1]*2, QtGui.QImage.Format_Grayscale16).copy()
-            pixmap = QtGui.QPixmap(qimage)
-            item = QtWidgets.QListWidgetItem(filename)
-            item.setSizeHint(QSize(219, 250))
-            item.setText(ds.series_description)
-            icon = QtGui.QIcon(pixmap)
-            item.setIcon(icon)
-            self.thumbnail_list[i].addItem(item) 
+            initialWidget.series_2_dicoms[i][ds.study_instance_UID][ds.series_description].append(ds)
+            # if ds.series_description in initialWidget.series_2_dicoms[i].keys():
+            #     initialWidget.series_2_dicoms[i][ds.series_description].append(ds)
+            #     continue
+            # initialWidget.series_2_dicoms[i][ds.series_description].append(ds)
+        for study, series in initialWidget.series_2_dicoms[i].items():
+            item = QtWidgets.QListWidgetItem(self.thumbnail_list[i])
+            self.thumbnail_list[i].addItem(item)
+            new_item = MyCustomWidget(study)
+            item.setSizeHint(QSize(219, 100))
+            self.thumbnail_list[i].setItemWidget(item, new_item)
+            for key in series: # key = series description
+                ds = initialWidget.series_2_dicoms[i][study][key][0]
+                arr = initialWidget.mappingWindow(ds.pixel_array, ds.window_level, ds.window_width)
+                qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1]*2, QtGui.QImage.Format_Grayscale16).copy()
+                pixmap = QtGui.QPixmap(qimage)
+                item = QtWidgets.QListWidgetItem()
+                item.setSizeHint(QSize(219, 250))
+                item.setText(key)
+                icon = QtGui.QIcon(pixmap)
+                item.setIcon(icon)
+                self.thumbnail_list[i].addItem(item) 
 
-        size = QSize(215, 215)
-        self.thumbnail_list[i].setIconSize(size)
-        self.thumbnail_list[i].setDragEnabled(True)
-        self.thumbnail_list[i].setDragDropMode(QAbstractItemView.DragOnly)
+
+        # item = QtWidgets.QListWidgetItem()
+        # item.setSizeHint(QSize(219, 100))
+        # item.setText('test')
+        # item.setFlags(item.flags() & ~Qt.ItemIsSelectable)
+        # self.thumbnail_list[i].addItem(item) 
+
 
     
 
@@ -681,6 +696,8 @@ class customDicom():
         self.dcm_path = _dcm_path 
         # self.dicom = self.dcmreader(self.dcm_path) # 若要存dicom
         self.pixel_array = None
+        self.study_description = None
+        self.study_instance_UID = None
         self.series_description = None
         self.series_number = None
         self.instance_no_of_series = None
@@ -693,9 +710,13 @@ class customDicom():
         self.scropInfo(self.dcmreader(self.dcm_path))
     def dcmreader(self, _dcm_path):
         ds = dcmread(_dcm_path)
+        print(ds)
+
         return ds
     def scropInfo(self, ds):
         self.pixel_array = np.uint16(ds.pixel_array).copy()
+        self.study_description = ds[0x0008, 0x1030].value if (0x0008, 0x1030) in ds else None
+        self.study_instance_UID = ds[0x0020, 0x000d].value if (0x0020, 0x000d) in ds else None
         self.series_description = ds[0x0008, 0x103e].value if (0x0008, 0x103e) in ds else None
         self.series_number = ds[0x0020, 0x0011].value if (0x0020, 0x0011) in ds else None
         self.instance_no_of_series = ds[0x0020, 0x0013].value if (0x0020, 0x0013) in ds else None
@@ -1127,7 +1148,16 @@ class PhotoViewer(QtWidgets.QGraphicsView):
 
     def dragMoveEvent(self, event):
         event.accept()
-    
+class MyCustomWidget(QtWidgets.QWidget):
+    def __init__(self, study, parent=None):
+        super(MyCustomWidget, self).__init__(parent)
+        self.row = QtWidgets.QHBoxLayout()
+        self.row.addWidget(QtWidgets.QLabel(study))
+
+        # self.row.addWidget(QtWidgets.QPushButton("view"))
+        # self.row.addWidget(QtWidgets.QPushButton("select"))
+
+        self.setLayout(self.row)
 if __name__ == '__main__':
     import sys
     app = QtWidgets.QApplication(sys.argv)
