@@ -113,11 +113,6 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.patient_list.itemClicked.connect(self.patient_listItemClicked)
         self.ui.recently_list.itemClicked.connect(self.recently_listItemClicked)
 
-        self.ui.thumbnail_list_1.itemClicked.connect(self.thumbnail_listItemClicked)
-        self.ui.thumbnail_list_2.itemClicked.connect(self.thumbnail_listItemClicked)
-        self.ui.thumbnail_list_3.itemClicked.connect(self.thumbnail_listItemClicked)
-        self.ui.thumbnail_list_4.itemClicked.connect(self.thumbnail_listItemClicked)
-        self.ui.thumbnail_list_5.itemClicked.connect(self.thumbnail_listItemClicked)
 
 #照片Show Pic----------------------------------------------------------------------
 
@@ -449,15 +444,12 @@ class initialWidget(QtWidgets.QMainWindow):
             dicom_path = pt_path + '/' + filename
             ds = customDicom(dicom_path)
             initialWidget.series_2_dicoms[i][ds.study_description][ds.series_description].append(ds)
-            # if ds.series_description in initialWidget.series_2_dicoms[i].keys():
-            #     initialWidget.series_2_dicoms[i][ds.series_description].append(ds)
-            #     continue
-            # initialWidget.series_2_dicoms[i][ds.series_description].append(ds)
         for study, series in initialWidget.series_2_dicoms[i].items():
             item = QtWidgets.QListWidgetItem(self.thumbnail_list[i])
             self.thumbnail_list[i].addItem(item)
             new_item = MyCustomWidget(study)
-            item.setSizeHint(QSize(219, 100))
+            item.setSizeHint(QSize(219, 180))
+            # item.setBackground(QtGui.QColor('#ffffff') )
             self.thumbnail_list[i].setItemWidget(item, new_item)
             for key in series: # key = series description
                 ds = initialWidget.series_2_dicoms[i][study][key][0]
@@ -471,25 +463,7 @@ class initialWidget(QtWidgets.QMainWindow):
                 icon = QtGui.QIcon(pixmap)
                 item.setIcon(icon)
                 self.thumbnail_list[i].addItem(item) 
-<<<<<<< HEAD
-=======
-
-        # item = QtWidgets.QListWidgetItem()
-        # item.setSizeHint(QSize(219, 100))
-        # item.setText('test')
-        # item.setFlags(item.flags() & ~Qt.ItemIsSelectable)
-        # self.thumbnail_list[i].addItem(item) 
-
-
->>>>>>> 1668ac0fe7fe44d91499a2f6882e22a543e64775
     
-
-
- 
-    def thumbnail_listItemClicked(self, item):
-        itemstr = str(item.text()) #拿到你按的那個內容是啥
-        print(itemstr)
-        print("click")
         
 # search page----------------------------------------------------------------------------------------------------
     # search
@@ -722,13 +696,13 @@ class customDicom():
         self.magnetic = None
         self.window_level = None # WL
         self.window_width = None # WW
+        self.study_date = None
+        self.study_time = None
+        self.modality = None
         self.scropInfo(self.dcmreader(self.dcm_path))
     def dcmreader(self, _dcm_path):
         ds = dcmread(_dcm_path)
-<<<<<<< HEAD
-        # print(ds)
-=======
->>>>>>> 1668ac0fe7fe44d91499a2f6882e22a543e64775
+        print(ds)
 
         return ds
     def scropInfo(self, ds):
@@ -744,6 +718,9 @@ class customDicom():
         self.magnetic = ds[0x0018, 0x0087].value if (0x0018, 0x0087) in ds else None
         self.window_level = ds[0x0028, 0x1050].value if (0x0028, 0x1050) in ds else None
         self.window_width = ds[0x0028, 0x1051].value if (0x0028, 0x1051) in ds else None
+        self.study_date = ds[0x0008, 0x0020].value if (0x0008, 0x0020) in ds else None
+        self.study_time = ds[0x0008, 0x0030].value if (0x0008, 0x0030) in ds else None
+        self.modality = ds[0x0008, 0x0060].value if (0x0008, 0x0060) in ds else None
     def print(self):
         print("pixel_array: ", self.pixel_array)
         print("series_description: ", self.series_description)
@@ -1189,7 +1166,9 @@ class MyCustomWidget(QtWidgets.QWidget):
     def __init__(self, study, parent=None):
         super(MyCustomWidget, self).__init__(parent)
         self.row = QtWidgets.QHBoxLayout()
-        self.row.addWidget(QtWidgets.QLabel(study))
+        self.label = QtWidgets.QLabel(study)
+        self.label.setStyleSheet("QLabel { background-color : white; }")
+        self.row.addWidget(self.label)
 
         # self.row.addWidget(QtWidgets.QPushButton("view"))
         # self.row.addWidget(QtWidgets.QPushButton("select"))
