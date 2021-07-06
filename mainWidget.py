@@ -476,6 +476,7 @@ class initialWidget(QtWidgets.QMainWindow):
             new_item = MyCustomWidget(study)
             item.setSizeHint(QSize(219, 180))
             # item.setBackground(QtGui.QColor('#ffffff') )
+
             self.thumbnail_list[i].setItemWidget(item, new_item)
             for key in series: # key = series description
                 ds = initialWidget.series_2_dicoms[i][study][key][0]
@@ -728,6 +729,7 @@ class customDicom():
         self.scropInfo(self.dcmreader(self.dcm_path))
     def dcmreader(self, _dcm_path):
         ds = dcmread(_dcm_path)
+        print(ds)
         return ds
     def scropInfo(self, ds):
         self.pixel_array = np.uint16(ds.pixel_array).copy()
