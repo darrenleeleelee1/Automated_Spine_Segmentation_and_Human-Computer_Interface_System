@@ -938,6 +938,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.instance_of_series = 0
         self.number_of_instance = 0
         self.rotate_degree = 0
+        self.delete = False
     def resetWindow(self, WL, WW):
         if (WL == 0 and WW == 0):
             WL = self.ds_copy[self.instance_of_series].window_level
@@ -1012,17 +1013,17 @@ class PhotoViewer(QtWidgets.QGraphicsView):
 
     def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
         self.press_key = event.key()
-        item = self._scene.itemAt(self.sp, QTransform())
-        # 刪除所選item
-        if self.press_key == 16777223 and PhotoViewer.tool_lock == 'mouse':
-            print("yes")
-            if isinstance(item, Pen) or isinstance(item, Protractor) or isinstance(item, Ruler):
-                self._scene.removeItem(item)
-            elif isinstance(item, QGraphicsLabel):
-                fi = item.parentItem()
-                self._scene.removeItem(fi)
-                app.instance().restoreOverrideCursor()  # label需要兩次hoverLeaveEvent
-            app.instance().restoreOverrideCursor()  # 需要hoverLeaveEvent，否則會刪掉後會一直有手手
+        if self.delete:
+            item = self._scene.itemAt(self.sp, QTransform())
+            # 刪除所選item
+            if self.press_key == 16777223 and PhotoViewer.tool_lock == 'mouse':
+                if isinstance(item, Pen) or isinstance(item, Protractor) or isinstance(item, Ruler):
+                    self._scene.removeItem(item)
+                elif isinstance(item, QGraphicsLabel):
+                    fi = item.parentItem()
+                    self._scene.removeItem(fi)
+                    app.instance().restoreOverrideCursor()  # label需要兩次hoverLeaveEvent
+                app.instance().restoreOverrideCursor()  # 需要hoverLeaveEvent，否則會刪掉後會一直有手手
         return super().keyPressEvent(event)
     def keyReleaseEvent(self, event: QtGui.QKeyEvent) -> None:
         self.press_key = None
@@ -1091,6 +1092,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
 
     def mousePressEvent(self, event):
         self.sp = self.mapToScene(event.pos())
+        self.delete = True
         initialWidget.pic_ith = self.in_ith
         initialWidget.pic_jth = self.in_jth
         if PhotoViewer.tool_lock == 'move':
@@ -1135,7 +1137,6 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             self.ruler.ep = self.ep
             self.ruler.setMovable(False)
             self.ruler_text_label.setMovable(False)
-            print("origin : ", self.ruler_text_label.pos())
             self.ruler_start = False
             self.ruler_text_label.setParentItem(self.ruler)
         elif PhotoViewer.tool_lock == 'angle':
