@@ -461,23 +461,40 @@ class initialWidget(QtWidgets.QMainWindow):
         self.thumbnail_list[i].setViewMode(QListWidget.IconMode)
         self.thumbnail_list[i].setItemAlignment(Qt.AlignCenter)
         self.thumbnail_list[i].setIconSize(QSize(215, 215))
+        self.thumbnail_list[i].setContentsMargins(0, 0, 0, 0)
         self.thumbnail_list[i].setDragEnabled(True)
         self.thumbnail_list[i].setDragDropMode(QAbstractItemView.DragOnly)
+        self.thumbnail_list[i].setStyleSheet( "QListWidget::item { border-top : 1px solid black }" )
         initialWidget.series_2_dicoms[i].clear()
+        #先放pt id
+        item = QtWidgets.QListWidgetItem(self.thumbnail_list[i])
+        self.thumbnail_list[i].addItem(item)
+        new_item = MyCustomWidgetPtid(pt_id)
+        item.setTextAlignment(Qt.AlignVCenter)
+        item.setSizeHint(QSize(219, 50))
+
+        self.thumbnail_list[i].setItemWidget(item, new_item)
         for filename in os.listdir(pt_path):    #set map
             if not filename.endswith('.dcm') :
                 continue
             dicom_path = pt_path + '/' + filename
             ds = customDicom(dicom_path)
-            initialWidget.series_2_dicoms[i][ds.study_description][ds.series_description].append(ds)
-        for study, series in initialWidget.series_2_dicoms[i].items():
-            item = QtWidgets.QListWidgetItem(self.thumbnail_list[i])
-            self.thumbnail_list[i].addItem(item)
-            new_item = MyCustomWidget(study)
-            item.setSizeHint(QSize(219, 180))
-            # item.setBackground(QtGui.QColor('#ffffff') )
-            self.thumbnail_list[i].setItemWidget(item, new_item)
-            for key in series: # key = series description
+            initialWidget.series_2_dicoms[i][ds.study_date, ds.study_time, ds.study_id][ds.series_description].append(ds)
+        for study, series in dict(sorted(initialWidget.series_2_dicoms[i].items())).items():
+            first = True
+
+            for key, value in dict(sorted(series.items(), key= lambda x: x[1][0].acquisition_time)).items(): # key = series description
+                if first:
+                    first = False
+                    item = QtWidgets.QListWidgetItem(self.thumbnail_list[i])
+                    self.thumbnail_list[i].addItem(item)
+                    date = "%s/%s/%s" % (study[0][0:4], study[0][4:6], study[0][6:8])
+                    time = "%s:%s:%s" % (study[1][0:2], study[1][2:4], study[1][4:6])
+                    new_item = MyCustomWidget("%s %s" % (date, time), value[0].study_description, "%s: %d series" % (value[0].modality, len(initialWidget.series_2_dicoms[i][study].keys())))
+                    item.setTextAlignment(Qt.AlignVCenter)
+                    item.setSizeHint(QSize(219, 90))
+                    # item.setBackground(QtGui.QColor('#ffffff') )
+                    self.thumbnail_list[i].setItemWidget(item, new_item)
                 ds = initialWidget.series_2_dicoms[i][study][key][0]
                 arr = initialWidget.mappingWindow(ds.pixel_array, ds.window_level, ds.window_width)
                 qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1]*2, QtGui.QImage.Format_Grayscale16).copy()
@@ -488,6 +505,7 @@ class initialWidget(QtWidgets.QMainWindow):
                 item.setData(Qt.UserRole, study)
                 icon = QtGui.QIcon(pixmap)
                 item.setIcon(icon)
+                item.setFont(QtGui.QFont('Verdana', 8))
                 self.thumbnail_list[i].addItem(item) 
     
         
@@ -724,11 +742,17 @@ class customDicom():
         self.window_width = None # WW
         self.study_date = None
         self.study_time = None
+        self.study_id = None
         self.modality = None
+        self.series_data_time_stamp = None
+        self.acquisition_time = None
         self.scropInfo(self.dcmreader(self.dcm_path))
+    
     def dcmreader(self, _dcm_path):
         ds = dcmread(_dcm_path)
+        # print(ds)
         return ds
+
     def scropInfo(self, ds):
         self.pixel_array = np.uint16(ds.pixel_array).copy()
         self.study_description = ds[0x0008, 0x1030].value if (0x0008, 0x1030) in ds else None
@@ -744,18 +768,10 @@ class customDicom():
         self.window_width = ds[0x0028, 0x1051].value if (0x0028, 0x1051) in ds else None
         self.study_date = ds[0x0008, 0x0020].value if (0x0008, 0x0020) in ds else None
         self.study_time = ds[0x0008, 0x0030].value if (0x0008, 0x0030) in ds else None
+        self.study_id = ds[0x0020, 0x0010].value if (0x0020, 0x0010) in ds else None
         self.modality = ds[0x0008, 0x0060].value if (0x0008, 0x0060) in ds else None
-    def print(self):
-        print("pixel_array: ", self.pixel_array)
-        print("series_description: ", self.series_description)
-        print("series_number: ", self.series_number)
-        print("instance_no_of_series: ", self.instance_no_of_series)
-        print("echotime: ", self.echotime)
-        print("content_time: ", self.content_time)
-        print("repetition_time: ", self.repetition_time)
-        print("magnetic: ", self.magnetic)
-        print("window_level: ", self.window_level)
-        print("window_width: ", self.window_width)
+        self.series_data_time_stamp = ds[0x0009, 0x10e9].value if (0x0009, 0x10e9) in ds else None
+        self.acquisition_time = ds[0x0008, 0x0032].value if (0x0008, 0x0032) in ds else "300000"
 class QGraphicsLabel(QtWidgets.QGraphicsTextItem):
     def __init__(self, text):
         super().__init__(text)
@@ -1221,8 +1237,6 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 ix = fake_model.index(r, c)
                 key_study = ix.data(Qt.UserRole)
                 key_series = ix.data(Qt.DisplayRole)
-                print(ix.data(Qt.UserRole))
-                print(ix.data(Qt.DisplayRole))
         self.ds_copy = initialWidget.series_2_dicoms[initialWidget.pic_ith][key_study][key_series]
         self.number_of_instance = len(initialWidget.series_2_dicoms[initialWidget.pic_ith][key_study][key_series])
         self.instance_of_series = 0
@@ -1244,19 +1258,42 @@ class PhotoViewer(QtWidgets.QGraphicsView):
 
     def dragMoveEvent(self, event):
         event.accept()
-class MyCustomWidget(QtWidgets.QWidget):
-    def __init__(self, study, parent=None):
+class MyCustomWidget(QtWidgets.QWidget):#thumbnail list study分隔
+    def __init__(self, t1, t2, t3, parent=None):
         super(MyCustomWidget, self).__init__(parent)
-        self.row = QtWidgets.QHBoxLayout()
-        self.label = QtWidgets.QLabel(study)
-        self.label.setStyleSheet("QLabel { background-color : white; }")
-        self.row.addWidget(self.label)
-
+        self.row = QtWidgets.QVBoxLayout()
+        self.label_1 = QtWidgets.QLabel(t1)
+        self.label_1.setAlignment(QtCore.Qt.AlignHCenter)
+        self.label_1.setFont(QtGui.QFont('Verdana', 9))
+        self.label_1.setStyleSheet("QLabel { background-color : rgb(162, 196, 201); padding: 10px 0px 0px 0px;}")
+        self.label_2 = QtWidgets.QLabel(t2)
+        self.label_2.setAlignment(QtCore.Qt.AlignHCenter)
+        self.label_2.setFont(QtGui.QFont('Verdana', 9))
+        self.label_2.setStyleSheet("QLabel { background-color : rgb(162, 196, 201); padding: 5px 0px 5px 0px;}")
+        self.label_3 = QtWidgets.QLabel(t3)
+        self.label_3.setAlignment(QtCore.Qt.AlignHCenter)
+        self.label_3.setFont(QtGui.QFont('Verdana', 9))
+        self.label_3.setStyleSheet("QLabel { background-color : rgb(162, 196, 201); padding: 0px 0px 10px 0px;}")
+        self.row.setSpacing(0)
+        self.row.setContentsMargins(0, 0, 0, 0)
+        self.row.addWidget(self.label_1)
+        self.row.addWidget(self.label_2)
+        self.row.addWidget(self.label_3)
         # self.row.addWidget(QtWidgets.QPushButton("view"))
         # self.row.addWidget(QtWidgets.QPushButton("select"))
-
         self.setLayout(self.row)
-
+class MyCustomWidgetPtid(QtWidgets.QWidget): #thumbnail list第一格放patient id
+    def __init__(self, t1, parent=None):
+        super(MyCustomWidgetPtid, self).__init__(parent)
+        self.row = QtWidgets.QVBoxLayout()
+        self.label_1 = QtWidgets.QLabel(t1)
+        self.label_1.setAlignment(QtCore.Qt.AlignHCenter)
+        self.label_1.setFont(QtGui.QFont('Verdana', 10))
+        self.label_1.setStyleSheet("QLabel { background-color : rgb(118, 165, 175); padding: 10px 0px 7px 0px;color: white;font-weight: bold;}")
+        self.row.setSpacing(0)
+        self.row.setContentsMargins(0, 0, 0, 0)
+        self.row.addWidget(self.label_1)
+        self.setLayout(self.row)
 class PhotoProcessing(QtWidgets.QWidget):
     def __init__(self, parent: None, _i, _j):
         super().__init__(parent)
