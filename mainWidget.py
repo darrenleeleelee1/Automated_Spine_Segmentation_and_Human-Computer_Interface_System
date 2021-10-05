@@ -13,7 +13,7 @@ from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QInputD
 from pydicom import dcmread, Dataset
 from pydicom.filebase import DicomBytesIO
 import numpy as np
-from PIL import ImageQt
+#from PIL import ImageQt
 import shutil
 import copy
 from collections import defaultdict
@@ -772,6 +772,46 @@ class customDicom():
         self.modality = ds[0x0008, 0x0060].value if (0x0008, 0x0060) in ds else None
         self.series_data_time_stamp = ds[0x0009, 0x10e9].value if (0x0009, 0x10e9) in ds else None
         self.acquisition_time = ds[0x0008, 0x0032].value if (0x0008, 0x0032) in ds else "300000"
+
+class ListWidgets(QListWidget):
+    def cliecked(self, item):
+        QMessageBox.information(self, "ListWget", "你選擇了: ", + item.text())
+
+class QGraphicsinfo(QtWidgets.QGraphicsTextItem):
+    def __init__(self, text):
+        super().__init__(text)
+        # self.setPen(QtGui.QPen(QtGui.QColor(230, 230, 10)))
+        # self.setBrush(QtGui.QBrush(QtGui.QColor(60, 30, 30)))
+        self.movable = False
+        self.setVisible(True)
+
+    def setMovable(self, enable):
+        self.setAcceptHoverEvents(enable)
+        self.movable = enable
+    # mouse hover event
+    # def hoverEnterEvent(self, event):
+    #     app.instance().setOverrideCursor(QtCore.Qt.OpenHandCursor)
+
+    # def hoverLeaveEvent(self, event):
+    #     app.instance().restoreOverrideCursor()
+
+    # mouse click event
+    def mousePressEvent(self, event):
+        pass
+
+    def mouseMoveEvent(self, event):
+        if self.movable:
+            self.parentItem().mouseMoveEvent(event) # 可以跟parent同時移動
+            # orig_cursor_position = event.lastScenePos()
+            # updated_cursor_position = event.scenePos()
+            # orig_position = self.scenePos()
+            # updated_cursor_x = updated_cursor_position.x() - orig_cursor_position.x() + orig_position.x()
+            # updated_cursor_y = updated_cursor_position.y() - orig_cursor_position.y() + orig_position.y()
+            # self.setPos(QtCore.QPointF(updated_cursor_x, updated_cursor_y))
+
+    def mouseReleaseEvent(self, event):
+        pass
+
 class QGraphicsLabel(QtWidgets.QGraphicsTextItem):
     def __init__(self, text):
         super().__init__(text)
@@ -938,6 +978,9 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.instance_of_series = 0
         self.number_of_instance = 0
         self.rotate_degree = 0
+
+
+
     def resetWindow(self, WL, WW):
         if (WL == 0 and WW == 0):
             WL = self.ds_copy[self.instance_of_series].window_level
@@ -969,6 +1012,11 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         if filePath == "":
             return
         save_image.save(filePath)
+
+    def clearInfo(self):
+        for item in self._scene.items():
+            if isinstance(item, QGraphicsinfo):
+                self._scene.removeItem(item)
 
     def clear(self):
         for item in self._scene.items():
@@ -1048,7 +1096,9 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 self.instance_of_series %= self.number_of_instance
                 print(self.instance_of_series)
                 pixmap = self.ndarray2QPixmap(self.instance_of_series)
+                #self.clear()
                 self.setPhoto(pixmap)
+                self.series.setHtml("<div style='font-size:50px;color:#ffffff;'>" + "%d" % self.instance_of_series + "/" + "%d" % self.number_of_instance + "</div>")
     # 控制item能否移動
     def Movable(self, enble):
         for item in self._scene.items():
@@ -1091,6 +1141,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
 
     def mousePressEvent(self, event):
         self.sp = self.mapToScene(event.pos())
+
         initialWidget.pic_ith = self.in_ith
         initialWidget.pic_jth = self.in_jth
         if PhotoViewer.tool_lock == 'move':
@@ -1237,10 +1288,30 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 key_study = ix.data(Qt.UserRole)
                 key_series = ix.data(Qt.DisplayRole)
         self.ds_copy = initialWidget.series_2_dicoms[initialWidget.pic_ith][key_study][key_series]
-        self.number_of_instance = len(initialWidget.series_2_dicoms[initialWidget.pic_ith][key_study][key_series])
+        self.number_of_instance = len(initialWidget.series_2_dicoms[initialWidget.pic_ith][key_study][key_series]) #series的大小
         self.instance_of_series = 0
         pixmap = self.ndarray2QPixmap(self.instance_of_series)
         self.setPhoto(pixmap)
+
+        self.clearInfo() #重疊刪除
+        #print(self.mapFromScene(event.pos()))
+        print(self._scene.width())
+        print(self._scene.width())
+
+        #self.mapToScene()Q
+        #self.mapFromScene
+        self.series = QGraphicsinfo("")
+        self.item_1 = QGraphicsinfo("")
+        self._scene.addItem(self.series)
+        self.series.setHtml("<div style='font-size:50px;color:#ffffff;'>" + "%d" % self.number_of_instance + "</div>")
+        self.item_1.setHtml("<div style='font-size:50px;color:#ffffff;'>" + "%d" % self.number_of_instance + "</div>")
+        #self.info_pos = self.mapFromScene(QPoint(400, 400))
+        self.series.setPos(QPoint(0, 0))
+        #self.series.setPos(QPoint(self._scene.width()-50, self._scene.width()-50))
+        print("wow")
+        print(self.width())
+        print(self.height())
+
         """
         mimeReader = event.mimeData().data('application/x-qabstractitemmodeldatalist')
         data_items = self.decode_data(mimeReader)
