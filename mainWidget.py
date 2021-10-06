@@ -1295,22 +1295,24 @@ class PhotoViewer(QtWidgets.QGraphicsView):
 
         self.clearInfo() #重疊刪除
         #print(self.mapFromScene(event.pos()))
-        print(self._scene.width())
-        print(self._scene.width())
+        # print(self._scene.width())
+        # print(self._scene.width())
 
         #self.mapToScene()Q
         #self.mapFromScene
+        print(key_study)
         self.series = QGraphicsinfo("")
         self.item_1 = QGraphicsinfo("")
         self._scene.addItem(self.series)
-        self.series.setHtml("<div style='font-size:50px;color:#ffffff;'>" + "%d" % self.number_of_instance + "</div>")
-        self.item_1.setHtml("<div style='font-size:50px;color:#ffffff;'>" + "%d" % self.number_of_instance + "</div>")
+        self._scene.addItem(self.item_1)
+        self.series.setHtml("<div style='font-size:25px;color:#ffffff;'>" + "%s" % key_study[0] + "</div>")
+        self.item_1.setHtml("<div style='font-size:25px;color:#ffffff;'>" + "%d" % self.number_of_instance + "</div>")
         #self.info_pos = self.mapFromScene(QPoint(400, 400))
         self.series.setPos(QPoint(0, 0))
-        #self.series.setPos(QPoint(self._scene.width()-50, self._scene.width()-50))
-        print("wow")
-        print(self.width())
-        print(self.height())
+        self.item_1.setPos(QPoint(self._scene.width()-50, self._scene.height()-60))
+        # print("wow")
+        # print(self.width())
+        # print(self.height())
 
         """
         mimeReader = event.mimeData().data('application/x-qabstractitemmodeldatalist')
