@@ -30,19 +30,21 @@ class initialWidget(QtWidgets.QMainWindow):
     for i in range(1, 6):
         for j in range(2, 5):
             listNoShow[i].append(j)
-
+    grids = 1
     # dictionary mapping series(str) to Dicoms(.dcm)
     series_2_dicoms = [None] * (5 + 1)
     for i in range(1, 5 + 1):
         series_2_dicoms[i] = defaultdict(lambda: defaultdict(list))
+    enlarge = False
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.search_record = QStandardItemModel()
-        
+        initialWidget.ui = self.ui
         self.loadPtList()
         self.pt_list.sort()
+        # 在搜尋那頁列出符合醫生輸入的數字的病歷號
         for ptid in self.pt_list:
             self.ui.no_list.addItem(ptid)
 
@@ -60,7 +62,7 @@ class initialWidget(QtWidgets.QMainWindow):
         self.recent_list = [] # 記錄倒過來
 
         self.ui.patient_list.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        #右键菜单
+        #右鍵菜單
         self.ui.patient_list.setContextMenuPolicy(Qt.CustomContextMenu)
         self.ui.patient_list.customContextMenuRequested.connect(self.myListWidgetContext)
         self.ui.patient_list.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -160,6 +162,7 @@ class initialWidget(QtWidgets.QMainWindow):
         self.gridLayout_list[initialWidget.pic_ith].removeWidget(self.pic_viewer[initialWidget.pic_ith][tp[3]])
         self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][tp[3]], 0, 2, 1, 1)
     def setPicWindows(self, x):
+        initialWidget.grids = x
         self.now_windows = initialWidget.pic_jth    # 當前按的照片位置
         if initialWidget.pic_windows[initialWidget.pic_ith] > x:
             for k in range(x + 1, initialWidget.pic_windows[initialWidget.pic_ith] + 1):
@@ -415,6 +418,7 @@ class initialWidget(QtWidgets.QMainWindow):
     def slideLeftMenu(self):
         width = self.ui.frame_left_menu.width()
         if width == 50:
+            initialWidget.enlarge = True
             newWidth = 200
         else:
             newWidth = 50
@@ -747,7 +751,6 @@ class customDicom():
         self.series_data_time_stamp = None
         self.acquisition_time = None
         self.scropInfo(self.dcmreader(self.dcm_path))
-    
     def dcmreader(self, _dcm_path):
         ds = dcmread(_dcm_path)
         # print(ds)
@@ -911,6 +914,7 @@ class Pen(QtWidgets.QGraphicsPathItem):
     
 class PhotoViewer(QtWidgets.QGraphicsView):
     tool_lock = 'mouse'
+    picWidth = 0
     def __init__(self, _i, _j, parent = None):
         super(PhotoViewer, self).__init__(parent)
         self.in_ith = _i
@@ -939,6 +943,12 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.number_of_instance = 0
         self.rotate_degree = 0
         self.delete = False
+
+        self.dicomInfoList =  QtWidgets.QListWidget()
+        self.dicomInfoList.setStyleSheet("color:#fff; background-color:transparent;")
+        self.dicomfont = QtGui.QFont()
+        self.dicomfont.setFamily("Verdana")
+        
     def resetWindow(self, WL, WW):
         if (WL == 0 and WW == 0):
             WL = self.ds_copy[self.instance_of_series].window_level
@@ -950,7 +960,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         pixmap = QtGui.QPixmap(qimage)
         pixmap = pixmap.scaled(self.width(), self.height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
         self.setPhoto(pixmap)
-
+        print()
     def setNewScene(self):
         self._scene = QtWidgets.QGraphicsScene(self)
         self._empty = True
@@ -1047,7 +1057,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             if self.number_of_instance > 1:
                 self.instance_of_series += 1
                 self.instance_of_series %= self.number_of_instance
-                print(self.instance_of_series)
+                # print(self.instance_of_series)
                 pixmap = self.ndarray2QPixmap(self.instance_of_series)
                 self.setPhoto(pixmap)
     # 控制item能否移動
@@ -1238,6 +1248,35 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 key_study = ix.data(Qt.UserRole)
                 key_series = ix.data(Qt.DisplayRole)
         self.ds_copy = initialWidget.series_2_dicoms[initialWidget.pic_ith][key_study][key_series]
+        
+        PhotoViewer.picWidth = self.width()
+        fnt_size = float(self.width()**2) / 2304
+        print("width = ", self.width(), "size = ", fnt_size)
+        # fnt_size = float(40)
+
+        self.dicomInfoList.clear()
+        sd = initialWidget.series_2_dicoms[initialWidget.pic_ith][key_study][key_series][0].study_date
+        at = initialWidget.series_2_dicoms[initialWidget.pic_ith][key_study][key_series][0].acquisition_time
+        # self.dicomInfoList.addItem(sd)
+        # self.dicomInfoList.addItem(at)
+        sdItem = QtWidgets.QListWidgetItem(self.dicomInfoList)
+        self.dicomInfoList.addItem(sdItem)
+        sd = MyCustomWidgetdicomInfo(sd)
+        self.dicomInfoList.setItemWidget(sdItem, sd)
+
+
+        self.dicomfont.setPointSizeF(fnt_size)
+        self.dicomInfoList.setFont(self.dicomfont)
+
+        self._scene.addWidget(self.dicomInfoList)
+        self.dicomInfoList.move(-30, 0)
+        # self.dicomScene.addWidget(self.dicomInfoList)
+
+        # self._scene.addWidget(self.dicomScene)
+        # self.dicomInfoList.itemAt(300, 300)
+        # print("grids = ", initialWidget.grids)
+        # print("width = ", self.width(), self.height())
+        # print("fnt_size = ", float(fnt_size))
         self.number_of_instance = len(initialWidget.series_2_dicoms[initialWidget.pic_ith][key_study][key_series])
         self.instance_of_series = 0
         pixmap = self.ndarray2QPixmap(self.instance_of_series)
@@ -1294,6 +1333,31 @@ class MyCustomWidgetPtid(QtWidgets.QWidget): #thumbnail list第一格放patient 
         self.row.setContentsMargins(0, 0, 0, 0)
         self.row.addWidget(self.label_1)
         self.setLayout(self.row)
+
+class MyCustomWidgetdicomInfo(QtWidgets.QWidget): # 
+    def __init__(self, t1, parent=None):
+        super(MyCustomWidgetdicomInfo, self).__init__(parent)
+        self.row = QtWidgets.QVBoxLayout()
+        self.label_1 = QtWidgets.QLabel(t1)
+        self.label_1.setAlignment(Qt.AlignTop|Qt.AlignLeft)
+        self.label_1.setFont(QtGui.QFont(
+            'Verdana', float(PhotoViewer.picWidth) / 48))
+        print("123", PhotoViewer.picWidth)
+        # self.dicomfont = QtGui.QFont()
+        # self.dicomfont.setFamily("Verdana")
+        # fnt_size = float(PhotoViewer.picWidth) / 48
+        # print("window width = ", PhotoViewer.picWidth)
+        # print("dicomsize = ", float(fnt_size))
+        # self.dicomfont.setPointSizeF(fnt_size)
+        # self.dicomInfoList.setFont(self.dicomfont)
+
+        # self.label_1.setFont(self.dicomfont)
+        self.label_1.setStyleSheet("QLabel { background-color : transparent; color : white;}")
+        self.row.setSpacing(0)
+        self.row.setContentsMargins(0, 0, 0, 0)
+        self.row.addWidget(self.label_1)
+        self.setLayout(self.row) 
+
 class PhotoProcessing(QtWidgets.QWidget):
     def __init__(self, parent: None, _i, _j):
         super().__init__(parent)
@@ -1307,7 +1371,6 @@ class PhotoProcessing(QtWidgets.QWidget):
         self.vbox.addWidget(self.pv)
         self.title.close_button.clicked.connect(self.close)
         # self.vbox.setAlignment(Qt.AlignTop)
-
     def close(self):
         if initialWidget.pic_windows[self.title.t_ith] != 1:
             initialWidget.pic_windows[self.title.t_ith] -= 1
@@ -1315,7 +1378,6 @@ class PhotoProcessing(QtWidgets.QWidget):
             initialWidget.listNoShow[initialWidget.pic_ith].append(self.pv.in_jth)
             print(initialWidget.pic_windows[self.title.t_ith])
             super().close()
-
 
 
 # title bar
@@ -1379,7 +1441,7 @@ class TitleBar(QtWidgets.QDialog):
                             """)
         label = QtWidgets.QLabel(self)
         # label.setText(" ")
-        self.setWindowTitle("patient number")
+        # self.setWindowTitle("patient number")
 
 
         hbox = QtWidgets.QHBoxLayout(self)

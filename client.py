@@ -12,4 +12,4 @@ ds = dcmread(raw)
 arr = ds.pixel_array
 print(arr.shape)
 # plt.imshow(arr, cmap="gray")
-# plt.show()
+plt.show()
