@@ -30,7 +30,6 @@ class initialWidget(QtWidgets.QMainWindow):
     for i in range(1, 6):
         for j in range(2, 5):
             listNoShow[i].append(j)
-    grids = 1
     # dictionary mapping series(str) to Dicoms(.dcm)
     series_2_dicoms = [None] * (5 + 1)
     for i in range(1, 5 + 1):
@@ -162,7 +161,6 @@ class initialWidget(QtWidgets.QMainWindow):
         self.gridLayout_list[initialWidget.pic_ith].removeWidget(self.pic_viewer[initialWidget.pic_ith][tp[3]])
         self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][tp[3]], 0, 2, 1, 1)
     def setPicWindows(self, x):
-        initialWidget.grids = x
         self.now_windows = initialWidget.pic_jth    # 當前按的照片位置
         if initialWidget.pic_windows[initialWidget.pic_ith] > x:
             for k in range(x + 1, initialWidget.pic_windows[initialWidget.pic_ith] + 1):
@@ -914,7 +912,6 @@ class Pen(QtWidgets.QGraphicsPathItem):
     
 class PhotoViewer(QtWidgets.QGraphicsView):
     tool_lock = 'mouse'
-    picWidth = 0
     def __init__(self, _i, _j, parent = None):
         super(PhotoViewer, self).__init__(parent)
         self.in_ith = _i
@@ -943,12 +940,12 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.number_of_instance = 0
         self.rotate_degree = 0
         self.delete = False
+        self.hbox = QtWidgets.QHBoxLayout(self) # 沒加的話照片拉不進去，不知道為啥
+        # self.hbox.setContentsMargins(0, 0, 0, 0)
+        # self.hbox.setSpacing(0)
+        self.dicomList = QListWidget(self)
+        self.dicomList.setStyleSheet("color:#fff; background-color:transparent;")
 
-        self.dicomInfoList =  QtWidgets.QListWidget()
-        self.dicomInfoList.setStyleSheet("color:#fff; background-color:transparent;")
-        self.dicomfont = QtGui.QFont()
-        self.dicomfont.setFamily("Verdana")
-        
     def resetWindow(self, WL, WW):
         if (WL == 0 and WW == 0):
             WL = self.ds_copy[self.instance_of_series].window_level
@@ -960,7 +957,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         pixmap = QtGui.QPixmap(qimage)
         pixmap = pixmap.scaled(self.width(), self.height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
         self.setPhoto(pixmap)
-        print()
+
     def setNewScene(self):
         self._scene = QtWidgets.QGraphicsScene(self)
         self._empty = True
@@ -1060,6 +1057,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 # print(self.instance_of_series)
                 pixmap = self.ndarray2QPixmap(self.instance_of_series)
                 self.setPhoto(pixmap)
+
     # 控制item能否移動
     def Movable(self, enble):
         for item in self._scene.items():
@@ -1249,34 +1247,12 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 key_series = ix.data(Qt.DisplayRole)
         self.ds_copy = initialWidget.series_2_dicoms[initialWidget.pic_ith][key_study][key_series]
         
-        PhotoViewer.picWidth = self.width()
-        fnt_size = float(self.width()**2) / 2304
-        print("width = ", self.width(), "size = ", fnt_size)
-        # fnt_size = float(40)
 
-        self.dicomInfoList.clear()
         sd = initialWidget.series_2_dicoms[initialWidget.pic_ith][key_study][key_series][0].study_date
         at = initialWidget.series_2_dicoms[initialWidget.pic_ith][key_study][key_series][0].acquisition_time
-        # self.dicomInfoList.addItem(sd)
-        # self.dicomInfoList.addItem(at)
-        sdItem = QtWidgets.QListWidgetItem(self.dicomInfoList)
-        self.dicomInfoList.addItem(sdItem)
-        sd = MyCustomWidgetdicomInfo(sd)
-        self.dicomInfoList.setItemWidget(sdItem, sd)
+        self.dicomList.clear()
+        self.dicomList.addItem(sd)
 
-
-        self.dicomfont.setPointSizeF(fnt_size)
-        self.dicomInfoList.setFont(self.dicomfont)
-
-        self._scene.addWidget(self.dicomInfoList)
-        self.dicomInfoList.move(-30, 0)
-        # self.dicomScene.addWidget(self.dicomInfoList)
-
-        # self._scene.addWidget(self.dicomScene)
-        # self.dicomInfoList.itemAt(300, 300)
-        # print("grids = ", initialWidget.grids)
-        # print("width = ", self.width(), self.height())
-        # print("fnt_size = ", float(fnt_size))
         self.number_of_instance = len(initialWidget.series_2_dicoms[initialWidget.pic_ith][key_study][key_series])
         self.instance_of_series = 0
         pixmap = self.ndarray2QPixmap(self.instance_of_series)
@@ -1334,30 +1310,6 @@ class MyCustomWidgetPtid(QtWidgets.QWidget): #thumbnail list第一格放patient 
         self.row.addWidget(self.label_1)
         self.setLayout(self.row)
 
-class MyCustomWidgetdicomInfo(QtWidgets.QWidget): # 
-    def __init__(self, t1, parent=None):
-        super(MyCustomWidgetdicomInfo, self).__init__(parent)
-        self.row = QtWidgets.QVBoxLayout()
-        self.label_1 = QtWidgets.QLabel(t1)
-        self.label_1.setAlignment(Qt.AlignTop|Qt.AlignLeft)
-        self.label_1.setFont(QtGui.QFont(
-            'Verdana', float(PhotoViewer.picWidth) / 48))
-        print("123", PhotoViewer.picWidth)
-        # self.dicomfont = QtGui.QFont()
-        # self.dicomfont.setFamily("Verdana")
-        # fnt_size = float(PhotoViewer.picWidth) / 48
-        # print("window width = ", PhotoViewer.picWidth)
-        # print("dicomsize = ", float(fnt_size))
-        # self.dicomfont.setPointSizeF(fnt_size)
-        # self.dicomInfoList.setFont(self.dicomfont)
-
-        # self.label_1.setFont(self.dicomfont)
-        self.label_1.setStyleSheet("QLabel { background-color : transparent; color : white;}")
-        self.row.setSpacing(0)
-        self.row.setContentsMargins(0, 0, 0, 0)
-        self.row.addWidget(self.label_1)
-        self.setLayout(self.row) 
-
 class PhotoProcessing(QtWidgets.QWidget):
     def __init__(self, parent: None, _i, _j):
         super().__init__(parent)
@@ -1370,7 +1322,6 @@ class PhotoProcessing(QtWidgets.QWidget):
         self.vbox.addWidget(self.title)
         self.vbox.addWidget(self.pv)
         self.title.close_button.clicked.connect(self.close)
-        # self.vbox.setAlignment(Qt.AlignTop)
     def close(self):
         if initialWidget.pic_windows[self.title.t_ith] != 1:
             initialWidget.pic_windows[self.title.t_ith] -= 1
