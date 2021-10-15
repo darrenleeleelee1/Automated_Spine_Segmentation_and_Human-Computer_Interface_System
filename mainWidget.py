@@ -699,15 +699,11 @@ class initialWidget(QtWidgets.QMainWindow):
         global WINDOW_SIZE
         win_status = WINDOW_SIZE
         if win_status == 0:
-            self.pic_1_1_pos_x = 700
-            self.pic_1_1_pos_y = 15
             WINDOW_SIZE = 1
             self.showMaximized()
             self.ui.restore_button.setIcon(QtGui.QIcon(u":/icons/icons/window-restore.png"))  # Show minized icon
         else:
             WINDOW_SIZE = 0
-            self.pic_1_1_pos_x = 350
-            self.pic_1_1_pos_y = 15
             self.showNormal()
             self.ui.restore_button.setIcon(QtGui.QIcon(u":/icons/icons/window-maximize.png"))
 
@@ -773,6 +769,7 @@ class customDicom():
         self.modality = ds[0x0008, 0x0060].value if (0x0008, 0x0060) in ds else None
         self.series_data_time_stamp = ds[0x0009, 0x10e9].value if (0x0009, 0x10e9) in ds else None
         self.acquisition_time = ds[0x0008, 0x0032].value if (0x0008, 0x0032) in ds else "300000"
+
 class QGraphicsLabel(QtWidgets.QGraphicsTextItem):
     def __init__(self, text):
         super().__init__(text)
@@ -943,8 +940,12 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.hbox = QtWidgets.QHBoxLayout(self) # 沒加的話照片拉不進去，不知道為啥
         # self.hbox.setContentsMargins(0, 0, 0, 0)
         # self.hbox.setSpacing(0)
-        self.dicomList = QListWidget(self)
-        self.dicomList.setStyleSheet("color:#fff; background-color:transparent;")
+        self.dicomListLT = QListWidget(self)
+        self.dicomListLT.setStyleSheet("color:#fff; background-color:transparent;")
+        self.dicomListRT = QListWidget(self)
+        self.dicomListRT.setStyleSheet("color:#fff; background-color:transparent;")
+        self.dicomListRT.move(self.width() - 150, 0)
+
 
     def resetWindow(self, WL, WW):
         if (WL == 0 and WW == 0):
@@ -1054,10 +1055,26 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             if self.number_of_instance > 1:
                 self.instance_of_series += 1
                 self.instance_of_series %= self.number_of_instance
-                # print(self.instance_of_series)
+                print(self.instance_of_series) 
                 pixmap = self.ndarray2QPixmap(self.instance_of_series)
                 self.setPhoto(pixmap)
 
+                self.dicomListLT.clear()
+                self.dicomListRT.clear()
+
+                sd = self.ds_copy[self.instance_of_series].study_date
+                at = self.ds_copy[self.instance_of_series].acquisition_time
+                sn = self.ds_copy[self.instance_of_series].series_number
+                
+
+                self.dicomListLT.addItem(sd)
+                self.dicomListRT.addItem(at)
+                self.dicomListLT.addItem(str(self.instance_of_series))
+                self.dicomListLT.addItem(str(sn))
+
+                # self.dicomListLT.addItem(sn)
+                
+                
     # 控制item能否移動
     def Movable(self, enble):
         for item in self._scene.items():
@@ -1246,17 +1263,19 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 key_study = ix.data(Qt.UserRole)
                 key_series = ix.data(Qt.DisplayRole)
         self.ds_copy = initialWidget.series_2_dicoms[initialWidget.pic_ith][key_study][key_series]
-        
-
+    
         sd = initialWidget.series_2_dicoms[initialWidget.pic_ith][key_study][key_series][0].study_date
         at = initialWidget.series_2_dicoms[initialWidget.pic_ith][key_study][key_series][0].acquisition_time
-        self.dicomList.clear()
-        self.dicomList.addItem(sd)
+        self.dicomListLT.clear()
+        self.dicomListRT.clear()
+        self.dicomListLT.addItem(sd)
+        self.dicomListRT.addItem(at)
 
         self.number_of_instance = len(initialWidget.series_2_dicoms[initialWidget.pic_ith][key_study][key_series])
         self.instance_of_series = 0
         pixmap = self.ndarray2QPixmap(self.instance_of_series)
         self.setPhoto(pixmap)
+        self.dicomListLT.setGeometry(0, 0, 150, 600)
         """
         mimeReader = event.mimeData().data('application/x-qabstractitemmodeldatalist')
         data_items = self.decode_data(mimeReader)
