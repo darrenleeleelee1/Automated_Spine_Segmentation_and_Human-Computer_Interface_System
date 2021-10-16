@@ -937,14 +937,19 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.number_of_instance = 0
         self.rotate_degree = 0
         self.delete = False
-        self.hbox = QtWidgets.QHBoxLayout(self) # 沒加的話照片拉不進去，不知道為啥
+        # self.hbox = QtWidgets.QHBoxLayout(self) # 沒加的話照片拉不進去，不知道為啥
         # self.hbox.setContentsMargins(0, 0, 0, 0)
         # self.hbox.setSpacing(0)
+        self.hbox = QtWidgets.QHBoxLayout(self)
+
+        
         self.dicomListLT = QListWidget(self)
         self.dicomListLT.setStyleSheet("color:#fff; background-color:transparent;")
         self.dicomListRT = QListWidget(self)
         self.dicomListRT.setStyleSheet("color:#fff; background-color:transparent;")
-        self.dicomListRT.move(self.width() - 150, 0)
+        self.dicomListLT.setGeometry(0, 0, 0, 0)
+        self.dicomListRT.setGeometry(0, 0, 0, 0)
+        
 
 
     def resetWindow(self, WL, WW):
@@ -1065,14 +1070,12 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 sd = self.ds_copy[self.instance_of_series].study_date
                 at = self.ds_copy[self.instance_of_series].acquisition_time
                 sn = self.ds_copy[self.instance_of_series].series_number
-                
 
                 self.dicomListLT.addItem(sd)
                 self.dicomListRT.addItem(at)
-                self.dicomListLT.addItem(str(self.instance_of_series))
+                self.dicomListLT.addItem(str(self.instance_of_series + 1))
                 self.dicomListLT.addItem(str(sn))
 
-                # self.dicomListLT.addItem(sn)
                 
                 
     # 控制item能否移動
@@ -1263,19 +1266,30 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 key_study = ix.data(Qt.UserRole)
                 key_series = ix.data(Qt.DisplayRole)
         self.ds_copy = initialWidget.series_2_dicoms[initialWidget.pic_ith][key_study][key_series]
-    
+        self.hbox.addWidget(self.dicomListLT)
+        # self.hbox.addWidget(self)
+        self.hbox.addWidget(self.dicomListRT)
         sd = initialWidget.series_2_dicoms[initialWidget.pic_ith][key_study][key_series][0].study_date
         at = initialWidget.series_2_dicoms[initialWidget.pic_ith][key_study][key_series][0].acquisition_time
+        sn = initialWidget.series_2_dicoms[initialWidget.pic_ith][key_study][key_series][0].series_number
+        item = QListWidgetItem(at)
+        item.setTextAlignment(Qt.AlignRight)
+
         self.dicomListLT.clear()
         self.dicomListRT.clear()
         self.dicomListLT.addItem(sd)
-        self.dicomListRT.addItem(at)
+        self.dicomListRT.addItem(item)
+        self.dicomListLT.addItem(str(self.instance_of_series + 1))
+        self.dicomListLT.addItem(str(sn))
 
         self.number_of_instance = len(initialWidget.series_2_dicoms[initialWidget.pic_ith][key_study][key_series])
         self.instance_of_series = 0
         pixmap = self.ndarray2QPixmap(self.instance_of_series)
         self.setPhoto(pixmap)
-        self.dicomListLT.setGeometry(0, 0, 150, 600)
+        self.dicomListLT.setGeometry(0, 0, 50, 20)
+        self.dicomListRT.setGeometry(0, 0, 50, 20)
+        print(self.dicomListLT.size())
+        print("viewer", self.size())
         """
         mimeReader = event.mimeData().data('application/x-qabstractitemmodeldatalist')
         data_items = self.decode_data(mimeReader)
