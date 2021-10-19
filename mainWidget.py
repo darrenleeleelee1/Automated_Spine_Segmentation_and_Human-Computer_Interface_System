@@ -1091,6 +1091,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         itemcd = QListWidgetItem(cd)
         itemcd.setTextAlignment(Qt.AlignRight)
         ct = self.ds_copy[self.instance_of_series].content_time  # 拍攝照片時間
+        ct = ct[:2]+":"+ct[2:4]+":"+ct[4:]
         itemct = QListWidgetItem(ct)
         itemct.setTextAlignment(Qt.AlignRight)
         sd = self.ds_copy[self.instance_of_series].series_description
@@ -1313,6 +1314,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         itemcd = QListWidgetItem(cd)
         itemcd.setTextAlignment(Qt.AlignRight)
         ct = self.ds_copy[self.instance_of_series].content_time  # 拍攝照片時間
+        ct = ct[:2]+":"+ct[2:4]+":"+ct[4:]
         itemct = QListWidgetItem(ct)
         itemct.setTextAlignment(Qt.AlignRight)
         sd = self.ds_copy[self.instance_of_series].series_description
