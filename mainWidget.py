@@ -949,21 +949,62 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.number_of_instance = 0
         self.rotate_degree = 0
         self.delete = False
-        self.hbox = QtWidgets.QHBoxLayout(self)
-
+        # self.hbox = QtWidgets.QHBoxLayout(self)
+        self.dicomGrid = QtWidgets.QGridLayout(self)
+        self.dicomGrid.setContentsMargins(10, 0, 10, 0) # L,T,R,B
         self.dicomListRT = QListWidget(self)
         self.dicomListRT.setStyleSheet("color:#fff; background-color:transparent;")
         self.dicomListRT.setContentsMargins(0, 0, 0, 0)
+        self.dicomListRT.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.dicomListLT = QListWidget(self)
         self.dicomListLT.setStyleSheet("color:#fff; background-color:transparent;")
         self.dicomListLT.setContentsMargins(0, 0, 0, 0)
-        self.hbox.addWidget(self.dicomListLT)
-        self.hbox.addStretch(1)
-        self.hbox.addWidget(self.dicomListRT)
-        self.hbox.setStretch(0, 1.5)
-        self.hbox.setStretch(1, 4)
-        self.hbox.setStretch(2, 1.95)
+        self.dicomListLT.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.dicomListLB = QListWidget(self)
+        self.dicomListLB.setStyleSheet("color:#fff; background-color:transparent;")
+        self.dicomListLB.setContentsMargins(0, 0, 0, 0)
+        self.dicomListLB.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.dicomListRB = QListWidget(self)
+        self.dicomListRB.setStyleSheet("color:#fff; background-color:transparent;")
+        self.dicomListRB.setContentsMargins(0, 0, 0, 0)
+        self.dicomListRB.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.dicomListRB.setMaximumSize(100, 50)
+        font = QtGui.QFont()
+        font.setFamily("Verdana")
+        font.setPointSize(10)
+        self.dicomListRT.setFont(font)
+        self.dicomListLT.setFont(font)
+        self.dicomListRB.setFont(font)
+        self.dicomListLB.setFont(font)
+        # self.hbox.addWidget(self.dicomListLT)
+        # self.hbox.addStretch(1)
+        # self.hbox.addWidget(self.dicomListRT)
+        # self.hbox.setStretch(0, 1.5)
+        # self.hbox.setStretch(1, 4)
+        # self.hbox.setStretch(2, 1.95)
         # self.hbox.setSpacing(self.width()-200)
+
+        self.dicomGrid.addWidget(self.dicomListLT, 0, 0)
+        space = QtWidgets.QSpacerItem(1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        # space = QtWidgets.QSpacerItem(10, 10)
+        self.dicomGrid.addItem(space, 0, 1)
+        # self.dicomGrid.setColumnStretch(1, 0)
+        self.dicomGrid.addWidget(self.dicomListRT, 0, 2)
+        self.dicomGrid.addItem(space, 1, 0)
+        self.dicomGrid.addItem(space, 1, 1)
+        self.dicomGrid.addItem(space, 1, 2)
+        self.dicomGrid.addWidget(self.dicomListLB, 2, 0)
+        self.dicomGrid.addItem(space, 2, 1)
+        self.dicomGrid.addWidget(self.dicomListRB, 2, 2)
+        self.dicomGrid.setRowStretch(0, 1)
+        self.dicomGrid.setRowStretch(1, 5)
+        self.dicomGrid.setRowStretch(2, 1)
+        self.dicomGrid.setColumnStretch(0, 1)
+        self.dicomGrid.setColumnStretch(1, 3)
+        self.dicomGrid.setColumnStretch(2, 1)
+
+
+
 
 
     def resetWindow(self, WL, WW):
@@ -1101,8 +1142,8 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         ww = self.ds_copy[self.instance_of_series].window_width
 
         self.dicomListLT.addItem(("se: "+str(se)))
-        self.dicomListLT.addItem(("TR: "+str(tr)))
-        self.dicomListLT.addItem(("TE: "+str(te)))
+        self.dicomListLB.addItem(("TR: "+str(tr)))
+        self.dicomListLB.addItem(("TE: "+str(te)))
         self.dicomListRT.addItem(itemcd)
         self.dicomListRT.addItem(itemct)
         self.dicomListRT.addItem(itemsd)
@@ -1324,10 +1365,10 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         ww = self.ds_copy[self.instance_of_series].window_width
 
         self.dicomListLT.addItem(("se: "+str(se)))
-        self.dicomListLT.addItem(("TR: "+str(tr)))
-        self.dicomListLT.addItem(("TE: "+str(te)))
-        self.dicomListRT.addItem(itemcd)
-        self.dicomListRT.addItem(itemct)
+        self.dicomListLB.addItem(("TR: "+str(tr)))
+        self.dicomListLB.addItem(("TE: "+str(te)))
+        self.dicomListRB.addItem(itemcd)
+        self.dicomListRB.addItem(itemct)
         self.dicomListRT.addItem(itemsd)
 
         """
