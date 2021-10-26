@@ -964,6 +964,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.dicomListLB.setStyleSheet("color:#fff; background-color:transparent;")
         self.dicomListLB.setContentsMargins(0, 0, 0, 0)
         self.dicomListLB.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.dicomListLB.setMaximumSize(100, 50)
         self.dicomListRB = QListWidget(self)
         self.dicomListRB.setStyleSheet("color:#fff; background-color:transparent;")
         self.dicomListRB.setContentsMargins(0, 0, 0, 0)
@@ -983,19 +984,17 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         # self.hbox.setStretch(1, 4)
         # self.hbox.setStretch(2, 1.95)
         # self.hbox.setSpacing(self.width()-200)
-
-        self.dicomGrid.addWidget(self.dicomListLT, 0, 0)
         space = QtWidgets.QSpacerItem(1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        # space = QtWidgets.QSpacerItem(10, 10)
+        self.dicomGrid.addWidget(self.dicomListLT, 0, 0)
         self.dicomGrid.addItem(space, 0, 1)
-        # self.dicomGrid.setColumnStretch(1, 0)
         self.dicomGrid.addWidget(self.dicomListRT, 0, 2)
-        self.dicomGrid.addItem(space, 1, 0)
-        self.dicomGrid.addItem(space, 1, 1)
-        self.dicomGrid.addItem(space, 1, 2)
+        # self.dicomGrid.addItem(space, 1, 0)
+        # self.dicomGrid.addItem(space, 1, 1)
+        # self.dicomGrid.addItem(space, 1, 2)
         self.dicomGrid.addWidget(self.dicomListLB, 2, 0)
-        self.dicomGrid.addItem(space, 2, 1)
+        # self.dicomGrid.addItem(space, 2, 1)
         self.dicomGrid.addWidget(self.dicomListRB, 2, 2)
+        print("888")
         self.dicomGrid.setRowStretch(0, 1)
         self.dicomGrid.setRowStretch(1, 5)
         self.dicomGrid.setRowStretch(2, 1)
@@ -1351,11 +1350,13 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         te = self.ds_copy[self.instance_of_series].te
         # 要靠右邊，需寫成QListWidgetItem
         cd = self.ds_copy[self.instance_of_series].content_date  # 拍攝照片日期
-        cd = cd[:4] + "/" + cd[4:6] + "/" + cd[6:]
+        if cd: # 有人的cd是 None
+            cd = cd[:4] + "/" + cd[4:6] + "/" + cd[6:]
         itemcd = QListWidgetItem(cd)
         itemcd.setTextAlignment(Qt.AlignRight)
         ct = self.ds_copy[self.instance_of_series].content_time  # 拍攝照片時間
-        ct = ct[:2]+":"+ct[2:4]+":"+ct[4:]
+        if ct: # 有人的ct是 None
+            ct = ct[:2]+":"+ct[2:4]+":"+ct[4:]
         itemct = QListWidgetItem(ct)
         itemct.setTextAlignment(Qt.AlignRight)
         sd = self.ds_copy[self.instance_of_series].series_description
