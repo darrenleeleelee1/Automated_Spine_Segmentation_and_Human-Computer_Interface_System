@@ -986,7 +986,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         # self.hbox.setSpacing(self.width()-200)
         space = QtWidgets.QSpacerItem(1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.dicomGrid.addWidget(self.dicomListLT, 0, 0)
-        self.dicomGrid.addItem(space, 0, 1)
+        # self.dicomGrid.addItem(space, 0, 1)
         self.dicomGrid.addWidget(self.dicomListRT, 0, 2)
         # self.dicomGrid.addItem(space, 1, 0)
         # self.dicomGrid.addItem(space, 1, 1)
@@ -1118,37 +1118,37 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 pixmap = self.ndarray2QPixmap(self.instance_of_series)
                 self.setPhoto(pixmap)
                 self.dicomListLT.clear()
-        self.dicomListRT.clear()
-        self.dicomListLT.addItem(
-            (str(self.instance_of_series + 1)+"/"+str(self.number_of_instance)))
+                self.dicomListRT.clear()
+                self.dicomListRB.clear()
+                self.dicomListLB.clear()
+                self.dicomListLT.addItem((str(self.instance_of_series + 1)+"/"+str(self.number_of_instance)))
 
-        se = self.ds_copy[self.instance_of_series].series_number
-        tr = self.ds_copy[self.instance_of_series].tr
-        te = self.ds_copy[self.instance_of_series].te
-        # 要靠右邊，需寫成QListWidgetItem
-        cd = self.ds_copy[self.instance_of_series].content_date  # 拍攝照片日期
-        cd = cd[:4] + "/" + cd[4:6] + "/" + cd[6:]
-        itemcd = QListWidgetItem(cd)
-        itemcd.setTextAlignment(Qt.AlignRight)
-        ct = self.ds_copy[self.instance_of_series].content_time  # 拍攝照片時間
-        ct = ct[:2]+":"+ct[2:4]+":"+ct[4:]
-        itemct = QListWidgetItem(ct)
-        itemct.setTextAlignment(Qt.AlignRight)
-        sd = self.ds_copy[self.instance_of_series].series_description
-        itemsd = QListWidgetItem(sd)
-        itemsd.setTextAlignment(Qt.AlignRight)
-        wc = self.ds_copy[self.instance_of_series].window_center
-        ww = self.ds_copy[self.instance_of_series].window_width
+                se = self.ds_copy[self.instance_of_series].series_number
+                tr = self.ds_copy[self.instance_of_series].tr
+                te = self.ds_copy[self.instance_of_series].te
+                # 要靠右邊，需寫成QListWidgetItem
+                cd = self.ds_copy[self.instance_of_series].content_date  # 拍攝照片日期
+                cd = cd[:4] + "/" + cd[4:6] + "/" + cd[6:]
+                itemcd = QListWidgetItem(cd)
+                itemcd.setTextAlignment(Qt.AlignRight)
+                ct = self.ds_copy[self.instance_of_series].content_time  # 拍攝照片時間
+                ct = ct[:2]+":"+ct[2:4]+":"+ct[4:]
+                itemct = QListWidgetItem(ct)
+                itemct.setTextAlignment(Qt.AlignRight)
+                sd = self.ds_copy[self.instance_of_series].series_description
+                itemsd = QListWidgetItem(sd)
+                itemsd.setTextAlignment(Qt.AlignRight)
+                wc = self.ds_copy[self.instance_of_series].window_center
+                ww = self.ds_copy[self.instance_of_series].window_width
 
-        self.dicomListLT.addItem(("se: "+str(se)))
-        self.dicomListLB.addItem(("TR: "+str(tr)))
-        self.dicomListLB.addItem(("TE: "+str(te)))
-        self.dicomListRT.addItem(itemcd)
-        self.dicomListRT.addItem(itemct)
-        self.dicomListRT.addItem(itemsd)
+                self.dicomListLT.addItem(("se: "+str(se)))
+                self.dicomListLB.addItem(("TR: "+str(tr)))
+                self.dicomListLB.addItem(("TE: "+str(te)))
+                self.dicomListRB.addItem(itemcd)
+                self.dicomListRB.addItem(itemct)
+                self.dicomListRT.addItem(itemsd)
 
-                
-                
+
     # 控制item能否移動
     def Movable(self, enble):
         for item in self._scene.items():
@@ -1343,6 +1343,8 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.setPhoto(pixmap)
         self.dicomListLT.clear()
         self.dicomListRT.clear()
+        self.dicomListRB.clear()
+        self.dicomListLB.clear()
         self.dicomListLT.addItem((str(self.instance_of_series + 1)+"/"+str(self.number_of_instance)))
         
         se = self.ds_copy[self.instance_of_series].series_number
@@ -1371,6 +1373,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.dicomListRB.addItem(itemcd)
         self.dicomListRB.addItem(itemct)
         self.dicomListRT.addItem(itemsd)
+        print(ct)
 
         """
         mimeReader = event.mimeData().data('application/x-qabstractitemmodeldatalist')
