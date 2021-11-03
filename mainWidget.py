@@ -7,6 +7,7 @@ from PyQt5.QtCore import QCoreApplication, Qt
 from PyQt5.QtGui import QStandardItem, QStandardItemModel, QTransform, QPainter
 from generatedUiFile.Spine_BrokenUi import Ui_MainWindow
 from generatedUiFile.customUi import Ui_Dialog
+from generatedUiFile.metaData import dicom_Dialog
 import os, requests
 from PyQt5.QtWidgets import *
 from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QInputDialog, QLineEdit, QDialog, QListWidgetItem
@@ -121,6 +122,7 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.pushButton_move.clicked.connect(self.pushButtonMoveClicked) # 移動
         self.ui.patient_list.itemClicked.connect(self.patient_listItemClicked)
         self.ui.recently_list.itemClicked.connect(self.recently_listItemClicked)
+        self.ui.pushButton_meta_data.clicked.connect(self.pushButtonMetaData) # 顯示 metaData
 
 
 #照片Show Pic----------------------------------------------------------------------
@@ -242,6 +244,28 @@ class initialWidget(QtWidgets.QMainWindow):
     # 清除
     def pushButtonEraseClicked(self):
         self.setToolLock('clear')
+    # 顯示 meta data
+    def pushButtonMetaData(self):
+        self.meta_data = metaDataDialog()
+        self.meta_data.show()
+        self.meta_data.meta.meta_label.setText("888")
+
+        def show_dataset(ds, indent):
+            for elem in ds:
+                if elem.VR == "SQ":
+                    indent += 4 * " "
+                    for item in elem:
+                        show_dataset(item, indent)
+                        print(indent)
+                    indent = indent[4:]
+                # print(indent + str(elem))
+        whichYouWantIsHere = self.pic_viewer[self.pic_ith][self.pic_jth].pv.ds_copy[self.pic_viewer[self.pic_ith][self.pic_jth].pv.instance_of_series].ds_copy
+        show_dataset(whichYouWantIsHere, indent="")
+        # print(whichYouWantIsHere)
+        self.meta_data.meta.meta_label.setText(str(whichYouWantIsHere))
+
+
+
 
     
     # 加照片
@@ -295,6 +319,7 @@ class initialWidget(QtWidgets.QMainWindow):
         elif PhotoViewer.tool_lock == 'clear':
             self.pic_viewer[initialWidget.pic_ith][initialWidget.pic_jth].pv.clear()
             PhotoViewer.tool_lock = 'mouse'
+
 
 
     # 對比度的選單設定
@@ -751,10 +776,12 @@ class customDicom():
         self.window_width = None
         self.tr = None
         self.te = None
+        self.ds_copy = None
         self.scropInfo(self.dcmreader(self.dcm_path))
     def dcmreader(self, _dcm_path):
         ds = dcmread(_dcm_path)
-        # print(ds)
+        self.ds_copy = ds
+        # show_dataset(ds, indent="")
         return ds
 
     def scropInfo(self, ds):
@@ -781,6 +808,13 @@ class customDicom():
         self.window_width = ds[0x0028, 0x1051].value if (0x0028, 0x1051) in ds else None
         self.tr = ds[0x0018, 0x0080].value if (0x0018, 0x0080) in ds else None
         self.te = ds[0x0018, 0x81].value if (0x0018, 0x81) in ds else None
+
+
+class metaDataDialog(QDialog):
+  def __init__(self):
+    super().__init__()
+    self.meta = dicom_Dialog()
+    self.meta.setupUi(self)
 
 class QGraphicsLabel(QtWidgets.QGraphicsTextItem):
     def __init__(self, text):
@@ -950,6 +984,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.rotate_degree = 0
         self.delete = False
         # self.hbox = QtWidgets.QHBoxLayout(self)
+        self.dicomShowed = True # 控制是否顯示 dicom 資訊
         self.dicomGrid = QtWidgets.QGridLayout(self)
         self.dicomGrid.setContentsMargins(10, 0, 10, 0) # L,T,R,B
         self.dicomListRT = QListWidget(self)
@@ -964,15 +999,15 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.dicomListLB.setStyleSheet("color:#fff; background-color:transparent;")
         self.dicomListLB.setContentsMargins(0, 0, 0, 0)
         self.dicomListLB.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.dicomListLB.setMaximumSize(100, 50)
+        # self.dicomListLB.setMaximumSize(100, 50)
         self.dicomListRB = QListWidget(self)
         self.dicomListRB.setStyleSheet("color:#fff; background-color:transparent;")
         self.dicomListRB.setContentsMargins(0, 0, 0, 0)
         self.dicomListRB.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.dicomListRB.setMaximumSize(100, 50)
+        self.dicomListRB.setMaximumSize(500, 50)
         font = QtGui.QFont()
         font.setFamily("Verdana")
-        font.setPointSize(10)
+        font.setPointSize(12)
         self.dicomListRT.setFont(font)
         self.dicomListLT.setFont(font)
         self.dicomListRB.setFont(font)
@@ -992,18 +1027,14 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         # self.dicomGrid.addItem(space, 1, 1)
         # self.dicomGrid.addItem(space, 1, 2)
         self.dicomGrid.addWidget(self.dicomListLB, 2, 0)
-        # self.dicomGrid.addItem(space, 2, 1)
+        self.dicomGrid.addItem(space, 2, 1)
         self.dicomGrid.addWidget(self.dicomListRB, 2, 2)
-        print("888")
         self.dicomGrid.setRowStretch(0, 1)
         self.dicomGrid.setRowStretch(1, 5)
         self.dicomGrid.setRowStretch(2, 1)
         self.dicomGrid.setColumnStretch(0, 1)
         self.dicomGrid.setColumnStretch(1, 3)
         self.dicomGrid.setColumnStretch(2, 1)
-
-
-
 
 
     def resetWindow(self, WL, WW):
@@ -1147,6 +1178,8 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 self.dicomListRB.addItem(itemcd)
                 self.dicomListRB.addItem(itemct)
                 self.dicomListRT.addItem(itemsd)
+                self.dicomListLB.addItem(("WL: "+str(wc)))
+                self.dicomListLB.addItem(("WW: "+str(ww)))
 
 
     # 控制item能否移動
@@ -1373,7 +1406,8 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.dicomListRB.addItem(itemcd)
         self.dicomListRB.addItem(itemct)
         self.dicomListRT.addItem(itemsd)
-        print(ct)
+        self.dicomListLB.addItem(("WL: "+str(wc)))
+        self.dicomListLB.addItem(("WW: "+str(ww)))
 
         """
         mimeReader = event.mimeData().data('application/x-qabstractitemmodeldatalist')
@@ -1440,6 +1474,7 @@ class PhotoProcessing(QtWidgets.QWidget):
         self.vbox.addWidget(self.title)
         self.vbox.addWidget(self.pv)
         self.title.close_button.clicked.connect(self.close)
+        self.title.button_hide_dicom.clicked.connect(self.hideOrShowDicom)
     def close(self):
         if initialWidget.pic_windows[self.title.t_ith] != 1:
             initialWidget.pic_windows[self.title.t_ith] -= 1
@@ -1447,6 +1482,15 @@ class PhotoProcessing(QtWidgets.QWidget):
             initialWidget.listNoShow[initialWidget.pic_ith].append(self.pv.in_jth)
             print(initialWidget.pic_windows[self.title.t_ith])
             super().close()
+    def hideOrShowDicom(self): # 是否顯示 dicom 資訊
+        self.pv.dicomShowed = not(self.pv.dicomShowed)
+        self.pv.dicomListRT.setVisible(self.pv.dicomShowed)
+        self.pv.dicomListLT.setVisible(self.pv.dicomShowed)
+        self.pv.dicomListRB.setVisible(self.pv.dicomShowed)
+        self.pv.dicomListLB.setVisible(self.pv.dicomShowed)
+        if self.pv.dicomShowed: # 換 icon
+            self.title.button_hide_dicom.setIcon(QtGui.QIcon('generatedUiFile/res/icons/view.png'))
+        else: self.title.button_hide_dicom.setIcon(QtGui.QIcon('generatedUiFile/res/icons/hide.png'))
 
 
 # title bar
@@ -1485,6 +1529,10 @@ class TitleBar(QtWidgets.QDialog):
         self.setBackgroundRole(QtGui.QPalette.Highlight)
         self.setStyleSheet(css)
 
+        self.button_hide_dicom = QtWidgets.QToolButton(self)
+        self.button_hide_dicom.setIcon(QtGui.QIcon('generatedUiFile/res/icons/view.png'))
+        self.button_hide_dicom.setIconSize(QtCore.QSize(25, 25))
+
         self.button_frame_spine = QtWidgets.QToolButton(self)
         self.button_frame_spine.setIcon(QtGui.QIcon('generatedUiFile/res/icons/img_frame_spine.png'))
         self.button_frame_spine.setIconSize(QtCore.QSize(25, 25))
@@ -1515,6 +1563,7 @@ class TitleBar(QtWidgets.QDialog):
 
         hbox = QtWidgets.QHBoxLayout(self)
         hbox.addWidget(label)
+        hbox.addWidget(self.button_hide_dicom)
         hbox.addWidget(self.button_frame_spine)
         hbox.addWidget(self.button_heat_map)
         hbox.addWidget(self.button_scoliosis_angle)
@@ -1545,11 +1594,6 @@ class TitleBar(QtWidgets.QDialog):
     def scoliosis_angle(self):
         print("scoliosis_angle", self.t_ith, self.t_jth)
 
-    # def close(self):
-    #     # print("close", self.t_ith, self.t_jth)
-    #     super(TitleBar, self).close()
-        # initialWidget.closePicWindowX(self.t_ith, self.t_jth)
-        # initialWidget.gridLayout_list[self.t_ith].removeWidget(initialWidget.pic_viewer[self.t_ith][self.t_jth])
 
 
 
