@@ -509,7 +509,6 @@ class initialWidget(QtWidgets.QMainWindow):
             initialWidget.series_2_dicoms[i][ds.study_date, ds.study_time, ds.study_id][ds.series_description].append(ds)
         for study, series in dict(sorted(initialWidget.series_2_dicoms[i].items())).items():
             first = True
-
             for key, value in dict(sorted(series.items(), key= lambda x: x[1][0].acquisition_time)).items(): # key = series description
                 if first:
                     first = False
@@ -520,22 +519,47 @@ class initialWidget(QtWidgets.QMainWindow):
                     new_item = MyCustomWidget("%s %s" % (date, time), value[0].study_description, "%s: %d series" % (value[0].modality, len(initialWidget.series_2_dicoms[i][study].keys())))
                     item.setTextAlignment(Qt.AlignVCenter)
                     item.setSizeHint(QSize(219, 90))
-                    # item.setBackground(QtGui.QColor('#ffffff') )
                     self.thumbnail_list[i].setItemWidget(item, new_item)
                 ds = initialWidget.series_2_dicoms[i][study][key][0]
                 arr = initialWidget.mappingWindow(ds.pixel_array, ds.window_level, ds.window_width)
                 qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1]*2, QtGui.QImage.Format_Grayscale16).copy()
                 pixmap = QtGui.QPixmap(qimage)
+                pixmap = pixmap.scaled(190, 190, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+
+                pix_wid = pixmap.width()
+                pix_hei = pixmap.height()
+                start_x = int((190 - pix_wid)/2) #pixmap 在黑框中起始x
+                start_y = int((190 - pix_hei)/2) # y
                 item = QtWidgets.QListWidgetItem()
-                item.setSizeHint(QSize(219, 250))
+                item.setSizeHint(QSize(219, 219))
                 item.setText(key)
                 item.setData(Qt.UserRole, study)
-                icon = QtGui.QIcon(pixmap)
+                
+                black_base = QtGui.QPixmap(190, 190)
+                black_base.fill(Qt.black)
+                no_rect = QtGui.QPixmap(25, 20) # num of instance background black rect
+                no_rect.fill(Qt.black)
+
+                qp = QPainter(black_base)
+                pen = QtGui.QPen(Qt.white, 1)
+                qp.setPen(pen)
+                qp.drawPixmap(start_x, start_y, pixmap) #pic 
+                qp.drawPixmap(160, 165, no_rect) #num_of_inst background
+
+                font = QtGui.QFont()
+                font.setFamily("Verdana")
+                font.setPointSize(7)
+                qp.setFont(font)
+                num_of_instance = len(initialWidget.series_2_dicoms[i][study][key])
+                qp.drawText(165, 180, str(num_of_instance))
+                qp.end()
+
+                icon = QtGui.QIcon(black_base)
                 item.setIcon(icon)
                 item.setFont(QtGui.QFont('Verdana', 8))
+
                 self.thumbnail_list[i].addItem(item) 
     
-        
 # search page----------------------------------------------------------------------------------------------------
     # search
     def loadSearchRecord(self):
