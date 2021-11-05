@@ -248,26 +248,24 @@ class initialWidget(QtWidgets.QMainWindow):
     def pushButtonMetaData(self):
         self.meta_data = metaDataDialog()
         self.meta_data.show()
-        self.meta_data.meta.meta_label.setText("888")
-
         def show_dataset(ds, indent):
             for elem in ds:
                 if elem.VR == "SQ":
                     indent += 4 * " "
                     for item in elem:
                         show_dataset(item, indent)
-                        print(indent)
                     indent = indent[4:]
-                # print(indent + str(elem))
-        whichYouWantIsHere = self.pic_viewer[self.pic_ith][self.pic_jth].pv.ds_copy[self.pic_viewer[self.pic_ith][self.pic_jth].pv.instance_of_series].ds_copy
-        show_dataset(whichYouWantIsHere, indent="")
-        # print(whichYouWantIsHere)
-        self.meta_data.meta.meta_label.setText(str(whichYouWantIsHere))
+                # print(str(elem))
+                self.meta_data.meta.dicom_table.setItem(self.ind, 0, QtWidgets.QTableWidgetItem(str(elem.tag)))
+                self.meta_data.meta.dicom_table.setItem(self.ind, 1, QtWidgets.QTableWidgetItem(str(elem.keyword)))
+                self.meta_data.meta.dicom_table.setItem(self.ind, 2, QtWidgets.QTableWidgetItem(elem.VR))
+                self.meta_data.meta.dicom_table.setItem(self.ind, 3, QtWidgets.QTableWidgetItem(elem.repval))
+                self.ind += 1
+        self.ind = 0
+        self.whichYouWantIsHere = self.pic_viewer[self.pic_ith][self.pic_jth].pv.ds_copy[self.pic_viewer[self.pic_ith][self.pic_jth].pv.instance_of_series].ds_copy
+        show_dataset(self.whichYouWantIsHere, indent="")
+        # self.meta_data.meta.meta_label.setText(str(self.whichYouWantIsHere))
 
-
-
-
-    
     # 加照片
     def pushButtonAddPicClicked(self):
         pic_file_path, filetype = QFileDialog.getOpenFileName(self,"選取檔案","/Users/user/Documents/畢專/dicom_data")  #設定副檔名過濾,注意用雙分號間隔
@@ -1015,19 +1013,26 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.dicomListRT.setStyleSheet("color:#fff; background-color:transparent;")
         self.dicomListRT.setContentsMargins(0, 0, 0, 0)
         self.dicomListRT.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.dicomListRT.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.dicomListRT.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.dicomListLT = QListWidget(self)
         self.dicomListLT.setStyleSheet("color:#fff; background-color:transparent;")
         self.dicomListLT.setContentsMargins(0, 0, 0, 0)
         self.dicomListLT.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.dicomListLT.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.dicomListLT.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.dicomListLB = QListWidget(self)
         self.dicomListLB.setStyleSheet("color:#fff; background-color:transparent;")
         self.dicomListLB.setContentsMargins(0, 0, 0, 0)
         self.dicomListLB.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        # self.dicomListLB.setMaximumSize(100, 50)
+        self.dicomListLB.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.dicomListLB.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.dicomListRB = QListWidget(self)
         self.dicomListRB.setStyleSheet("color:#fff; background-color:transparent;")
         self.dicomListRB.setContentsMargins(0, 0, 0, 0)
         self.dicomListRB.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.dicomListRB.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.dicomListRB.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.dicomListRB.setMaximumSize(500, 50)
         font = QtGui.QFont()
         font.setFamily("Verdana")
@@ -1036,13 +1041,6 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.dicomListLT.setFont(font)
         self.dicomListRB.setFont(font)
         self.dicomListLB.setFont(font)
-        # self.hbox.addWidget(self.dicomListLT)
-        # self.hbox.addStretch(1)
-        # self.hbox.addWidget(self.dicomListRT)
-        # self.hbox.setStretch(0, 1.5)
-        # self.hbox.setStretch(1, 4)
-        # self.hbox.setStretch(2, 1.95)
-        # self.hbox.setSpacing(self.width()-200)
         space = QtWidgets.QSpacerItem(1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.dicomGrid.addWidget(self.dicomListLT, 0, 0)
         # self.dicomGrid.addItem(space, 0, 1)

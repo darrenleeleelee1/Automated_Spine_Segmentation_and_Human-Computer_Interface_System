@@ -236,7 +236,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout.addWidget(self.frame_left_menu, 0, QtCore.Qt.AlignLeft)
         self.stackedWidget_right = QtWidgets.QStackedWidget(self.frame_main_body)
         self.stackedWidget_right.setStyleSheet("background-color: #4F4F4F;")
-        self.stackedWidget_right.setLineWidth(0)
+        self.stackedWidget_right.setLineWidth(10)
         self.stackedWidget_right.setObjectName("stackedWidget_right")
         self.recently_viewed_page = QtWidgets.QWidget()
         self.recently_viewed_page.setStyleSheet("QLabel{\n"
