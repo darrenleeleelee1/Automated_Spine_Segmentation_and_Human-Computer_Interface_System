@@ -1420,7 +1420,7 @@ QPushButton{
                  <number>0</number>
                 </property>
                 <item>
-                 <widget class="QPushButton" name="pushButton_record">
+                 <widget class="QPushButton" name="pushButton_meta_data">
                   <property name="minimumSize">
                    <size>
                     <width>50</width>
@@ -1553,32 +1553,6 @@ QPushButton{
                  </widget>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="pushButton_brightness">
-                  <property name="minimumSize">
-                   <size>
-                    <width>50</width>
-                    <height>0</height>
-                   </size>
-                  </property>
-                  <property name="text">
-                   <string/>
-                  </property>
-                  <property name="icon">
-                   <iconset resource="res/icons.qrc">
-                    <normaloff>:/icons/icons/brightness.png</normaloff>:/icons/icons/brightness.png</iconset>
-                  </property>
-                  <property name="iconSize">
-                   <size>
-                    <width>30</width>
-                    <height>30</height>
-                   </size>
-                  </property>
-                  <property name="flat">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item>
                  <widget class="QFrame" name="rotate_frame">
                   <property name="minimumSize">
                    <size>
@@ -1655,6 +1629,32 @@ QPushButton{
                     </widget>
                    </item>
                   </layout>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="pushButton_brightness">
+                  <property name="minimumSize">
+                   <size>
+                    <width>50</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="res/icons.qrc">
+                    <normaloff>:/icons/icons/brightness.png</normaloff>:/icons/icons/brightness.png</iconset>
+                  </property>
+                  <property name="iconSize">
+                   <size>
+                    <width>30</width>
+                    <height>30</height>
+                   </size>
+                  </property>
+                  <property name="flat">
+                   <bool>true</bool>
+                  </property>
                  </widget>
                 </item>
                 <item>
@@ -1814,6 +1814,8 @@ QPushButton{
                  </widget>
                 </item>
                 <item>
+<<<<<<< HEAD
+=======
                  <widget class="QPushButton" name="pushButton_windows">
                   <property name="minimumSize">
                    <size>
@@ -1840,6 +1842,7 @@ QPushButton{
                  </widget>
                 </item>
                 <item>
+>>>>>>> main
                  <spacer name="horizontalSpacer_2">
                   <property name="orientation">
                    <enum>Qt::Horizontal</enum>
