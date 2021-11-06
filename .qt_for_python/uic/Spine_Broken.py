@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'Spine_Broken.ui'
+# Form implementation generated from reading ui file 'c:\Users\user\Desktop\Spine_Broken\generatedUiFile\Spine_Broken.ui'
 #
 # Created by: PyQt5 UI code generator 5.9.2
 #
@@ -758,4 +758,5 @@ class Ui_MainWindow(object):
         item = self.thumbnail_list_4.item(1)
         item.setText(_translate("MainWindow", "67890"))
         self.thumbnail_list_4.setSortingEnabled(__sortingEnabled)
-import generatedUiFile.res.icons_rc
+
+import icons_rc
