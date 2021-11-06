@@ -108,7 +108,7 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.no_list.itemClicked.connect(self.no_listItemClicked)
         self.ui.input_no.setCompleter(completer)  # 搜尋紀錄
         self.linkPage2Array() # 將影像處理頁面預設有五頁
-        self.ui.pushButton_record.clicked.connect(self.pushButtonMetaData)
+        self.ui.pushButton_meta_data.clicked.connect(self.pushButtonMetaData)
         self.ui.pushButton_angle.clicked.connect(self.pushButtonAngleClicked) # 角度按鈕連結
         self.ui.pushButton_ruler.clicked.connect(self.pushButtonRulerClicked)
         self.ui.pushButton_add_pic.clicked.connect(self.pushButtonAddPicClicked) # 加照片按鈕連結

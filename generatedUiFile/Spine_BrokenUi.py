@@ -324,7 +324,7 @@ class Ui_MainWindow(object):
         self.search_no_label.setMaximumSize(QtCore.QSize(100, 40))
         font = QtGui.QFont()
         font.setFamily("Verdana")
-        font.setPointSize(14)
+        font.setPointSize(8)
         self.search_no_label.setFont(font)
         self.search_no_label.setAlignment(QtCore.Qt.AlignCenter)
         self.search_no_label.setObjectName("search_no_label")
@@ -727,13 +727,8 @@ class Ui_MainWindow(object):
         self.pushButton_windows.setFlat(True)
         self.pushButton_windows.setObjectName("pushButton_windows")
         self.horizontalLayout_7.addWidget(self.pushButton_windows)
-<<<<<<< HEAD
-        spacerItem5 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_7.addItem(spacerItem5)
-=======
         spacerItem4 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_7.addItem(spacerItem4)
->>>>>>> main
         self.verticalLayout_7.addWidget(self.tool_box)
         self.horizontalLayout_8.addLayout(self.verticalLayout_7)
         self.stackedWidget_right.addWidget(self.thumbnail_page)
