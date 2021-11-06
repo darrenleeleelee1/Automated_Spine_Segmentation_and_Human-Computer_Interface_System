@@ -1398,7 +1398,7 @@ QPushButton{
                  <number>0</number>
                 </property>
                 <item>
-                 <widget class="QPushButton" name="pushButton_record">
+                 <widget class="QPushButton" name="pushButton_meta_data">
                   <property name="minimumSize">
                    <size>
                     <width>50</width>
@@ -1531,32 +1531,6 @@ QPushButton{
                  </widget>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="pushButton_brightness">
-                  <property name="minimumSize">
-                   <size>
-                    <width>50</width>
-                    <height>0</height>
-                   </size>
-                  </property>
-                  <property name="text">
-                   <string/>
-                  </property>
-                  <property name="icon">
-                   <iconset resource="res/icons.qrc">
-                    <normaloff>:/icons/icons/brightness.png</normaloff>:/icons/icons/brightness.png</iconset>
-                  </property>
-                  <property name="iconSize">
-                   <size>
-                    <width>30</width>
-                    <height>30</height>
-                   </size>
-                  </property>
-                  <property name="flat">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item>
                  <widget class="QFrame" name="rotate_frame">
                   <property name="minimumSize">
                    <size>
@@ -1633,6 +1607,32 @@ QPushButton{
                     </widget>
                    </item>
                   </layout>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="pushButton_brightness">
+                  <property name="minimumSize">
+                   <size>
+                    <width>50</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="res/icons.qrc">
+                    <normaloff>:/icons/icons/brightness.png</normaloff>:/icons/icons/brightness.png</iconset>
+                  </property>
+                  <property name="iconSize">
+                   <size>
+                    <width>30</width>
+                    <height>30</height>
+                   </size>
+                  </property>
+                  <property name="flat">
+                   <bool>true</bool>
+                  </property>
                  </widget>
                 </item>
                 <item>
@@ -1805,32 +1805,6 @@ QPushButton{
                   <property name="icon">
                    <iconset resource="res/icons.qrc">
                     <normaloff>:/icons/grid.png</normaloff>:/icons/grid.png</iconset>
-                  </property>
-                  <property name="iconSize">
-                   <size>
-                    <width>30</width>
-                    <height>30</height>
-                   </size>
-                  </property>
-                  <property name="flat">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="pushButton_meta_data">
-                  <property name="minimumSize">
-                   <size>
-                    <width>50</width>
-                    <height>0</height>
-                   </size>
-                  </property>
-                  <property name="text">
-                   <string/>
-                  </property>
-                  <property name="icon">
-                   <iconset resource="res/icons.qrc">
-                    <normaloff>:/icons/icons/mood-very-bad.png</normaloff>:/icons/icons/mood-very-bad.png</iconset>
                   </property>
                   <property name="iconSize">
                    <size>
