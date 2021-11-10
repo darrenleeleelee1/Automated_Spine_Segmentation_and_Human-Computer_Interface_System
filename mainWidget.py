@@ -1,9 +1,8 @@
 from os import listdir
 from os.path import join
-from PyQt5.QtCore import (QCoreApplication, QDataStream, QPropertyAnimation, QMetaObject, QObject, QPoint,
-                          QSize, Qt, QPointF)
+from PyQt5.QtCore import (QPropertyAnimation, QSize, Qt)
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QCoreApplication, Qt
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QStandardItem, QStandardItemModel, QTransform, QPainter
 from generatedUiFile.Spine_BrokenUi import Ui_MainWindow
 from generatedUiFile.customUi import Ui_Dialog
@@ -12,15 +11,16 @@ from generatedUiFile.frameSpineUi import frame_spine_Dialog
 import os, requests
 from PyQt5.QtWidgets import *
 from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QInputDialog, QLineEdit, QDialog, QListWidgetItem
-from pydicom import dcmread, Dataset
-from pydicom.filebase import DicomBytesIO
+from pydicom import dcmread
 import numpy as np
-from PIL import ImageQt
 import shutil
-import copy
 from collections import defaultdict
 from pathlib import Path
+from data import *
+from model import *
+import cv2
 WINDOW_SIZE = 0
+os.environ["CUDA_VISIBLE_DEVICES"] = "1" # use cpu to test
 
 class initialWidget(QtWidgets.QMainWindow):
     pic_ith = 1 
@@ -129,20 +129,44 @@ class initialWidget(QtWidgets.QMainWindow):
 
 #照片Show Pic----------------------------------------------------------------------
     # 顯示分割好的脊椎照片
+    def adjustPredictPic(self, src):
+        pmax = np.max(src)
+        pmin = np.min(src)
+        rescale = (src - pmin) / (pmax - pmin) * 255
+        img = rescale.astype(np.uint8)
+        new_img = np.zeros((img.shape[0], img.shape[1], 3), dtype=np.int8)
+        for i in range(3):
+            new_img[:, :, i] = img
+        return new_img
+    def spineSegmentationPredict(self, src, test_path = './ml_workspace/test', model_path = "binaryCrossEntropy.hdf5"):
+        dst = './ml_workspace/test/a.bmp'
+        cv2.imwrite(dst, src)
+
+        model = load_model(model_path)
+        test_list = createTestList(test_path)
+        testGene = testGenerator(test_path, len(test_list), test_list)
+        results = model.predict(testGene, len(test_list), verbose=1)
+        saveResult('./ml_workspace/result', results, test_list) 
     def showingFrameSpine(self):
-        self.dic_path = self.pic_viewer[self.pic_ith][self.pic_jth].pv.ds_copy[self.pic_viewer[self.pic_ith][self.pic_jth].pv.instance_of_series].dcm_path
-        # print(self.dic_path)
+        dic_path = self.pic_viewer[self.pic_ith][self.pic_jth].pv.ds_copy[self.pic_viewer[self.pic_ith][self.pic_jth].pv.instance_of_series].dcm_path
+        # print(dic_path)
         self.showFramed = frameSpineDialog()
         self.showFramed.show()
-        # print(Path(self.dic_path).stem)
-        self.showFramed.setWindowTitle(Path(self.dic_path).stem)
+        # print(Path(dic_path).stem)
+        self.showFramed.setWindowTitle(Path(dic_path).stem)
 
-        ds = customDicom(self.dic_path)
+        ds = customDicom(dic_path)
         arr = initialWidget.mappingWindow(ds.pixel_array, ds.window_level, ds.window_width)
-        qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1]*2, QtGui.QImage.Format_Grayscale16).copy()
-        pixmap = QtGui.QPixmap(qimage)
-        pixmap = pixmap.scaled(500, 500, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        self.showFramed.framed.originalLabel.setPixmap(pixmap)
+        original_qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1]*2, QtGui.QImage.Format_Grayscale16).copy()
+        original_pixmap = QtGui.QPixmap(original_qimage)
+        original_pixmap = original_pixmap.scaled(500, 500, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        self.showFramed.framed.originalLabel.setPixmap(original_pixmap)
+
+        new_arr = self.adjustPredictPic(arr)
+        self.spineSegmentationPredict(new_arr)
+        frame_pixmap = QtGui.QPixmap('./ml_workspace/result/a_predict.bmp')
+        frame_pixmap = frame_pixmap.scaled(500, 500, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        self.showFramed.framed.framedLabel.setPixmap(frame_pixmap)
 
 
     #brightness 
