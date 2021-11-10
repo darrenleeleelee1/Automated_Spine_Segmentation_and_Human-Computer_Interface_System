@@ -128,12 +128,13 @@ class initialWidget(QtWidgets.QMainWindow):
 
 
 #照片Show Pic----------------------------------------------------------------------
+    # 顯示分割好的脊椎照片
     def showingFrameSpine(self):
         self.dic_path = self.pic_viewer[self.pic_ith][self.pic_jth].pv.ds_copy[self.pic_viewer[self.pic_ith][self.pic_jth].pv.instance_of_series].dcm_path
-        print(self.dic_path)
+        # print(self.dic_path)
         self.showFramed = frameSpineDialog()
         self.showFramed.show()
-        print(Path(self.dic_path).stem)
+        # print(Path(self.dic_path).stem)
         self.showFramed.setWindowTitle(Path(self.dic_path).stem)
 
         ds = customDicom(self.dic_path)
@@ -141,7 +142,8 @@ class initialWidget(QtWidgets.QMainWindow):
         qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1]*2, QtGui.QImage.Format_Grayscale16).copy()
         pixmap = QtGui.QPixmap(qimage)
         pixmap = pixmap.scaled(500, 500, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        self.showFramed.framed.framedLabel.setPixmap(pixmap)
+        self.showFramed.framed.originalLabel.setPixmap(pixmap)
+
 
     #brightness 
     def getWindow(self, WL, WW):
