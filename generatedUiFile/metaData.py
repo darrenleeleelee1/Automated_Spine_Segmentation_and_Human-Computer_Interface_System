@@ -1,5 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets, Qt
-from PyQt5.QtWidgets import QWidget
+from PyQt5.QtWidgets import QWidget, QAbstractItemView
 class dicom_Dialog(QWidget):
     def setupUi(self, QWidget):
         w = 1000
@@ -9,6 +9,7 @@ class dicom_Dialog(QWidget):
         self.lo = QtWidgets.QVBoxLayout(QWidget)
         self.lo.setContentsMargins(0, 0, 0, 0)
         self.dicom_table = QtWidgets.QTableWidget()
+        self.dicom_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.lo.addWidget(self.dicom_table)
         self.dicom_table.setStyleSheet(
                 """QTabelWidget { background-color : #aaa;

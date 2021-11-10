@@ -1,7 +1,7 @@
 from os import listdir
 from os.path import join
 from PyQt5.QtCore import (QCoreApplication, QDataStream, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
-                          QSize, QTime, QUrl, QVariant, Qt, QEvent, QPointF)
+                          QSize, Qt, QEvent, QPointF)
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QCoreApplication, Qt
 from PyQt5.QtGui import QStandardItem, QStandardItemModel, QTransform, QPainter
@@ -1005,7 +1005,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.number_of_instance = 0
         self.rotate_degree = 0
         self.delete = False
-        # self.hbox = QtWidgets.QHBoxLayout(self)
+        self.showFrameSpine = False
         self.dicomShowed = True # 控制是否顯示 dicom 資訊
         self.dicomGrid = QtWidgets.QGridLayout(self)
         self.dicomGrid.setContentsMargins(10, 0, 10, 0) # L,T,R,B
@@ -1057,6 +1057,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.dicomGrid.setColumnStretch(0, 1)
         self.dicomGrid.setColumnStretch(1, 3)
         self.dicomGrid.setColumnStretch(2, 1)
+
 
 
     def resetWindow(self, WL, WW):
@@ -1497,6 +1498,7 @@ class PhotoProcessing(QtWidgets.QWidget):
         self.vbox.addWidget(self.pv)
         self.title.close_button.clicked.connect(self.close)
         self.title.button_hide_dicom.clicked.connect(self.hideOrShowDicom)
+        self.title.button_frame_spine.clicked.connect(self.frameSpine)
     def close(self):
         if initialWidget.pic_windows[self.title.t_ith] != 1:
             initialWidget.pic_windows[self.title.t_ith] -= 1
@@ -1513,6 +1515,22 @@ class PhotoProcessing(QtWidgets.QWidget):
         if self.pv.dicomShowed: # 換 icon
             self.title.button_hide_dicom.setIcon(QtGui.QIcon('generatedUiFile/res/icons/view.png'))
         else: self.title.button_hide_dicom.setIcon(QtGui.QIcon('generatedUiFile/res/icons/hide.png'))
+
+    def frameSpine(self):
+        self.pv.showFrameSpine = not(self.pv.showFrameSpine)
+        self.tmp = QtWidgets.QLabel(self)
+        self.tmp.setScaledContents(True)
+        pixmap = QtGui.QPixmap("tmp.png")
+        self.tmp.setPixmap(pixmap)
+
+        
+        if self.pv.showFrameSpine:
+            self.pv.dicomGrid.addWidget(self.tmp, 1, 1, 1, 1)
+        else: 
+            self.pv.dicomGrid.itemAt(5).widget().deleteLater()
+
+
+
 
 
 # title bar
@@ -1594,7 +1612,7 @@ class TitleBar(QtWidgets.QDialog):
         hbox.setSpacing(10)
         self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
 
-        self.button_frame_spine.clicked.connect(self.frameSpine)
+        # self.button_frame_spine.clicked.connect(self.frameSpine)
         self.button_heat_map.clicked.connect(self.heatMap)
         self.button_scoliosis_angle.clicked.connect(self.scoliosis_angle)
 
@@ -1607,8 +1625,8 @@ class TitleBar(QtWidgets.QDialog):
         initialWidget.pic_ith = self.t_ith
         initialWidget.pic_jth = self.t_jth
 
-    def frameSpine(self):
-        print("frameSpine", self.t_ith, self.t_jth)
+    # def frameSpine(self):
+    #     print("frameSpine", self.t_ith, self.t_jth)
 
     def heatMap(self):
         print("heatmap", self.t_ith, self.t_jth)
