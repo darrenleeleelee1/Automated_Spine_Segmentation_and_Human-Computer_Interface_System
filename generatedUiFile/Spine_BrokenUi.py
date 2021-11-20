@@ -225,7 +225,7 @@ class Ui_MainWindow(object):
         self.patient_list = QtWidgets.QListWidget(self.frame_left_menu)
         font = QtGui.QFont()
         font.setFamily("Verdana")
-        font.setPointSize(20)
+        font.setPointSize(9)
         font.setBold(False)
         font.setItalic(False)
         font.setWeight(50)
@@ -501,10 +501,6 @@ class Ui_MainWindow(object):
         self.thumbnail_list_4 = QtWidgets.QListWidget(self.thumbnail_frame_4)
         self.thumbnail_list_4.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.thumbnail_list_4.setObjectName("thumbnail_list_4")
-        item = QtWidgets.QListWidgetItem()
-        self.thumbnail_list_4.addItem(item)
-        item = QtWidgets.QListWidgetItem()
-        self.thumbnail_list_4.addItem(item)
         self.verticalLayout_11.addWidget(self.thumbnail_list_4)
         self.horizontalLayout_11.addWidget(self.thumbnail_frame_4)
         self.pic_frame_4 = QtWidgets.QFrame(self.patient_page_4)
@@ -737,7 +733,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.central_widget)
 
         self.retranslateUi(MainWindow)
-        self.stackedWidget_right.setCurrentIndex(1)
+        self.stackedWidget_right.setCurrentIndex(2)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -751,13 +747,6 @@ class Ui_MainWindow(object):
         self.recently_viewed_label.setText(_translate("MainWindow", "Recently Viewed"))
         self.patients_label.setText(_translate("MainWindow", "Patients"))
         self.search_no_label.setText(_translate("MainWindow", "Search No."))
-        __sortingEnabled = self.thumbnail_list_4.isSortingEnabled()
-        self.thumbnail_list_4.setSortingEnabled(False)
-        item = self.thumbnail_list_4.item(0)
-        item.setText(_translate("MainWindow", "12345"))
-        item = self.thumbnail_list_4.item(1)
-        item.setText(_translate("MainWindow", "67890"))
-        self.thumbnail_list_4.setSortingEnabled(__sortingEnabled)
 import generatedUiFile.res.icons_rc
 
 

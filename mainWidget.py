@@ -126,6 +126,10 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.recently_list.itemClicked.connect(self.recently_listItemClicked)
         self.ui.pushButton_meta_data.clicked.connect(self.pushButtonMetaData) # 顯示 metaData
 
+        # Load unet model
+        model_path = "focalLoss.hdf5"
+        self.unet_model = load_model(model_path)
+
 
 #照片Show Pic----------------------------------------------------------------------
     # 顯示分割好的脊椎照片
@@ -138,14 +142,12 @@ class initialWidget(QtWidgets.QMainWindow):
         for i in range(3):
             new_img[:, :, i] = img
         return new_img
-    def spineSegmentationPredict(self, src, test_path = './ml_workspace/test', model_path = "binaryCrossEntropy.hdf5"):
+    def spineSegmentationPredict(self, src, test_path = './ml_workspace/test'):
         dst = './ml_workspace/test/a.bmp'
         cv2.imwrite(dst, src)
-
-        model = load_model(model_path)
         test_list = createTestList(test_path)
         testGene = testGenerator(test_path, len(test_list), test_list)
-        results = model.predict(testGene, len(test_list), verbose=1)
+        results = self.unet_model.predict(testGene, len(test_list), verbose=0)
         saveResult('./ml_workspace/result', results, test_list) 
     def showingFrameSpine(self):
         dic_path = self.pic_viewer[self.pic_ith][self.pic_jth].pv.ds_copy[self.pic_viewer[self.pic_ith][self.pic_jth].pv.instance_of_series].dcm_path
