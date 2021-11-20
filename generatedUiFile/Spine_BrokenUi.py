@@ -126,7 +126,7 @@ class Ui_MainWindow(object):
 "    border-radius:5px;\n"
 "    background-color: rgb(102, 102, 102);\n"
 "    color: #fff;\n"
-"    padding-left: 30px;\n"
+"    padding-left: 40px;\n"
 "}\n"
 "QLabel{\n"
 "    color: #fff;\n"
@@ -225,7 +225,7 @@ class Ui_MainWindow(object):
         self.patient_list = QtWidgets.QListWidget(self.frame_left_menu)
         font = QtGui.QFont()
         font.setFamily("Verdana")
-        font.setPointSize(9)
+        font.setPointSize(20)
         font.setBold(False)
         font.setItalic(False)
         font.setWeight(50)
@@ -737,7 +737,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.central_widget)
 
         self.retranslateUi(MainWindow)
-        self.stackedWidget_right.setCurrentIndex(2)
+        self.stackedWidget_right.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -747,7 +747,7 @@ class Ui_MainWindow(object):
         self.menu_toggle.setText(_translate("MainWindow", "   MENU"))
         self.add_patient.setText(_translate("MainWindow", "  Add Patient"))
         self.search.setText(_translate("MainWindow", "Search"))
-        self.patients.setText(_translate("MainWindow", "Patients"))
+        self.patients.setText(_translate("MainWindow", "Opened Patients"))
         self.recently_viewed_label.setText(_translate("MainWindow", "Recently Viewed"))
         self.patients_label.setText(_translate("MainWindow", "Patients"))
         self.search_no_label.setText(_translate("MainWindow", "Search No."))

@@ -272,7 +272,7 @@ QPushButton{
 	border-radius:5px;
 	background-color: rgb(102, 102, 102);
 	color: #fff;
-	padding-left: 30px;
+	padding-left: 40px;
 }
 QLabel{
 	color: #fff;
@@ -468,7 +468,7 @@ background-repeat: none;
 background-position: center left;</string>
             </property>
             <property name="text">
-             <string>Patients</string>
+             <string>Opened Patients</string>
             </property>
             <property name="iconSize">
              <size>
@@ -525,7 +525,7 @@ background-position: center left;</string>
           <number>0</number>
          </property>
          <property name="currentIndex">
-          <number>2</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="recently_viewed_page">
           <property name="styleSheet">
