@@ -272,7 +272,7 @@ QPushButton{
 	border-radius:5px;
 	background-color: rgb(102, 102, 102);
 	color: #fff;
-	padding-left: 30px;
+	padding-left: 40px;
 }
 QLabel{
 	color: #fff;
@@ -468,7 +468,7 @@ background-repeat: none;
 background-position: center left;</string>
             </property>
             <property name="text">
-             <string>Patients</string>
+             <string>Opened Patients</string>
             </property>
             <property name="iconSize">
              <size>
@@ -1228,16 +1228,6 @@ margin:50px;</string>
                       <property name="frameShape">
                        <enum>QFrame::NoFrame</enum>
                       </property>
-                      <item>
-                       <property name="text">
-                        <string>12345</string>
-                       </property>
-                      </item>
-                      <item>
-                       <property name="text">
-                        <string>67890</string>
-                       </property>
-                      </item>
                      </widget>
                     </item>
                    </layout>
