@@ -1,24 +1,26 @@
 from os import listdir
 from os.path import join
-from PyQt5.QtCore import (QCoreApplication, QDataStream, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
-                          QSize, QTime, QUrl, QVariant, Qt, QEvent, QPointF)
+from PyQt5.QtCore import (QPropertyAnimation, QSize, Qt)
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QCoreApplication, Qt
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QStandardItem, QStandardItemModel, QTransform, QPainter
 from generatedUiFile.Spine_BrokenUi import Ui_MainWindow
 from generatedUiFile.customUi import Ui_Dialog
 from generatedUiFile.metaData import dicom_Dialog
+from generatedUiFile.frameSpineUi import frame_spine_Dialog
 import os, requests
 from PyQt5.QtWidgets import *
 from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QInputDialog, QLineEdit, QDialog, QListWidgetItem
-from pydicom import dcmread, Dataset
-from pydicom.filebase import DicomBytesIO
+from pydicom import dcmread
 import numpy as np
-from PIL import ImageQt
 import shutil
-import copy
 from collections import defaultdict
+from pathlib import Path
+from data import *
+from model import *
+import cv2
 WINDOW_SIZE = 0
+os.environ["CUDA_VISIBLE_DEVICES"] = "1" # use cpu to test
 
 class initialWidget(QtWidgets.QMainWindow):
     pic_ith = 1 
@@ -124,8 +126,50 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ui.recently_list.itemClicked.connect(self.recently_listItemClicked)
         self.ui.pushButton_meta_data.clicked.connect(self.pushButtonMetaData) # 顯示 metaData
 
+        # Load unet model
+        model_path = "focalLoss.hdf5"
+        self.unet_model = load_model(model_path)
+
 
 #照片Show Pic----------------------------------------------------------------------
+    # 顯示分割好的脊椎照片
+    def adjustPredictPic(self, src):
+        pmax = np.max(src)
+        pmin = np.min(src)
+        rescale = (src - pmin) / (pmax - pmin) * 255
+        img = rescale.astype(np.uint8)
+        new_img = np.zeros((img.shape[0], img.shape[1], 3), dtype=np.int8)
+        for i in range(3):
+            new_img[:, :, i] = img
+        return new_img
+    def spineSegmentationPredict(self, src, test_path = './ml_workspace/test'):
+        dst = './ml_workspace/test/a.bmp'
+        cv2.imwrite(dst, src)
+        test_list = createTestList(test_path)
+        testGene = testGenerator(test_path, len(test_list), test_list)
+        results = self.unet_model.predict(testGene, len(test_list), verbose=0)
+        saveResult('./ml_workspace/result', results, test_list) 
+    def showingFrameSpine(self):
+        dic_path = self.pic_viewer[self.pic_ith][self.pic_jth].pv.ds_copy[self.pic_viewer[self.pic_ith][self.pic_jth].pv.instance_of_series].dcm_path
+        # print(dic_path)
+        self.showFramed = frameSpineDialog()
+        self.showFramed.show()
+        # print(Path(dic_path).stem)
+        self.showFramed.setWindowTitle(Path(dic_path).stem)
+
+        ds = customDicom(dic_path)
+        arr = initialWidget.mappingWindow(ds.pixel_array, ds.window_level, ds.window_width)
+        original_qimage = QtGui.QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1]*2, QtGui.QImage.Format_Grayscale16).copy()
+        original_pixmap = QtGui.QPixmap(original_qimage)
+        original_pixmap = original_pixmap.scaled(500, 500, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        self.showFramed.framed.originalLabel.setPixmap(original_pixmap)
+
+        new_arr = self.adjustPredictPic(arr)
+        self.spineSegmentationPredict(new_arr)
+        frame_pixmap = QtGui.QPixmap('./ml_workspace/result/a_predict.bmp')
+        frame_pixmap = frame_pixmap.scaled(500, 500, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        self.showFramed.framed.framedLabel.setPixmap(frame_pixmap)
+
 
     #brightness 
     def getWindow(self, WL, WW):
@@ -191,6 +235,8 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][tp[2]], 0, 1, 1, 1)
                 self.pic_viewer[initialWidget.pic_ith][tp[1]].pv.show()
                 self.pic_viewer[initialWidget.pic_ith][tp[2]].pv.show()
+                self.pic_viewer[initialWidget.pic_ith][tp[1]].title.button_frame_spine.clicked.connect(self.showingFrameSpine)
+                self.pic_viewer[initialWidget.pic_ith][tp[2]].title.button_frame_spine.clicked.connect(self.showingFrameSpine)
             elif x == 3:
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][tp[1]], 0, 0, 1, 1)
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][tp[2]], 0, 1, 1, 1)
@@ -198,6 +244,9 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.pic_viewer[initialWidget.pic_ith][tp[1]].pv.show()
                 self.pic_viewer[initialWidget.pic_ith][tp[2]].pv.show()
                 self.pic_viewer[initialWidget.pic_ith][tp[3]].pv.show()
+                self.pic_viewer[initialWidget.pic_ith][tp[1]].title.button_frame_spine.clicked.connect(self.showingFrameSpine)
+                self.pic_viewer[initialWidget.pic_ith][tp[2]].title.button_frame_spine.clicked.connect(self.showingFrameSpine)
+                self.pic_viewer[initialWidget.pic_ith][tp[3]].title.button_frame_spine.clicked.connect(self.showingFrameSpine)
             elif x == 4:
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][tp[1]], 0, 0, 1, 1)
                 self.gridLayout_list[initialWidget.pic_ith].addWidget(self.pic_viewer[initialWidget.pic_ith][tp[2]], 0, 1, 1, 1)
@@ -207,6 +256,10 @@ class initialWidget(QtWidgets.QMainWindow):
                 self.pic_viewer[initialWidget.pic_ith][tp[2]].pv.show()
                 self.pic_viewer[initialWidget.pic_ith][tp[3]].pv.show()
                 self.pic_viewer[initialWidget.pic_ith][tp[4]].pv.show()
+                self.pic_viewer[initialWidget.pic_ith][tp[1]].title.button_frame_spine.clicked.connect(self.showingFrameSpine)
+                self.pic_viewer[initialWidget.pic_ith][tp[2]].title.button_frame_spine.clicked.connect(self.showingFrameSpine)
+                self.pic_viewer[initialWidget.pic_ith][tp[3]].title.button_frame_spine.clicked.connect(self.showingFrameSpine)
+                self.pic_viewer[initialWidget.pic_ith][tp[4]].title.button_frame_spine.clicked.connect(self.showingFrameSpine)
             initialWidget.pic_windows[initialWidget.pic_ith] = x
             initialWidget.pic_jth = self.now_windows    # 設回原本的位置
         self.setToolLock(PhotoViewer.tool_lock)    # 傳到setToolLock更新當前總共幾張照片
@@ -264,7 +317,8 @@ class initialWidget(QtWidgets.QMainWindow):
         self.ind = 0
         self.whichYouWantIsHere = self.pic_viewer[self.pic_ith][self.pic_jth].pv.ds_copy[self.pic_viewer[self.pic_ith][self.pic_jth].pv.instance_of_series].ds_copy
         show_dataset(self.whichYouWantIsHere, indent="")
-        # self.meta_data.meta.meta_label.setText(str(self.whichYouWantIsHere))
+        # path = self.whichYouWantIsHere = self.pic_viewer[self.pic_ith][self.pic_jth].pv.ds_copy[self.pic_viewer[self.pic_ith][self.pic_jth].pv.instance_of_series].dcm_path
+        # print(path)
 
     # 加照片
     def pushButtonAddPicClicked(self):
@@ -729,6 +783,7 @@ class initialWidget(QtWidgets.QMainWindow):
             self.pic_viewer[i][1] = PhotoProcessing(self.pic_frame_list[i], i, 1)
             self.gridLayout_list[i].addWidget(self.pic_viewer[i][1], 0, 0, 1, 1)
             self.pic_viewer[i][1].pv.show()
+            self.pic_viewer[i][1].title.button_frame_spine.clicked.connect(self.showingFrameSpine)
         # Image Processing Attributes
         var_pic = 'self.ui.pic'
         self.pic_clicked = [ [False] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 哪張照片被clicked
@@ -837,6 +892,12 @@ class metaDataDialog(QDialog):
     super().__init__()
     self.meta = dicom_Dialog()
     self.meta.setupUi(self)
+
+class frameSpineDialog(QDialog):
+  def __init__(self):
+    super().__init__()
+    self.framed = frame_spine_Dialog()
+    self.framed.setupUi(self)
 
 class QGraphicsLabel(QtWidgets.QGraphicsTextItem):
     def __init__(self, text):
@@ -1005,7 +1066,6 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.number_of_instance = 0
         self.rotate_degree = 0
         self.delete = False
-        # self.hbox = QtWidgets.QHBoxLayout(self)
         self.dicomShowed = True # 控制是否顯示 dicom 資訊
         self.dicomGrid = QtWidgets.QGridLayout(self)
         self.dicomGrid.setContentsMargins(10, 0, 10, 0) # L,T,R,B
@@ -1057,6 +1117,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.dicomGrid.setColumnStretch(0, 1)
         self.dicomGrid.setColumnStretch(1, 3)
         self.dicomGrid.setColumnStretch(2, 1)
+
 
 
     def resetWindow(self, WL, WW):
@@ -1514,7 +1575,6 @@ class PhotoProcessing(QtWidgets.QWidget):
             self.title.button_hide_dicom.setIcon(QtGui.QIcon('generatedUiFile/res/icons/view.png'))
         else: self.title.button_hide_dicom.setIcon(QtGui.QIcon('generatedUiFile/res/icons/hide.png'))
 
-
 # title bar
 class TitleBar(QtWidgets.QDialog):
     def __init__(self, _i, _j,  parent = None):
@@ -1608,13 +1668,19 @@ class TitleBar(QtWidgets.QDialog):
         initialWidget.pic_jth = self.t_jth
 
     def frameSpine(self):
-        print("frameSpine", self.t_ith, self.t_jth)
+        initialWidget.pic_ith = self.t_ith
+        initialWidget.pic_jth = self.t_jth
+        # print("frameSpine", self.t_ith, self.t_jth)
 
     def heatMap(self):
-        print("heatmap", self.t_ith, self.t_jth)
+        initialWidget.pic_ith = self.t_ith
+        initialWidget.pic_jth = self.t_jth
+        # print("heatmap", self.t_ith, self.t_jth)
 
     def scoliosis_angle(self):
-        print("scoliosis_angle", self.t_ith, self.t_jth)
+        initialWidget.pic_ith = self.t_ith
+        initialWidget.pic_jth = self.t_jth
+        # print("scoliosis_angle", self.t_ith, self.t_jth)
 
 
 

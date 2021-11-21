@@ -1,7 +1,12 @@
 **/__pycache__/
 **/.DS_Store
+.DS_Store
+.DS_Store?
+*/.DS_Store
 tmp/
 tmp_database/
 **.idea/
 **/record/ 
-
+*.hdf5
+*.7z
+ml_workspace/

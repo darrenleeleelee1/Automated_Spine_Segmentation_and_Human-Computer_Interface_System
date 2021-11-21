@@ -126,7 +126,7 @@ class Ui_MainWindow(object):
 "    border-radius:5px;\n"
 "    background-color: rgb(102, 102, 102);\n"
 "    color: #fff;\n"
-"    padding-left: 30px;\n"
+"    padding-left: 40px;\n"
 "}\n"
 "QLabel{\n"
 "    color: #fff;\n"
@@ -501,10 +501,6 @@ class Ui_MainWindow(object):
         self.thumbnail_list_4 = QtWidgets.QListWidget(self.thumbnail_frame_4)
         self.thumbnail_list_4.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.thumbnail_list_4.setObjectName("thumbnail_list_4")
-        item = QtWidgets.QListWidgetItem()
-        self.thumbnail_list_4.addItem(item)
-        item = QtWidgets.QListWidgetItem()
-        self.thumbnail_list_4.addItem(item)
         self.verticalLayout_11.addWidget(self.thumbnail_list_4)
         self.horizontalLayout_11.addWidget(self.thumbnail_frame_4)
         self.pic_frame_4 = QtWidgets.QFrame(self.patient_page_4)
@@ -747,17 +743,10 @@ class Ui_MainWindow(object):
         self.menu_toggle.setText(_translate("MainWindow", "   MENU"))
         self.add_patient.setText(_translate("MainWindow", "  Add Patient"))
         self.search.setText(_translate("MainWindow", "Search"))
-        self.patients.setText(_translate("MainWindow", "Patients"))
+        self.patients.setText(_translate("MainWindow", "Opened Patients"))
         self.recently_viewed_label.setText(_translate("MainWindow", "Recently Viewed"))
         self.patients_label.setText(_translate("MainWindow", "Patients"))
         self.search_no_label.setText(_translate("MainWindow", "Search No."))
-        __sortingEnabled = self.thumbnail_list_4.isSortingEnabled()
-        self.thumbnail_list_4.setSortingEnabled(False)
-        item = self.thumbnail_list_4.item(0)
-        item.setText(_translate("MainWindow", "12345"))
-        item = self.thumbnail_list_4.item(1)
-        item.setText(_translate("MainWindow", "67890"))
-        self.thumbnail_list_4.setSortingEnabled(__sortingEnabled)
 import generatedUiFile.res.icons_rc
 
 
