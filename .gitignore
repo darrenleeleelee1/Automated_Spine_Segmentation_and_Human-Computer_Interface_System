@@ -5,3 +5,5 @@ tmp_database/
 **.idea/
 **/record/ 
 *.hdf5
+*.7z
+ml_workspace/
