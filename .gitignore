@@ -10,3 +10,4 @@ tmp_database/
 *.hdf5
 *.7z
 ml_workspace/
+t.py

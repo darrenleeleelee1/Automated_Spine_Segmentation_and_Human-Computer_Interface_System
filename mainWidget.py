@@ -138,7 +138,7 @@ class initialWidget(QtWidgets.QMainWindow):
         pmin = np.min(src)
         rescale = (src - pmin) / (pmax - pmin) * 255
         img = rescale.astype(np.uint8)
-        new_img = np.zeros((img.shape[0], img.shape[1], 3), dtype=np.int8)
+        new_img = np.zeros((img.shape[0], img.shape[1], 3), dtype=np.uint8)
         for i in range(3):
             new_img[:, :, i] = img
         return new_img
@@ -778,7 +778,8 @@ class initialWidget(QtWidgets.QMainWindow):
             exec("%s[%d] = %s_%d" % (var_array_pic_frame_list, i, var_pic_frame_list, i))
         
         # pic Viewer
-        self.pic_viewer = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE + 1) ] # 對應到照片的viewer array
+        self.pic_viewer = [ [None] * (self.MAXIMUM_PIC + 1) for i in range(self.MAXIMUM_PAGE
+         + 1) ] # 對應到照片的viewer array
         for i in range(1, self.MAXIMUM_PAGE + 1):
             self.pic_viewer[i][1] = PhotoProcessing(self.pic_frame_list[i], i, 1)
             self.gridLayout_list[i].addWidget(self.pic_viewer[i][1], 0, 0, 1, 1)
@@ -853,6 +854,7 @@ class customDicom():
         self.window_width = None
         self.tr = None
         self.te = None
+        self.spacing = None
         self.ds_copy = None
         self.scropInfo(self.dcmreader(self.dcm_path))
     def dcmreader(self, _dcm_path):
@@ -885,7 +887,8 @@ class customDicom():
         self.window_width = ds[0x0028, 0x1051].value if (0x0028, 0x1051) in ds else None
         self.tr = ds[0x0018, 0x0080].value if (0x0018, 0x0080) in ds else None
         self.te = ds[0x0018, 0x81].value if (0x0018, 0x81) in ds else None
-
+        self.spacing = ds[0x0028, 0x30].value[0] if (0x0028, 0x30) in ds else None
+        
 
 class metaDataDialog(QDialog):
   def __init__(self):
@@ -1379,7 +1382,9 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             self.length = np.sqrt(QtCore.QPointF.dotProduct(self.sp - self.mp, self.sp - self.mp))
             self.ruler_text_label.setVisible(True)
             # self.ruler_text_label.setText("%.2f pixels" % self.length)
-            self.ruler_text_label.setHtml("<div style='background-color:#3c1e1e;font-size:10px;color:#e6e60a;'>" + "%.2f pixels" % self.length + "</div>")
+            spacing = self.ds_copy[self.instance_of_series].spacing
+            spacing = float(spacing)
+            self.ruler_text_label.setHtml("<div style='background-color:#3c1e1e;font-size:10px;color:#e6e60a;'>" + "%.2f cm" % (self.length * spacing) + "</div>")
             if self.mapFromScene(self.sp.toPoint()).x() <= self.mapFromScene(self.mp.toPoint()).x(): 
                 tmp = self.mapFromScene(self.mp.toPoint()) + QtCore.QPoint(10, 0)
                 self.ruler_text_label.setPos(self.mapToScene(tmp))
