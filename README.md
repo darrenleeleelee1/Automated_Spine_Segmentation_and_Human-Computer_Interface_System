@@ -1,4 +1,4 @@
-# Spine_Broken
+# Automated Spine Segmentation and Human-Machine Interface System
 ## Set up
 1. Create a new enviroment
 ```
