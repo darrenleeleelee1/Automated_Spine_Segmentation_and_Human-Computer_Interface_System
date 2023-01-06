@@ -1,4 +1,4 @@
-# Automated Spine Segmentation and Human-Machine Interface System
+# Automated Spine Segmentation and Human-Computer Interface System
 ## Set up
 1. Create a new enviroment
 ```
