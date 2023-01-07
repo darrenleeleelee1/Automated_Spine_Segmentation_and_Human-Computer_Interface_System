@@ -6,7 +6,11 @@
 4. [Reference](#Reference)
 
 ## Introduction
+### Motivation
 Design an artificial intelligence algorithm that can predict the probability of a patient who has undergone spinal fusion surgery experiencing a vertebral fracture within one year, and provide a simple and clear interface system (GUI) for medical staff to create a visualized prediction model for the convenience of researchers to use and optimize.
+
+### Demonstrations
+A DICOM contain an advanced function - Spine Segmentation. 
 ![](https://i.imgur.com/xz1sovX.png)
 
 [More Detailed](https://docs.google.com/presentation/d/1Vd_tQBE5Ut5m4bTp5vuH_ZFHBKwUkGDB1o-B7ACBkuY/edit?usp=sharing)
