@@ -4,7 +4,7 @@ The code was written by [Chein Chang](https://github.com/pchien0415), [Darren Le
 ## Outline
 1. [Introduction](#Introduction)
 2. [Set up](#Set-up)
-3. [Qt technique](#Qt-technique)
+3. [Qt Note](#Qt-Note)
 4. [Reference](#Reference)
 
 ## Introduction
@@ -36,7 +36,7 @@ pip install pyqt5-tools
 import PyQt5
 ```
 
-## Qt technique
+## Qt Note
 ### Qt Designer to Python Code
 [link](https://realpython.com/qt-designer-python/)
 
