@@ -1,4 +1,6 @@
 # Automated Spine Segmentation and Human-Computer Interface System
+The code was written by [Chein Chang](https://github.com/pchien0415), [Darren Lee](https://github.com/darrenleeleelee1), [Jamie Wang](https://github.com/jamie212) and [Yoyo Zheng](https://github.com/yo-yo97).
+
 ## Outline
 1. [Introduction](#Introduction)
 2. [Set up](#Set-up)
